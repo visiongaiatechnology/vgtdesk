@@ -36,7 +36,7 @@ It is engineered under the **Zero-Overheat Doctrine**: maximum performance, abso
 Installed plugins are automatically detected, mapped as standalone desktop apps, and isolated within a **chromeless iframe architecture** — eliminating sidebar fragmentation and replacing it with a consistent, distraction-free multi-window workflow.
 
 <img width="1917" height="908" alt="Multi-Window Workspace" src="https://github.com/user-attachments/assets/1b9b8656-5866-4443-a9a8-ed2c7f7a724b" />
-´´´
+```
 Classic WordPress Admin:
 → Fragmented sidebar navigation
 → Context-switching overhead
@@ -51,11 +51,11 @@ VGT WP-Desk OS Layer:
 → CSRF Nonce Hardening       — cryptographic session coupling
 → DOM XSS Engine             — full HTML escaping before DOM injection
 → Glassmorphic UI Layer      — wallpaper engine, accent colors, blur modes
-´´´
+```
 ---
 
 ## 🏛️ Architecture
-´´´
+```
 WordPress Admin Request
 ↓
 Heuristic Session Detection (PHP Engine)
@@ -89,7 +89,7 @@ Persistent Workspace Sync (wp_usermeta)
 → All state saved asynchronously via Non-Blocking AJAX
 → Per-user profiles — no global option overwrites
 → JSON_FORCE_OBJECT enforcement prevents array/object corruption
-´´´
+```
 
 <img width="1914" height="911" alt="VGT Architecture Layer" src="https://github.com/user-attachments/assets/10f41efb-4b27-4e33-ac6d-dd9d3b127797" />
 
