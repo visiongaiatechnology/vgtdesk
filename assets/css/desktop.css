@@ -38,14 +38,14 @@ html, html.wp-toolbar {
     flex: 1 1 0% !important;
 }
 
-/* Base Styles */
+/* Base Styles (Native WordPress System-Font-Stack for DSGVO / GDPR Compliance) */
 .vgt-desk-shell {
     height: 100vh !important;
     width: 100vw !important;
     background-color: #020617 !important;
     overflow: hidden !important;
     position: relative;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
     color: #f1f5f9;
 }
 
@@ -1073,5 +1073,4 @@ body.vgt-dragging, body.vgt-dragging * {
     .dot-emerald {
         display: none !important;
     }
-}
 }
