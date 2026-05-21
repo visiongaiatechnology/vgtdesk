@@ -194,13 +194,7 @@ Glassmorphism Mode:
 → Performance fallback for older GPUs via Boolean state
 ```
 
-**DSGVO Compliance vs. Competitor:**
-
-| | VGT WP-Desk | Automattic Prototype |
-|---|---|---|
-| Wallpaper source | Local WebP (plugin folder) | External CDN hotlinking |
-| External requests on load | **Zero** | Yes |
-| Admin IP exposure | **None** | Possible on CDN call |
+**100% DSGVO Konform**
 
 ---
 
