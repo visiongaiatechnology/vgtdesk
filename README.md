@@ -3,13 +3,14 @@
 [![License](https://img.shields.io/badge/License-AGPLv3-green?style=for-the-badge)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-1.0.0--Beta-brightgreen?style=for-the-badge)](#)
 [![Platform](https://img.shields.io/badge/Platform-WordPress-21759B?style=for-the-badge&logo=wordpress)](#)
+[![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php)](#)
 [![Architecture](https://img.shields.io/badge/Architecture-Zero--Overheat_OS--Layer-blue?style=for-the-badge)](#)
 [![Engine](https://img.shields.io/badge/Engine-Vanilla_JS_%2F_CSS3-orange?style=for-the-badge)](#)
 [![Status](https://img.shields.io/badge/Status-BETA-yellow?style=for-the-badge)](#)
 [![Security](https://img.shields.io/badge/Security-Diamant_VGT_Supreme-red?style=for-the-badge)](#)
 [![VGT](https://img.shields.io/badge/VGT-VisionGaia_Technology-red?style=for-the-badge)](https://visiongaiatechnology.de)
 
-> *"No frameworks. No cloud dependencies. No compromise on UX."*
+> *"No frameworks. No build pipeline. No compromise on UX."*  
 > *AGPLv3 — Open Source Core. Built for operators, not for SaaS dashboards.*
 
 ---
@@ -23,82 +24,71 @@ This project is currently in **Beta** and part of ongoing development at VisionG
 Found a bug or have an improvement? **Open an issue or contact us.**
 
 ---
-<img width="1916" height="908" alt="{FD2F259C-4066-4045-89C2-BED21834E3C2}" src="https://github.com/user-attachments/assets/b0776d5f-4dcc-4939-bf0f-215de8d87cd7" />
 
-
+<img width="1916" height="908" alt="VGT WP-Desk Main Desktop" src="https://github.com/user-attachments/assets/b0776d5f-4dcc-4939-bf0f-215de8d87cd7" />
 
 ## 🔍 What is VGT WP-Desk?
 
-VGT WP-Desk is a **modular, zero-dependency WordPress backend enhancement** that transforms the classic WordPress admin interface into a high-performance, OS-style desktop environment.
+VGT WP-Desk is a **modular, framework-free WordPress backend enhancement** that transforms the classic WordPress admin interface into a high-performance, OS-style desktop environment.
 
-It is engineered under the **Zero-Overheat Doctrine**: maximum performance, absolute compatibility with Core and third-party hooks, and a strict refusal to rely on heavy frameworks or build pipelines.
+It is engineered under the **Zero-Overheat Doctrine**: maximum performance, absolute compatibility with WordPress Core and third-party hooks, and a strict refusal to rely on heavy frameworks or build pipelines.
 
-Installed plugins are automatically detected, mapped as standalone desktop apps, and isolated within a **chromeless Iframe architecture** — eliminating sidebar fragmentation and replacing it with a consistent, distraction-free multi-window workflow.
+Installed plugins are automatically detected, mapped as standalone desktop apps, and isolated within a **chromeless iframe architecture** — eliminating sidebar fragmentation and replacing it with a consistent, distraction-free multi-window workflow.
 
-<img width="1917" height="908" alt="{701C590C-B1C1-4857-85FD-06C9F0A1052A}" src="https://github.com/user-attachments/assets/1b9b8656-5866-4443-a9a8-ed2c7f7a724b" />
-
-
-```
+<img width="1917" height="908" alt="Multi-Window Workspace" src="https://github.com/user-attachments/assets/1b9b8656-5866-4443-a9a8-ed2c7f7a724b" />
 Classic WordPress Admin:
 → Fragmented sidebar navigation
 → Context-switching overhead
 → No persistent workspace state
 → Monotone, static interface
-
 VGT WP-Desk OS Layer:
-→ IframeTransformer          — 100% Hook-preserving CSS-Grid tile engine
-→ Multi-Window Workspace      — Drag, resize, minimize, focus
-→ App Registry               — Auto-maps installed plugins as desktop apps
-→ Persistent Profiles        — Per-user workspace state via wp_usermeta
-→ Anti-Bot Origin Guard      — Deep-link phishing & SSRF prevention
-→ CSRF Nonce Hardening        — Cryptographic session coupling
-→ DOM XSS Engine             — Full HTML escaping before DOM injection
-→ Glassmorphic UI Layer       — Wallpaper engine, accent colors, blur modes
-```
+→ IframeTransformer          — 100% hook-preserving CSS-Grid tile engine
+→ Multi-Window Workspace     — drag, resize, minimize, focus
+→ App Registry               — auto-maps installed plugins as desktop apps
+→ Persistent Profiles        — per-user workspace state via wp_usermeta
+→ Anti-Phishing Origin Guard — deep-link SSRF prevention
+→ CSRF Nonce Hardening       — cryptographic session coupling
+→ DOM XSS Engine             — full HTML escaping before DOM injection
+→ Glassmorphic UI Layer      — wallpaper engine, accent colors, blur modes
 
 ---
 
 ## 🏛️ Architecture
-
-```
 WordPress Admin Request
-        ↓
+↓
 Heuristic Session Detection (PHP Engine)
 → URL indicator: vgt_iframe=true
 → Modern HTTP security header: Sec-Fetch-Dest: iframe
 → HTTP Referer analysis on form submissions
 → Iframe context detected → strip menus, adminbar, footer
-        ↓
+↓
 IframeTransformer (CSS-Grid Injection)
 → Manipulates native WordPress admin list table DOM
 → display: grid !important on native tbody
 → Posts, pages, comments, plugins → responsive tiles
 → 100% of WordPress and third-party hooks preserved
-        ↓
+↓
 Deep-Link Origin Guard (Anti-Phishing / Anti-SSRF)
 → openDeepLink(rawUrl) intercepts all deep-link targets
 → URL.origin validated against window.location.origin
 → External origins blocked → redirect to welcome window
-        ↓
+↓
 CSRF Nonce Validation
 → Activation / deactivation bound to wp_verify_nonce()
 → AJAX actions verified via check_ajax_referer()
 → Replay / CSRF attacks neutralized at session level
-        ↓
+↓
 DOM XSS Protection Layer
 → escapeHTML() neutralizes all special chars before DOM injection
 → cleanUrl() blocks javascript: injections → fallback: about:blank
 → Covers plugin titles, URL parameters, deep-link window generation
-        ↓
+↓
 Persistent Workspace Sync (wp_usermeta)
-→ All state saved asynchronously over Non-Blocking AJAX
+→ All state saved asynchronously via Non-Blocking AJAX
 → Per-user profiles — no global option overwrites
 → JSON_FORCE_OBJECT enforcement prevents array/object corruption
-```
 
-<img width="1914" height="911" alt="{AC59016C-8AAC-4969-BF61-ECDA8D7EE094}" src="https://github.com/user-attachments/assets/10f41efb-4b27-4e33-ac6d-dd9d3b127797" />
-
-
+<img width="1914" height="911" alt="VGT Architecture Layer" src="https://github.com/user-attachments/assets/10f41efb-4b27-4e33-ac6d-dd9d3b127797" />
 
 ---
 
@@ -117,8 +107,7 @@ The core innovation of VGT WP-Desk. Where other desktop-mode approaches rewrite 
 | **Responsive** | Yes — tiles adapt to workspace window dimensions |
 | **Competitor Approach** | Automattic prototype rewrites `edit.php` via `<wpd-table>` — breaks all hooks |
 
-<img width="1914" height="914" alt="{050924FF-8119-429D-A344-A06FE160877E}" src="https://github.com/user-attachments/assets/3f3df87a-45ef-4666-a879-8831f791a0e2" />
-
+<img width="1914" height="914" alt="Tile Engine Layout" src="https://github.com/user-attachments/assets/3f3df87a-45ef-4666-a879-8831f791a0e2" />
 
 ---
 
@@ -178,23 +167,18 @@ A full OS-style window management system operating entirely within the WordPress
 ---
 
 ### 🎨 2.4 Glassmorphic UI & Wallpaper Engine
-
-```
 Wallpaper Engine:
-→ Exclusively local, pre-optimized WebP resources (wallpapers/)
-→ Zero external IP exposure on shell startup — 100% DSGVO-compliant
+→ Local, pre-optimized WebP resources (wallpapers/)
+→ Local-first delivery — bundled assets only, no third-party image CDNs
 → Preset collection + custom URL support
-
 Accent Color System:
 → Indigo | Emerald | Cyan | Amber | Rose
 → Dynamically adjusts: badges, buttons, LED indicators, dock accents
-
 Glassmorphism Mode:
 → Blur filter toggle (vgt_desk_blur)
 → Performance fallback for older GPUs via Boolean state
-```
 
-**100% DSGVO Konform**
+> **Data sovereignty note:** Core UI rendering, wallpapers, scripts and stylesheets are served from your own server. The Beta build currently enqueues Plus Jakarta Sans via Google Fonts CDN for typography consistency — this is the only external request and will be made fully local-only in v1.1 for strict DSGVO compliance.
 
 ---
 
@@ -230,15 +214,15 @@ To prevent empty PHP arrays from being serialized as unusable `[]` values (which
 | Metric | Specification |
 |---|---|
 | **Required WordPress** | 6.0+ |
-| **Required PHP** | 7.4+ to 8.3+ (Strict Types enforced) |
+| **Required PHP** | 8.1+ (Strict Types enforced) |
 | **Frontend Frameworks** | None — 100% Vanilla JS (ES6+) / CSS Custom Variables |
 | **Compilation Overhead** | Zero — no Node.js, no Vite, no TypeScript at runtime |
 | **Database Footprint** | 5 user-scoped meta keys (`wp_usermeta`) |
-| **External Dependencies** | Zero (DSGVO-compliant, no CDN calls) |
-| **Asset Enqueue Priority** | Head-Priority (prevents race conditions with iframes) |
+| **Runtime External Calls** | Zero — uses WordPress-native system font stack |
+| **Typography** | System font stack — renders as native UI on macOS, Windows, Linux |
+| **Asset Enqueue Priority** | Head-priority (prevents race conditions with iframes) |
 | **Bypass Mechanism** | Cookie-based express state for emergency access |
-| **Utility Framework** | Tailwind CSS CDN (minimal CSS footprint in core file) |
-| **Canvas Workspace** | HTML5 Canvas |
+| **Canvas Workspace** | HTML5 / CSS-Grid hybrid |
 
 ---
 
@@ -252,17 +236,17 @@ git clone https://github.com/visiongaiatechnology/vgtdesk
 # 2. Activate in WordPress Admin
 # Plugins → VGT WP-Desk → Activate
 
-# 3. Configure per-user activation
-# User Profile → VGT WP-Desk → Enable Desktop Mode
+# 3. Open the Desktop
+# Click "VGT WP-Desk" in the admin sidebar (top of menu)
 
 # 4. Customize workspace
-# Desktop → Right-Click → Settings → Wallpaper / Accent Color / Blur
+# Use the in-app Settings window to change Wallpaper / Accent Color / Blur
 
 # 5. Emergency bypass (if needed)
-# Append ?vgt_desk_bypass=1 to any admin URL — restores classic view
+# Append ?vgt_bypass=1 to any admin URL — restores classic view for the session
 ```
 
-> **Opt-In by Design:** VGT WP-Desk uses a strict per-user opt-in via the user profile. The standard WordPress administration remains completely unaffected for users who have not enabled the desktop layer.
+> **Non-Destructive Design:** VGT WP-Desk does not modify your WordPress core, theme, or any other plugin. Deactivate the plugin at any time to fully restore the classic WordPress admin experience.
 
 ---
 
@@ -271,11 +255,11 @@ git clone https://github.com/visiongaiatechnology/vgtdesk
 - **Design Changes:** All visual modifications must use CSS Custom Properties in `desktop.css` only — ensures global color synchronization across all components.
 - **Iframe Navigation:** All internal links and forms within the iframe context must carry the `&vgt_iframe=true` parameter. The JavaScript module `interceptIframeNavigations()` monitors and auto-corrects this on all dynamic clicks and form submissions.
 - **State Management:** Never write to global WordPress options — all state belongs in `wp_usermeta` under the `vgt_desk_` prefix.
-- **External Requests:** Strictly forbidden at runtime. All assets must be local.
+- **Runtime External Requests:** Forbidden by policy — with the single exception of the typography CDN (slated for removal in v1.1). All other assets must remain local.
 
 ---
 
-Inspired by [WP Desktop Mode from Automattic](https://github.com/WordPress/desktop-mode) but whitout Dependencys
+Inspired by [WP Desktop Mode from Automattic](https://github.com/WordPress/desktop-mode) — but without the dependency stack.
 
 ## 🔗 VGT Ecosystem
 
