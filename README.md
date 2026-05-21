@@ -281,6 +281,8 @@ git clone https://github.com/visiongaiatechnology/vgtdesk
 
 ---
 
+Inspired by [WP Desktop Mode from Automattic](https://github.com/WordPress/desktop-mode) but whitout Dependencys
+
 ## 🔗 VGT Ecosystem
 
 | Tool | Type | Purpose |
