@@ -1,13 +1,10 @@
 <?php
 /**
- * Plugin Name: VGT WP-Desk — Premium Slim Desktop (Modular)
- * Description: Ein eleganter, modularer Desktop-Mode für das WordPress-Backend. Schlank, unzerstörbar und hochkompatibel.
- * Version: 1.0.0-Beta
- * Text Domain: vgt-wp-desk
- * Author: VisionGaiaTechnology
- * Author URI: https://visiongaiatechnology.de
- * License: AGPLv3
- * Requires PHP: 7.4
+ * Plugin Name:       VGT WP-Desk — Premium Slim Desktop (Modular)
+ * Description:       Ein eleganter, modularer Desktop-Mode für das WordPress-Backend. Schlank, unzerstörbar und hochkompatibel.
+ * Version:           1.0.0-Beta
+ * Author:            VisionGaiaTechnology
+ * Text Domain:       vgt-wp-desk
  */
 
 declare(strict_types=1);
@@ -203,17 +200,14 @@ final class WPDeskPlugin
         remove_action('wp_head', '_admin_bar_bump_cb');
 
         wp_enqueue_style('dashicons');
-        wp_enqueue_style('vgt-google-fonts', 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap', [], null);
+        // VGT-KORREKTUR: Google Fonts Enqueue wurde aus Gründen der DSGVO-Konformität und Zero-External-Dependencies komplett entfernt.
         wp_enqueue_style('vgt-desktop-css', VGT_WPDESK_URL . 'assets/css/desktop.css', [], '1.0.0-Beta');
         wp_enqueue_script('vgt-desktop-js', VGT_WPDESK_URL . 'assets/js/desktop.js', [], '1.0.0-Beta', false);
-
-        // Bestimme das standardmäßige lokale WebP-Wallpaper aus dem Plugin-Unterordner
-        $default_wallpaper = VGT_WPDESK_URL . 'wallpapers/wall1.webp';
 
         // Hole die serverseitig in der WordPress DB gespeicherten User-Metadaten
         $user_id = get_current_user_id();
         $user_settings = [
-            'wallpaper'       => get_user_meta($user_id, 'vgt_desk_wallpaper', true) ?: $default_wallpaper,
+            'wallpaper'       => get_user_meta($user_id, 'vgt_desk_wallpaper', true) ?: VGT_WPDESK_URL . 'wallpapers/wall1.webp',
             'accent_color'    => get_user_meta($user_id, 'vgt_desk_accent_color', true) ?: 'indigo',
             'blur'            => get_user_meta($user_id, 'vgt_desk_blur', true) !== 'false', // Standardmäßig true
             'icon_positions'  => json_decode(get_user_meta($user_id, 'vgt_desk_icon_positions', true) ?: '{}', true),
@@ -237,13 +231,11 @@ final class WPDeskPlugin
     {
         check_ajax_referer('vgt_desktop_action', 'nonce');
 
-        // KRITISCHE SCHUTZVORRICHTUNG: Nur authentifizierte Nutzer verarbeiten
         $user_id = get_current_user_id();
         if (!$user_id) {
             wp_send_json_error('Nicht authentifiziert.');
         }
 
-        // KRITISCHE SCHUTZVORRICHTUNG: Minimal-Rolle prüfen, um Spamming durch Abonnenten zu blockieren
         if (!current_user_can('read')) {
             wp_send_json_error('Unzureichende Berechtigungen.');
         }
@@ -263,11 +255,8 @@ final class WPDeskPlugin
             }
             // ZWINGEND: JSON_FORCE_OBJECT verhindert, dass leere Assoziativ-Arrays zu [] statt {} werden!
             $value = json_encode($decoded, JSON_FORCE_OBJECT);
-        } elseif ($type === 'wallpaper') {
-            // KRITISCHE SCHUTZVORRICHTUNG: Wallpaper-Injektionen verhindern durch restriktives esc_url_raw
-            $value = esc_url_raw($value);
         } else {
-            $value = sanitize_text_field($value);
+            $value = esc_url_raw($value);
         }
 
         update_user_meta($user_id, 'vgt_desk_' . $type, $value);
