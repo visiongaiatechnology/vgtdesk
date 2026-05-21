@@ -1,0 +1,1077 @@
+/**
+ * VGT WP-Desk — Premium UI-Stylesheets (Native CSS - 100% Zero-Dependency)
+ */
+
+/* WordPress Admin-Reset */
+#wpbody-content { 
+    padding-bottom: 0 !important; 
+}
+
+#wpcontent, 
+#wpbody { 
+    padding: 0 !important; 
+    margin: 0 !important; 
+}
+
+#adminmenumain, 
+#wpadminbar, 
+#wpfooter { 
+    display: none !important; 
+}
+
+html, html.wp-toolbar {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Core Utility Classes */
+.hidden {
+    display: none !important;
+}
+.absolute {
+    position: absolute !important;
+}
+.relative {
+    position: relative !important;
+}
+.flex-1 {
+    flex: 1 1 0% !important;
+}
+
+/* Base Styles */
+.vgt-desk-shell {
+    height: 100vh !important;
+    width: 100vw !important;
+    background-color: #020617 !important;
+    overflow: hidden !important;
+    position: relative;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: #f1f5f9;
+}
+
+/* Wallpaper-Engine */
+.vgt-wallpaper-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.7s ease-in-out;
+    z-index: 0;
+    transform: scale(1.05);
+}
+
+.vgt-wallpaper-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(2, 6, 23, 0.6) 0%, transparent 50%, rgba(2, 6, 23, 0.3) 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Layout Canvas */
+.vgt-interface-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 14px;
+    z-index: 10;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* Premium Glassmorphism & Shadow */
+.glassmorphism {
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.window-shadow {
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.7);
+}
+
+/* Header Top-Bar */
+.vgt-topbar {
+    width: 100%;
+    height: 44px;
+    border-radius: 12px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 9999 !important;
+    box-sizing: border-box;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    animation: slideDownVGT 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideDownVGT {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.vgt-topbar-left,
+.vgt-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.vgt-logo-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+.vgt-logo-group:hover {
+    opacity: 0.8;
+}
+
+.vgt-topbar-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #6366f1;
+    animation: pulseDot 2s infinite;
+}
+
+@keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.15); }
+}
+
+.vgt-topbar-title {
+    font-weight: 700;
+    color: #6366f1;
+}
+.vgt-topbar-subtitle {
+    color: #cbd5e1;
+}
+.vgt-topbar-separator {
+    color: #475569;
+}
+
+/* BRANDING & VERSION IN TOP-BAR */
+.vgt-topbar-branding {
+    font-size: 11px;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.vgt-topbar-version-badge {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 9px;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+@media (max-width: 900px) {
+    .vgt-topbar-branding {
+        display: none !important;
+    }
+}
+
+.vgt-topbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+@media (max-width: 1024px) {
+    .vgt-topbar-nav {
+        display: none !important;
+    }
+}
+
+.vgt-topbar-btn {
+    background: transparent;
+    border: none;
+    color: #cbd5e1;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    transition: color 0.15s ease;
+}
+.vgt-topbar-btn:hover {
+    color: #ffffff;
+}
+
+/* User Profil & Clock in Header */
+.vgt-profile-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: background-color 0.15s ease;
+}
+.vgt-profile-badge:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.vgt-profile-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: rgba(99, 102, 241, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+.vgt-profile-name {
+    font-weight: 600;
+    color: #e2e8f0;
+}
+
+.vgt-clock-badge {
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+/* Workspace Canvas */
+.vgt-workspace {
+    flex: 1 1 0% !important;
+    width: 100%;
+    position: relative;
+    margin: 12px 0;
+    overflow: visible !important; 
+    z-index: 10;
+}
+
+.vgt-icons-area {
+    position: absolute;
+    inset: 0;
+    z-index: 11;
+}
+
+/* Desktop Icon Item */
+.vgt-icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 80px !important;
+    height: 80px !important;
+    border-radius: 16px;
+    transition: transform 0.15s ease, background-color 0.15s ease;
+    cursor: pointer !important;
+}
+.vgt-icon-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+.vgt-icon-item:active {
+    transition: none !important;
+    transform: scale(0.95);
+}
+
+.desktop-icon {
+    width: 64px !important;
+}
+
+.vgt-icon-tile {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    transition: transform 0.15s ease;
+    background-color: rgba(255, 255, 255, 0.05); /* Fallback */
+}
+.vgt-icon-item:hover .vgt-icon-tile {
+    transform: scale(1.05);
+}
+
+.vgt-color-gradient-settings {
+    background: linear-gradient(135deg, #475569 0%, #1e293b 100%) !important;
+}
+
+/* native Ersetzung für entfernte Tailwind-Farbklassen */
+.from-indigo-500.to-indigo-600 { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important; }
+.from-emerald-500.to-emerald-600 { background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; }
+.from-cyan-500.to-cyan-600 { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%) !important; }
+.from-amber-500.to-amber-600 { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; }
+.from-purple-500.to-purple-600 { background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%) !important; }
+.from-rose-500.to-rose-600 { background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important; }
+.from-pink-500.to-pink-600 { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%) !important; }
+.from-blue-500.to-blue-600 { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+
+.vgt-icon-emoji {
+    font-size: 20px;
+}
+.vgt-icon-dashicon {
+    color: #ffffff;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+.vgt-icon-img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    filter: invert(1) brightness(2);
+}
+
+.vgt-icon-label {
+    font-size: 10px;
+    font-weight: 600;
+    margin-top: 6px;
+    text-align: center;
+    color: #f1f5f9;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    padding: 0 4px;
+    box-sizing: border-box;
+}
+
+/* Windows Layer Container */
+.vgt-windows-container {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    pointer-events: none;
+}
+
+.vgt-dynamic-windows-container {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    pointer-events: none;
+}
+
+/* Base Window Window Styles */
+.vgt-window {
+    background: rgba(10, 13, 22, 0.95);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    pointer-events: auto;
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.7);
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-out, border-color 0.2s ease;
+}
+
+.window {
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-out, border-color 0.2s ease;
+}
+.window:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Titlebar Header */
+.vgt-window-header {
+    height: 44px;
+    background: rgba(15, 23, 42, 0.4);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.vgt-window-dots {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vgt-window-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+}
+.vgt-window-dot:hover {
+    filter: brightness(1.2);
+}
+
+.dot-rose { background-color: #f43f5e; }
+.dot-amber { background-color: #f59e0b; }
+.dot-emerald { background-color: #10b981; }
+
+.vgt-window-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #cbd5e1;
+    letter-spacing: 0.025em;
+}
+
+.vgt-window-spacer {
+    width: 56px;
+}
+
+.vgt-window-badge-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vgt-badge-item {
+    font-size: 9px;
+    background-color: rgba(99, 102, 241, 0.2);
+    color: #818cf8;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+/* Window Content Viewports */
+.vgt-window-body {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    color: #cbd5e1;
+    box-sizing: border-box;
+}
+
+.vgt-body-h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 8px 0;
+}
+
+.vgt-body-p {
+    font-size: 14px;
+    color: #94a3b8;
+    margin-bottom: 16px;
+    line-height: 1.625;
+}
+
+/* System Grid Card Layout inside Welcome */
+.vgt-welcome-grid {
+    display: grid;
+    grid-template-cols: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.vgt-welcome-card {
+    padding: 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.vgt-card-h3 {
+    font-size: 12px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+}
+.card-accent-indigo { color: #818cf8; }
+.card-accent-emerald { color: #34d399; }
+
+.vgt-card-p {
+    font-size: 11px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* SPENDEN / DONATIONS STYLES */
+.vgt-donation-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.vgt-donation-header {
+    font-size: 14px;
+    font-weight: 700;
+    color: #f43f5e;
+    margin-bottom: 4px;
+}
+
+.vgt-donation-desc {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+}
+
+.vgt-donation-grid {
+    display: grid;
+    grid-template-cols: repeat(4, 1fr);
+    gap: 10px;
+}
+
+@media (max-width: 640px) {
+    .vgt-donation-grid {
+        grid-template-cols: repeat(2, 1fr);
+    }
+}
+
+.vgt-donation-card-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    padding: 12px 6px !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.vgt-donation-card-item:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    transform: translateY(-2px) !important;
+    border-color: rgba(244, 63, 94, 0.3) !important;
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.15) !important;
+}
+
+.vgt-donation-card-item.paypal-color:hover {
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15) !important;
+}
+
+.vgt-donation-icon {
+    font-size: 18px;
+    margin-bottom: 4px;
+}
+
+.vgt-donation-label {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+}
+
+.vgt-donation-addr {
+    font-size: 9px !important;
+    color: #64748b !important;
+    max-width: 100% !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    margin-top: 2px;
+}
+
+/* POPUP FOOTER INTEGRATION */
+.vgt-popup-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 12px;
+    margin-top: 20px;
+}
+
+.vgt-footer-branding {
+    font-size: 11px;
+    color: #475569;
+    font-weight: 500;
+}
+
+.vgt-footer-version {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+/* Settings Viewport & Form Controls */
+.vgt-settings-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px !important;
+    padding: 20px !important;
+}
+
+.vgt-settings-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.vgt-settings-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+/* FIXED WALLPAPER GRID IN SETTINGS (PREVENTS VERTICAL FLATTENING & UNCONTROLLED SCALING) */
+.vgt-wallpaper-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    width: 100% !important;
+    margin-bottom: 4px !important;
+}
+
+.vgt-wallpaper-thumb {
+    width: 80px !important;
+    height: 80px !important;
+    aspect-ratio: 1/1 !important;
+    border-radius: 10px !important;
+    background-size: cover !important;
+    background-position: center !important;
+    border: 2px solid rgba(255, 255, 255, 0.08) !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.vgt-wallpaper-thumb:hover {
+    transform: translateY(-3px) scale(1.05) !important;
+    border-color: #6366f1 !important;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3) !important;
+}
+
+.vgt-settings-form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.vgt-form-input-line {
+    display: flex;
+    gap: 8px;
+}
+
+.vgt-input-text {
+    background-color: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 12px;
+    outline: none;
+    color: #cbd5e1;
+    flex: 1;
+}
+.vgt-input-text:focus {
+    border-color: #6366f1;
+}
+
+.vgt-btn-primary {
+    background-color: #4f46e5;
+    color: #ffffff;
+    border: none;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 0 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+.vgt-btn-primary:hover {
+    background-color: #4338ca;
+}
+
+/* Accent Palette */
+.vgt-color-palette {
+    display: flex;
+    gap: 12px;
+}
+
+.vgt-color-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+.vgt-color-circle:hover {
+    transform: scale(1.1);
+}
+
+.bg-indigo { background-color: #6366f1 !important; }
+.bg-emerald { background-color: #10b981 !important; }
+.bg-cyan { background-color: #06b6d4 !important; }
+.bg-amber { background-color: #f59e0b !important; }
+.bg-rose { background-color: #f43f5e !important; }
+
+/* System Bypass Box */
+.vgt-bypass-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 16px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-sizing: border-box;
+}
+
+.vgt-bypass-buttons-row {
+    display: flex;
+    gap: 12px;
+}
+
+@media (max-width: 640px) {
+    .vgt-bypass-buttons-row {
+        flex-direction: column;
+    }
+}
+
+.vgt-btn-secondary {
+    background-color: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f1f5f9;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    flex: 1;
+}
+.vgt-btn-secondary:hover {
+    background-color: #334155;
+}
+
+.vgt-btn-danger {
+    background-color: rgba(159, 18, 57, 0.4);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    color: #fecdd3;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    text-align: center;
+    text-decoration: none;
+    flex: 1;
+}
+.vgt-btn-danger:hover {
+    background-color: rgba(159, 18, 57, 0.6);
+}
+
+/* Blur Custom Switch Slider */
+.vgt-toggle-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.vgt-toggle-label-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.vgt-toggle-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+}
+
+.vgt-toggle-desc {
+    font-size: 10px;
+    color: #94a3b8;
+    margin: 2px 0 0 0;
+}
+
+.vgt-toggle-switch {
+    width: 32px;
+    height: 16px;
+    background-color: #1e293b;
+    border-radius: 99px;
+    appearance: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    position: relative;
+    outline: none;
+}
+.vgt-toggle-switch:checked {
+    background-color: #6366f1;
+}
+.vgt-toggle-switch::before {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    top: 1px;
+    left: 1px;
+    transition: transform 0.2s ease;
+}
+.vgt-toggle-switch:checked::before {
+    transform: translateX(16px);
+}
+
+/* Footer & Dock Taskbar Component */
+.vgt-footer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: 40;
+    position: relative;
+}
+
+.vgt-dock {
+    border-radius: 16px;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+    position: relative;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    transition: padding 0.3s ease;
+    box-sizing: border-box;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.vgt-dock:hover {
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+
+.vgt-dock-item {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.vgt-dock-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background-color: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.vgt-dock-item:hover .vgt-dock-icon {
+    transform: scale(1.25);
+}
+.vgt-dock-item:active .vgt-dock-icon {
+    transform: scale(0.9);
+}
+
+.vgt-dock-emoji {
+    font-size: 20px;
+}
+.vgt-dock-dashicon {
+    color: #ffffff;
+    font-size: 20px;
+}
+.vgt-dock-img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    filter: invert(1) brightness(2);
+}
+
+/* Tooltips */
+.vgt-dock-tooltip {
+    position: absolute;
+    top: -40px;
+    transform: scale(0);
+    transition: transform 0.2s ease;
+    background-color: #0f172a;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    white-space: nowrap;
+}
+.vgt-dock-item:hover .vgt-dock-tooltip {
+    transform: scale(1);
+}
+
+/* Dock Indicators */
+.vgt-dock-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-top: 6px;
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+    opacity: 0;
+}
+
+.vgt-bg-slate-500 { background-color: #64748b !important; }
+.vgt-bg-indigo-400 { background-color: #818cf8 !important; }
+.vgt-bg-emerald-400 { background-color: #34d399 !important; }
+.vgt-bg-cyan-400 { background-color: #22d3ee !important; }
+.vgt-bg-amber-400 { background-color: #fbbf24 !important; }
+.vgt-bg-rose-400 { background-color: #fb7185 !important; }
+
+.vgt-dock-divider {
+    width: 1px;
+    height: 32px;
+    background-color: rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+.vgt-dynamic-taskbar-flex {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Core Iframe Setup */
+.iframe-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #090d16;
+}
+
+/* Animated CSS Loading Indication */
+.spinner-vgt {
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top: 2px solid #6366f1;
+    width: 20px;
+    height: 20px;
+    animation: spinVGT 0.8s linear infinite;
+    display: none;
+}
+
+@keyframes spinVGT {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Webkit Scrollbars inside workspace */
+.window-content::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.window-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+.window-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 99px;
+}
+
+/* Grabbing states */
+body.vgt-dragging, body.vgt-dragging * {
+    cursor: grabbing !important;
+}
+.desktop-icon.dragging {
+    cursor: grabbing !important;
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+/* Resize Control Edges */
+.resize-handle {
+    position: absolute;
+    z-index: 10;
+    background: transparent;
+}
+.resize-handle-n { top: 0; left: 0; right: 0; height: 6px; cursor: n-resize; }
+.resize-handle-s { bottom: 0; left: 0; right: 0; height: 6px; cursor: s-resize; }
+.resize-handle-e { top: 0; bottom: 0; right: 0; width: 6px; cursor: e-resize; }
+.resize-handle-w { top: 0; bottom: 0; left: 0; width: 6px; cursor: w-resize; }
+.resize-handle-nw { top: 0; left: 0; width: 10px; height: 10px; cursor: nwse-resize; z-index: 11; }
+.resize-handle-ne { top: 0; right: 0; width: 10px; height: 10px; cursor: nesw-resize; z-index: 11; }
+.resize-handle-sw { bottom: 0; left: 0; width: 10px; height: 10px; cursor: nesw-resize; z-index: 11; }
+.resize-handle-se { bottom: 0; right: 0; width: 10px; height: 10px; cursor: nwse-resize; z-index: 11; }
+
+/* Pop in Animations for taskbars */
+#vgt-dynamic-task-bar > div {
+    animation: taskBarPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes taskBarPopIn {
+    0% {
+        transform: scale(0) translateY(20px);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* RESPONSIVE MOBILE WINDOW FORCING (ZERO OVERWRITE FOR DB PERSISTENCE) */
+@media (max-width: 768px) {
+    .vgt-window:not(.hidden) {
+        width: 100% !important;
+        height: calc(100% - 70px) !important; /* Passt sich perfekt über dem Dock ein */
+        top: 0px !important;
+        left: 0px !important;
+        border-radius: 16px 16px 0 0 !important; /* Moderner App-Sheet Look */
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Verhindert Verzerrung von Iframes und inneren Elementen */
+    .vgt-window-body {
+        padding: 16px !important;
+    }
+
+    /* Verstecke Resize-Handles vollständig auf mobilen Geräten */
+    .resize-handle {
+        display: none !important;
+    }
+
+    /* Deaktiviere Drag-Cursor auf dem Header */
+    .window-header, .vgt-window-header {
+        cursor: default !important;
+    }
+
+    /* Grid-Layouts für Willkommensfenster stapeln */
+    .vgt-welcome-grid {
+        grid-template-cols: 1fr !important;
+        gap: 10px !important;
+    }
+
+    /* Spenden-Grid auf Handys kompakter darstellen */
+    .vgt-donation-grid {
+        grid-template-cols: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+
+    /* Verstecke den Maximieren-Punkt (grün) auf Handys, da ohnehin Fullscreen */
+    .dot-emerald {
+        display: none !important;
+    }
+}
+}
