@@ -25,6 +25,12 @@ Found a bug or have an improvement? **Open an issue or contact us.**
 
 ---
 
+
+
+https://github.com/user-attachments/assets/c7c1bde7-a178-4dff-8d09-a3ace3f77c14
+
+
+
 <img width="1916" height="908" alt="VGT WP-Desk Main Desktop" src="https://github.com/user-attachments/assets/b0776d5f-4dcc-4939-bf0f-215de8d87cd7" />
 
 ## 🔍 What is VGT WP-Desk?
