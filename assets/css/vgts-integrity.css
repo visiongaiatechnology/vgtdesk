@@ -1,0 +1,82 @@
+/**
+ * VGT SENTINEL - INTEGRITY MODULE STYLES
+ * STATUS: PLATIN STATUS
+ */
+
+.vgts-integrity-status-icon {
+    width: 50px;
+    height: 50px; 
+    background: rgba(255, 255, 255, 0.05); 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+
+.vgts-integrity-header {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    border-bottom: 1px solid var(--vgts-border); 
+    padding-bottom: 20px; 
+    margin-bottom: 20px;
+}
+
+.vgts-integrity-alert-box {
+    background: rgba(239, 68, 68, 0.1); 
+    border: 1px solid rgba(239, 68, 68, 0.3); 
+    padding: 15px; 
+    border-radius: 6px; 
+    margin-bottom: 25px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+}
+
+/* Progress Indicator */
+#vgts-scan-progress {
+    display: none; 
+    margin-top: 20px; 
+    background: var(--vgts-bg-sidebar); 
+    padding: 20px; 
+    border-radius: 8px; 
+    border: 1px solid var(--vgts-border); 
+    text-align: center; 
+    color: var(--vgts-accent);
+}
+
+.vgts-spin {
+    animation: vgtsRotation 2s infinite linear;
+}
+
+@keyframes vgtsRotation {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(359deg); }
+}
+
+/* Badges for Integrity Table */
+.vgts-badge-integrity {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.bg-green { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+.bg-red { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+/* Custom Approve Modal Overlay */
+.vgts-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

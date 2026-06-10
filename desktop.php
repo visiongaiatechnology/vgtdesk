@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       VGT WP-Desk — Premium Slim Desktop (Modular)
  * Description:       Ein eleganter, modularer Desktop-Mode für das WordPress-Backend. Schlank, unzerstörbar und hochkompatibel.
- * Version:           1.0.0-Beta (Hardened Edition)
+ * Version:           1.0.0-Beta v2 (Hardened Edition)
  * Author:            VisionGaiaTechnology
  * Text Domain:       vgt-wp-desk
  */
@@ -47,9 +47,32 @@ final class WPDeskPlugin
 
     private function __construct()
     {
-        // PATTERN 1.5.C — Globale Fehlersensitivität erzwingen
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_reporting(E_ALL);
+        // PATTERN 1.5.C — Separation of internal reporting vs. display
+        ini_set('display_errors', '0');              // User-visible output suppressed
+        error_reporting(E_ALL);                      // Internal sensitivity maximum
+        set_error_handler(static function(int $sev, string $msg, string $file, int $line): bool {
+            if (!(error_reporting() & $sev)) return false;
+            
+            // Limit strict ErrorException mapping to our own namespace/plugin folder
+            $normalized_file = str_replace('\\', '/', $file);
+            $normalized_path = str_replace('\\', '/', VGT_WPDESK_PATH);
+            
+            if (str_contains($normalized_file, $normalized_path)) {
+                throw new \ErrorException($msg, 0, $sev, $file, $line);
+            }
+            return false;
+        });
+
+        if (file_exists(VGT_WPDESK_PATH . 'vision-integrity-sentinel.php')) {
+            require_once VGT_WPDESK_PATH . 'vision-integrity-sentinel.php';
+        }
+
+        if (file_exists(VGT_WPDESK_PATH . 'includes/class-iframe-transformer.php')) {
+            require_once VGT_WPDESK_PATH . 'includes/class-iframe-transformer.php';
+        }
+
+        if (file_exists(VGT_WPDESK_PATH . 'includes/class-vgt-throne-guard.php')) {
+            require_once VGT_WPDESK_PATH . 'includes/class-vgt-throne-guard.php';
         }
 
         $this->init_hooks();
@@ -67,6 +90,11 @@ final class WPDeskPlugin
         add_action('admin_head', [$this, 'inject_chromeless_css']);
         add_action('admin_init', [$this, 'handle_iframe_restrictions']);
         add_action('wp_ajax_vgt_save_user_settings', [$this, 'ajax_save_user_settings']);
+        add_action('wp_ajax_vgt_toggle_sentinel', [$this, 'ajax_toggle_sentinel']);
+
+        // Dynamic CSP Nonce filters for enqueued assets
+        add_filter('style_loader_tag', [$this, 'add_csp_nonce_to_tags'], 10, 2);
+        add_filter('script_loader_tag', [$this, 'add_csp_nonce_to_tags'], 10, 2);
     }
 
     public function register_admin_page(): void
@@ -188,19 +216,44 @@ final class WPDeskPlugin
 
         $user_id       = get_current_user_id();
         $user_settings = [
-            'wallpaper'       => esc_url_raw(get_user_meta($user_id, 'vgt_desk_wallpaper', true) ?: VGT_WPDESK_URL . 'wallpapers/wall1.webp'),
-            'accent_color'    => sanitize_key(get_user_meta($user_id, 'vgt_desk_accent_color', true) ?: 'indigo'),
-            'blur'            => get_user_meta($user_id, 'vgt_desk_blur', true) !== 'false',
-            'icon_positions'  => json_decode(get_user_meta($user_id, 'vgt_desk_icon_positions', true) ?: '{}', true),
-            'window_settings' => json_decode(get_user_meta($user_id, 'vgt_desk_window_settings', true) ?: '{}', true)
+            'wallpaper'        => esc_url_raw(get_user_meta($user_id, 'vgt_desk_wallpaper', true) ?: VGT_WPDESK_URL . 'wallpapers/wall1.webp'),
+            'accent_color'     => sanitize_key(get_user_meta($user_id, 'vgt_desk_accent_color', true) ?: 'indigo'),
+            'blur'             => get_user_meta($user_id, 'vgt_desk_blur', true) !== 'false',
+            'icon_positions'   => json_decode(get_user_meta($user_id, 'vgt_desk_icon_positions', true) ?: '{}', true),
+            'window_settings'  => json_decode(get_user_meta($user_id, 'vgt_desk_window_settings', true) ?: '{}', true),
+            'widgets_visible'  => get_user_meta($user_id, 'vgt_desk_widgets_visible', true) !== 'false',
+            'icons_visible'    => get_user_meta($user_id, 'vgt_desk_icons_visible', true) !== 'false',
+            'audio_enabled'    => get_user_meta($user_id, 'vgt_desk_audio_enabled', true) !== 'false',
+            'widget_positions' => json_decode(get_user_meta($user_id, 'vgt_desk_widget_positions', true) ?: '{}', true)
         ];
+
+        global $wpdb;
+        $bans_count = 0;
+
+        // Check Sentinel V5/CE Bans
+        $table_bans_v5 = $wpdb->prefix . 'vgts_apex_bans';
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_bans_v5'") === $table_bans_v5) {
+            $bans_count += (int) $wpdb->get_var("SELECT COUNT(*) FROM $table_bans_v5");
+        }
+
+        // Check Sentinel V7 Bans
+        $table_bans_v7 = $wpdb->prefix . 'vis_apex_bans';
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_bans_v7'") === $table_bans_v7) {
+            $bans_count += (int) $wpdb->get_var("SELECT COUNT(*) FROM $table_bans_v7");
+        }
+
+        $sentinel_v7_active = defined('VIS_VERSION');
+        $sentinel_active = (get_option('vgt_sentinel_enabled') === 'true') || $sentinel_v7_active;
 
         wp_localize_script('vgt-desktop-js', 'vgtConfig', [
             'ajaxUrl'      => admin_url('admin-ajax.php'),
             'adminUrl'     => admin_url(),
             'nonce'        => wp_create_nonce('vgt_desktop_action'),
             'toggleNonce'  => wp_create_nonce('vgt_toggle_desktop'),
-            'userSettings' => $user_settings
+            'userSettings' => $user_settings,
+            'sentinelEnabled' => $sentinel_active,
+            'sentinelBans'    => $bans_count,
+            'isSentinelV7'    => $sentinel_v7_active
         ]);
     }
 
@@ -222,7 +275,7 @@ final class WPDeskPlugin
             $type  = isset($_POST['setting_type']) ? sanitize_key($_POST['setting_type']) : '';
             $value = isset($_POST['value']) ? wp_unslash($_POST['value']) : '';
 
-            if (!in_array($type, ['wallpaper', 'accent_color', 'blur', 'icon_positions', 'window_settings'], true)) {
+            if (!in_array($type, ['wallpaper', 'accent_color', 'blur', 'icon_positions', 'window_settings', 'widgets_visible', 'icons_visible', 'audio_enabled', 'widget_positions'], true)) {
                 throw new ValidationException('Invalid configuration parameters submitted.');
             }
 
@@ -231,11 +284,11 @@ final class WPDeskPlugin
                 throw new ValidationException('Illegal accent color value.');
             }
 
-            if ($type === 'blur') {
+            if (in_array($type, ['blur', 'widgets_visible', 'icons_visible', 'audio_enabled'], true)) {
                 $value = ($value === 'true' || $value === '1') ? 'true' : 'false';
             }
 
-            if (in_array($type, ['icon_positions', 'window_settings'], true)) {
+            if (in_array($type, ['icon_positions', 'window_settings', 'widget_positions'], true)) {
                 if (!is_string($value)) {
                     throw new ValidationException('Expected string payload for JSON fields.');
                 }
@@ -250,8 +303,11 @@ final class WPDeskPlugin
                 $value = sanitize_key($value);
             }
 
-            if (update_user_meta($user_id, 'vgt_desk_' . $type, $value) === false) {
-                throw new StorageException('Database transaction failure during meta persistence update.');
+            $old_val = get_user_meta($user_id, 'vgt_desk_' . $type, true);
+            if ($old_val !== $value) {
+                if (update_user_meta($user_id, 'vgt_desk_' . $type, $value) === false) {
+                    throw new StorageException('Database transaction failure during meta persistence update.');
+                }
             }
 
             wp_send_json_success(['message' => 'Configuration persisted successfully.', 'type' => $type]);
@@ -267,6 +323,38 @@ final class WPDeskPlugin
         } catch (\Throwable $e) {
             error_log('[FATAL] VGT WP-Desk Critical Exception — ' . $e->getMessage());
             wp_send_json_error('Critical system fault execution halted.');
+        }
+    }
+
+    public function ajax_toggle_sentinel(): void
+    {
+        try {
+            if (!check_ajax_referer('vgt_desktop_action', 'nonce', false)) {
+                throw new SecurityException('CSRF Token validation failed.');
+            }
+
+            if (!current_user_can('manage_options')) {
+                throw new SecurityException('Insufficient capabilities.');
+            }
+
+            $current = get_option('vgt_sentinel_enabled') === 'true';
+            $new_state = !$current;
+            update_option('vgt_sentinel_enabled', $new_state ? 'true' : 'false');
+
+            wp_send_json_success([
+                'enabled' => $new_state,
+                'message' => $new_state ? 'Sentinel erfolgreich aktiviert.' : 'Sentinel erfolgreich deaktiviert.'
+            ]);
+
+        } catch (SecurityException $e) {
+            error_log('[SEC] ' . $e->getMessage());
+            wp_send_json_error('Request rejected for security reasons.');
+        } catch (StorageException $e) {
+            error_log('[STORAGE] ' . $e->getMessage());
+            wp_send_json_error('A server error occurred.');
+        } catch (\Throwable $e) {
+            error_log('[FATAL] ' . $e->getMessage());
+            wp_send_json_error('Critical system fault.');
         }
     }
 
@@ -347,19 +435,37 @@ final class WPDeskPlugin
             return;
         }
 
-        // HINWEIS: Einbindung eines CSP-Zertifikats/Nonce wird dringend für den Style-Tag empfohlen
-        echo '';
+        $user_id = get_current_user_id();
+        $accent_color = sanitize_key(get_user_meta($user_id, 'vgt_desk_accent_color', true) ?: 'indigo');
+        
+        $accent_map = [
+            'indigo'  => ['main' => '#6366f1', 'hover' => '#818cf8', 'rgba15' => 'rgba(99, 102, 241, 0.15)', 'rgba8' => 'rgba(99, 102, 241, 0.08)'],
+            'emerald' => ['main' => '#10b981', 'hover' => '#34d399', 'rgba15' => 'rgba(16, 185, 129, 0.15)', 'rgba8' => 'rgba(16, 185, 129, 0.08)'],
+            'cyan'    => ['main' => '#06b6d4', 'hover' => '#22d3ee', 'rgba15' => 'rgba(6, 182, 212, 0.15)', 'rgba8' => 'rgba(6, 182, 212, 0.08)'],
+            'amber'   => ['main' => '#f59e0b', 'hover' => '#fbbf24', 'rgba15' => 'rgba(245, 158, 11, 0.15)', 'rgba8' => 'rgba(245, 158, 11, 0.08)'],
+            'rose'    => ['main' => '#f43f5e', 'hover' => '#fb7185', 'rgba15' => 'rgba(244, 63, 94, 0.15)', 'rgba8' => 'rgba(244, 63, 94, 0.08)']
+        ];
+        
+        $color = $accent_map[$accent_color] ?? $accent_map['indigo'];
+
         echo '<style nonce="' . (function_exists('vgt_get_csp_nonce') ? esc_attr(vgt_get_csp_nonce()) : '') . '">
+            :root {
+                --vgt-accent: ' . esc_html($color['main']) . ';
+                --vgt-accent-hover: ' . esc_html($color['hover']) . ';
+                --vgt-accent-rgba15: ' . esc_html($color['rgba15']) . ';
+                --vgt-accent-rgba8: ' . esc_html($color['rgba8']) . ';
+            }
             #adminmenumain, #adminmenuback, #adminmenuwrap, #wpadminbar, #wpfooter, 
             .update-nag, #screen-meta-links, .notice, .notice-error, .notice-warning, 
             .notice-info, .notice-success, #contextual-help-link-wrap, #wp-admin-bar-root-default { 
                 display: none !important; 
             }
             html, html.wp-toolbar { padding-top: 0 !important; margin-top: 0 !important; height: 100vh !important; background: #090d16 !important; }
+            body { background: #090d16 !important; }
             body.admin-bar #wpcontent, #wpcontent, #wpbody, .wrap { margin-left: 0 !important; margin-right: 0 !important; padding: 15px !important; background: #090d16 !important; color: #cbd5e1 !important; min-height: 100vh !important; box-sizing: border-box !important; }
             .wrap h1, .wrap h2, .wrap h3, h1, h2, h3, h4, h5, h6, .title, .postbox-header h2, .wp-heading-inline, .card h2, .form-table th, label, .manage-column, .column-title, strong, td, th, .wp-filter-search { color: #f1f5f9 !important; }
             p, span, .description, .help, .tablenav, .subsubsub a { color: #94a3b8 !important; }
-            a { color: #6366f1 !important; } a:hover { color: #818cf8 !important; }
+            a { color: var(--vgt-accent) !important; } a:hover { color: var(--vgt-accent-hover) !important; }
             .widefat, .wp-list-table { background: #0f172a !important; border: 1px solid #1e293b !important; }
             .widefat td, .widefat th { border-bottom: 1px solid #1e293b !important; color: #cbd5e1 !important; }
             .alternate, .striped > tbody > :nth-child(odd) { background-color: #0b0f19 !important; }
@@ -395,6 +501,21 @@ final class WPDeskPlugin
         $apps_data    = $this->apps;
         include VGT_WPDESK_PATH . 'templates/desktop-shell.php';
     }
+
+    public function add_csp_nonce_to_tags(string $tag, string $handle): string
+    {
+        if (str_starts_with($handle, 'vgt-')) {
+            if (function_exists('vgt_get_csp_nonce')) {
+                $nonce = vgt_get_csp_nonce();
+                if (!empty($nonce)) {
+                    $tag = str_replace('<link ', '<link nonce="' . esc_attr($nonce) . '" ', $tag);
+                    $tag = str_replace('<script ', '<script nonce="' . esc_attr($nonce) . '" ', $tag);
+                }
+            }
+        }
+        return $tag;
+    }
+
 }
 
 WPDeskPlugin::getInstance();

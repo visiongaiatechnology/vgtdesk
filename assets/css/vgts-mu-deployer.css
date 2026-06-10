@@ -1,0 +1,53 @@
+/**
+ * VGT SENTINEL - MU-DEPLOYER MODULE STYLES
+ * STATUS: PLATIN STATUS
+ */
+
+.vgts-mu-status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.vgts-mu-active {
+    background: #10b981;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+}
+
+.vgts-mu-inactive {
+    background: #ef4444;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+}
+
+.vgts-mu-code-block {
+    width: 100%;
+    height: 300px;
+    background: #020617 !important;
+    color: #10b981 !important;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+    font-size: 11px !important;
+    line-height: 1.5 !important;
+    padding: 20px !important;
+    border-radius: 6px !important;
+    border: 1px solid #1e293b !important;
+    resize: none !important;
+    outline: none !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.vgts-mu-info-panel {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid var(--vgts-border);
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.vgts-mu-copy-hint {
+    display: block;
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--vgts-text-secondary);
+    font-style: italic;
+}

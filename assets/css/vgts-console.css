@@ -1,0 +1,81 @@
+/**
+ * VGT SENTINEL - CONSOLE MODULE STYLES
+ * STATUS: PLATIN STATUS
+ */
+
+.vgts-term-wrapper {
+    border-top: 3px solid #10b981; 
+    padding: 0; 
+    background: #050505; 
+    overflow: hidden; 
+    border-radius: 8px; 
+    box-shadow: 0 10px 40px rgba(16, 185, 129, 0.15);
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+.vgts-term-header {
+    background: #111; 
+    padding: 10px 20px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    border-bottom: 1px solid #222;
+}
+
+.vgts-term-body {
+    height: 550px; 
+    display: flex; 
+    flex-direction: column; 
+    position: relative;
+}
+
+.vgts-term-output {
+    flex-grow: 1; 
+    padding: 20px; 
+    color: #10b981; 
+    font-size: 13px; 
+    line-height: 1.6; 
+    overflow-y: auto; 
+    text-shadow: 0 0 5px rgba(16, 185, 129, 0.4);
+}
+
+.vgts-term-input-row {
+    padding: 0 20px 20px 20px; 
+    display: flex; 
+    align-items: center; 
+    background: transparent;
+}
+
+.vgts-term-input {
+    background: transparent; 
+    border: none; 
+    color: #10b981; 
+    font-family: inherit;
+    font-size: 13px; 
+    outline: none; 
+    flex-grow: 1; 
+    width: 100%; 
+    box-shadow: none;
+    text-shadow: 0 0 5px rgba(16, 185, 129, 0.4);
+}
+
+.vgts-term-input::placeholder { 
+    color: transparent; 
+}
+
+.vgts-scanline {
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); 
+    background-size: 100% 2px, 3px 100%; 
+    pointer-events: none; 
+    opacity: 0.4;
+}
+
+.vgts-term-output::-webkit-scrollbar { width: 8px; }
+.vgts-term-output::-webkit-scrollbar-track { background: #050505; }
+.vgts-term-output::-webkit-scrollbar-thumb { background: #10b981; border-radius: 4px; }

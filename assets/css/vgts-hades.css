@@ -1,0 +1,77 @@
+/**
+ * VGT SENTINEL - HADES MODULE STYLES
+ * STATUS: PLATIN STATUS
+ */
+
+@keyframes vgtsFadeIn { 
+    from { opacity: 0; transform: translateY(2px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+.vgts-lang-en { display: none !important; }
+.vgts-lang-de { animation: vgtsFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+.vgts-state-en .vgts-lang-de { display: none !important; }
+.vgts-state-en span.vgts-lang-en { display: inline !important; animation: vgtsFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+.vgts-state-en strong.vgts-lang-en,
+.vgts-state-en h4.vgts-lang-en,
+.vgts-state-en p.vgts-lang-en, 
+.vgts-state-en div.vgts-lang-en { 
+    display: block !important; 
+    animation: vgtsFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+
+.vgts-toggle-wrapper { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+.vgts-toggle-label { 
+    display: flex; align-items: center; cursor: pointer; gap: 12px; 
+    background: rgba(15, 23, 42, 0.6); padding: 6px 14px; border-radius: 20px; 
+    border: 1px solid #334155; backdrop-filter: blur(4px); transition: all 0.3s ease; 
+}
+.vgts-toggle-label:hover { border-color: rgba(139, 92, 246, 0.4); box-shadow: 0 0 10px rgba(139, 92, 246, 0.1); }
+.vgts-toggle-text { font-size: 11px; font-weight: 800; letter-spacing: 0.5px; transition: color 0.3s ease; }
+
+/* Hades Purple Colors */
+.vgts-text-de { color: #8b5cf6; text-shadow: 0 0 8px rgba(139, 92, 246, 0.4); }
+.vgts-text-en { color: #475569; }
+.vgts-state-en .vgts-text-de { color: #475569; text-shadow: none; }
+.vgts-state-en .vgts-text-en { color: #8b5cf6; text-shadow: 0 0 8px rgba(139, 92, 246, 0.4); }
+
+.vgts-switch-track { 
+    position: relative; width: 38px; height: 18px; background: #0b0f19; 
+    border-radius: 18px; overflow: hidden; 
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05); 
+}
+.vgts-switch-thumb { 
+    position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; 
+    background: #8b5cf6; border-radius: 50%; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.6); 
+}
+.vgts-state-en .vgts-switch-thumb { transform: translateX(20px); }
+
+/* Custom Hades Main Toggle */
+.vgt-hades-toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+.vgt-hades-toggle input { opacity: 0; width: 0; height: 0; }
+.vgt-hades-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .4s cubic-bezier(0.4, 0.0, 0.2, 1); border-radius: 24px; }
+.vgt-hades-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s cubic-bezier(0.4, 0.0, 0.2, 1); border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+.vgt-hades-toggle input:checked + .vgt-hades-slider { background-color: #8b5cf6; } 
+.vgt-hades-toggle input:checked + .vgt-hades-slider:before { transform: translateX(20px); }
+.vgt-hades-toggle input:focus + .vgt-hades-slider { box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2); }
+
+/* Virtual Path Matrix Rows */
+.vgts-matrix-row { 
+    display: flex; align-items: center; justify-content: space-between; 
+    background: rgba(15, 23, 42, 0.4); padding: 12px 20px; border-radius: 6px; 
+    border: 1px solid #1e293b; transition: all 0.2s ease; 
+}
+.vgts-matrix-row:hover { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.05); }
+
+.vgts-hades-input {
+    background: #0f172a; border: 1px solid #334155; color: #8b5cf6; 
+    padding: 8px 12px; border-radius: 4px; font-family: monospace; font-weight: 700; 
+    text-align: right; width: 200px; transition: border-color 0.2s;
+}
+.vgts-hades-input:focus {
+    border-color: #8b5cf6;
+    outline: none;
+}

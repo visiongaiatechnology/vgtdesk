@@ -1,0 +1,82 @@
+/**
+ * VGT SENTINEL - AEGIS MODULE STYLES
+ * STATUS: PLATIN STATUS
+ */
+
+.vgts-card-aegis {
+    border-left: 4px solid var(--vgts-accent);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Whitelist Panel Specifics */
+.vgts-whitelist-container {
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.05), transparent);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.vgts-input-whitelist {
+    min-height: 120px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    color: #10b981 !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+    background: rgba(2, 6, 23, 0.8) !important;
+    transition: all 0.3s ease;
+}
+
+.vgts-input-whitelist:focus {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+}
+
+/* Pattern Grid */
+.vgts-pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.vgts-pattern-badge {
+    background: rgba(6, 182, 212, 0.05);
+    border: 1px solid rgba(6, 182, 212, 0.2);
+    color: var(--vgts-accent);
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: center;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.vgts-pattern-badge:hover {
+    background: rgba(6, 182, 212, 0.1);
+    border-color: var(--vgts-accent);
+    transform: translateY(-2px);
+}
+
+/* Status Indicators */
+.vgts-matrix-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--vgts-text-secondary);
+}
+
+.vgts-pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #10b981;
+    animation: vgtsPulse 2s infinite;
+}
+
+@keyframes vgtsPulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+}

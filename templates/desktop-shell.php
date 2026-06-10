@@ -15,20 +15,115 @@ if (!defined('ABSPATH')) {
     <div id="vgt-wallpaper" class="vgt-wallpaper-bg"></div>
     <div class="vgt-wallpaper-overlay"></div>
 
+    <!-- Globaler Drag & Resize Overlay Schutz vor Iframe Capturing -->
+    <div id="vgt-global-drag-overlay" style="position: fixed; inset: 0; z-index: 99999; display: none; background: transparent;"></div>
+
+    <!-- STARTMENÜ / APP LAUNCHER -->
+    <div id="vgt-start-menu" class="vgt-start-menu hidden glassmorphism">
+        <div class="vgt-start-menu-header">
+            <input type="text" id="vgt-start-search" placeholder="Apps durchsuchen..." class="vgt-input-text" oninput="VGTDeskEngine.filterStartMenu()">
+        </div>
+        <div class="vgt-start-menu-body">
+            <div class="vgt-start-favorites-title">Apps & Verknüpfungen</div>
+            <div class="vgt-start-grid" id="vgt-start-grid">
+                <?php foreach ($apps_data as $key => $app): ?>
+                    <div class="vgt-start-item" data-title="<?php echo esc_attr($app['title']); ?>" onclick="VGTDeskEngine.handleStartItemClick('<?php echo esc_js($key); ?>')">
+                        <div class="vgt-start-icon-tile <?php echo esc_attr($app['color']); ?>">
+                            <?php if ($app['icon_type'] === 'dashicons'): ?>
+                                <span class="dashicons <?php echo esc_attr($app['icon_val']); ?> vgt-start-icon-dashicon"></span>
+                            <?php elseif ($app['icon_type'] === 'svg' || $app['icon_type'] === 'url'): ?>
+                                <img src="<?php echo esc_url($app['icon_val']); ?>" class="vgt-start-icon-img" alt="" />
+                            <?php endif; ?>
+                        </div>
+                        <span class="vgt-start-label"><?php echo esc_html($app['title']); ?></span>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- SPOTLIGHT SEARCH / COMMAND RUNNER -->
+    <div id="vgt-spotlight" class="vgt-spotlight hidden glassmorphism">
+        <div class="vgt-spotlight-input-wrap">
+            <span class="vgt-spotlight-search-icon">🔍</span>
+            <input type="text" id="vgt-spotlight-input" placeholder="Apps, Aktionen oder Befehle suchen..." autocomplete="off">
+        </div>
+        <div id="vgt-spotlight-results" class="vgt-spotlight-results"></div>
+    </div>
+
+    <!-- PREMIUM CONTROL CENTER -->
+    <div id="vgt-control-center" class="vgt-control-center hidden glassmorphism">
+        <div class="vgt-cc-header">
+            <span class="vgt-cc-title">Kontrollzentrum</span>
+            <span class="vgt-cc-status">Online</span>
+        </div>
+        <div class="vgt-cc-toggles">
+            <div class="vgt-cc-toggle" onclick="VGTDeskEngine.toggleCCToggle('sound')">
+                <div class="vgt-cc-toggle-icon" id="cc-toggle-sound">🔊</div>
+                <div class="vgt-cc-toggle-label">Sound</div>
+            </div>
+            <div class="vgt-cc-toggle" onclick="VGTDeskEngine.toggleCCToggle('widgets')">
+                <div class="vgt-cc-toggle-icon" id="cc-toggle-widgets">🧩</div>
+                <div class="vgt-cc-toggle-label">Widgets</div>
+            </div>
+            <div class="vgt-cc-toggle" onclick="VGTDeskEngine.toggleCCToggle('icons')">
+                <div class="vgt-cc-toggle-icon" id="cc-toggle-icons">🖥️</div>
+                <div class="vgt-cc-toggle-label">Symbole</div>
+            </div>
+            <div class="vgt-cc-toggle" onclick="VGTDeskEngine.toggleCCToggle('blur')">
+                <div class="vgt-cc-toggle-icon" id="cc-toggle-blur">✨</div>
+                <div class="vgt-cc-toggle-label">Blur</div>
+            </div>
+        </div>
+        
+        <div class="vgt-cc-section">
+            <span class="vgt-cc-section-title">System-Latenz (Live)</span>
+            <canvas id="vgt-cc-graph" width="230" height="70" class="vgt-cc-canvas"></canvas>
+        </div>
+
+        <div class="vgt-cc-section">
+            <span class="vgt-cc-section-title">Schnell-Bypässe</span>
+            <div class="vgt-cc-row-buttons">
+                <button class="vgt-btn-secondary" style="font-size:10px; padding:6px 10px;" onclick="VGTDeskEngine.resetIconGrid()">Grid reset</button>
+                <a href="<?php echo esc_url(wp_nonce_url(admin_url('index.php?vgt_action=disable_desk'), 'vgt_toggle_desktop')); ?>" class="vgt-btn-danger" style="font-size:10px; padding:6px 10px; line-height:1.2;">Bypass</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Globaler Snap-Layout Helfer für Fenster-Tiling -->
+    <div id="vgt-global-snap-menu" class="vgt-snap-menu hidden glassmorphism">
+        <div class="vgt-snap-option option-left" onclick="VGTDeskEngine.snapActiveWindow('left')">
+            <div class="vgt-snap-preview"></div>
+            <span>Links</span>
+        </div>
+        <div class="vgt-snap-option option-right" onclick="VGTDeskEngine.snapActiveWindow('right')">
+            <div class="vgt-snap-preview"></div>
+            <span>Rechts</span>
+        </div>
+        <div class="vgt-snap-option option-topleft" onclick="VGTDeskEngine.snapActiveWindow('topleft')">
+            <div class="vgt-snap-preview"></div>
+            <span>O. Links</span>
+        </div>
+        <div class="vgt-snap-option option-bottomleft" onclick="VGTDeskEngine.snapActiveWindow('bottomleft')">
+            <div class="vgt-snap-preview"></div>
+            <span>U. Links</span>
+        </div>
+    </div>
+
     <!-- MAIN INTERFACE OVERLAY -->
     <div class="vgt-interface-overlay">
         
         <!-- STATUS BAR (MENÜOBEN) -->
         <header class="vgt-topbar" id="top-bar">
             <div class="vgt-topbar-left">
-                <div class="vgt-logo-group" onclick="VGTDeskEngine.handleDockClick('welcome')">
+                <div class="vgt-logo-group" onclick="VGTDeskEngine.toggleStartMenu(event)">
                     <span class="vgt-topbar-dot" id="vgt-topbar-dot"></span>
                     <span class="vgt-topbar-title" id="vgt-topbar-title">VGT</span>
                     <span class="vgt-topbar-subtitle">WP-Desk</span>
                 </div>
                 <span class="vgt-topbar-separator">|</span>
                 <span class="vgt-topbar-branding">Powered by VisionGaiaTechnology</span>
-                <span class="vgt-topbar-version-badge">V1.0 Beta</span>
+                <span class="vgt-topbar-version-badge">V1.0 Beta v2</span>
                 <span class="vgt-topbar-separator">|</span>
                 <div class="vgt-topbar-nav">
                     <button class="vgt-topbar-btn" onclick="VGTDeskEngine.openWindow('welcome')">Home</button>
@@ -38,17 +133,56 @@ if (!defined('ABSPATH')) {
 
             <!-- Uhrzeit und Status -->
             <div class="vgt-topbar-right">
-                <div class="vgt-profile-badge" onclick="VGTDeskEngine.openWindow('settings')">
+                <div class="vgt-profile-badge" onclick="VGTDeskEngine.toggleControlCenter(event)">
                     <span class="vgt-profile-icon" id="vgt-accent-badge">⚙️</span>
                     <span class="vgt-profile-name"><?php echo esc_html($current_user->display_name); ?></span>
                 </div>
-                <div id="vgt-clock" class="vgt-clock-badge">00:00</div>
+                <div id="vgt-clock" class="vgt-clock-badge" onclick="VGTDeskEngine.toggleControlCenter(event)" style="cursor:pointer;">00:00</div>
             </div>
         </header>
 
         <!-- CANVAS ARBEITSBEREICH -->
         <main class="vgt-workspace" id="desktop-workspace">
             
+            <!-- DESKTOP WIDGETS LAYER -->
+            <div id="vgt-widgets-container" class="vgt-widgets-container">
+                <!-- Clock Widget -->
+                <div id="widget-clock" class="vgt-widget widget-clock glassmorphism absolute" style="z-index: 15; width: 260px;">
+                    <div id="vgt-widget-clock-time">00:00</div>
+                    <div id="vgt-widget-clock-date">Montag, 1. Januar</div>
+                </div>
+                <!-- System Status Widget -->
+                <div id="widget-system" class="vgt-widget widget-system glassmorphism absolute" style="z-index: 15; width: 260px;">
+                    <h4 class="vgt-widget-title">WordPress Status</h4>
+                    <div class="vgt-widget-row"><span>WP Version:</span><strong><?php echo esc_html(get_bloginfo('version')); ?></strong></div>
+                    <div class="vgt-widget-row"><span>PHP Version:</span><strong><?php echo esc_html(PHP_VERSION); ?></strong></div>
+                    <div class="vgt-widget-row"><span>Aktiv:</span><strong><?php echo esc_html(wp_get_theme()->get('Name')); ?></strong></div>
+                </div>
+                <!-- Notes Widget -->
+                <div id="widget-notes" class="vgt-widget widget-notes glassmorphism absolute" style="z-index: 15; width: 260px; height: 160px; display: flex; flex-direction: column;">
+                    <h4 class="vgt-widget-title">Notizen</h4>
+                    <textarea id="vgt-widget-notes-text" class="vgt-widget-textarea" placeholder="Schnelle Gedanken aufschreiben..."></textarea>
+                </div>
+                <!-- Sentinel Widget -->
+                <div id="widget-sentinel" class="vgt-widget widget-sentinel glassmorphism absolute" style="z-index: 15; width: 260px; display: flex; flex-direction: column; gap: 8px;">
+                    <h4 class="vgt-widget-title" style="color: #f43f5e; display: flex; align-items: center; justify-content: space-between; margin: 0 0 10px 0;">
+                        <span>VGT Sentinel</span>
+                        <span id="vgt-sentinel-status-dot" class="vgt-widget-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 8px #ef4444; transition: all 0.3s;"></span>
+                    </h4>
+                    <div class="vgt-widget-row">
+                        <span>Status:</span>
+                        <strong id="vgt-sentinel-status-text" style="transition: color 0.3s; color: #f43f5e;">Inaktiv</strong>
+                    </div>
+                    <div class="vgt-widget-row">
+                        <span>Bans:</span>
+                        <strong id="vgt-sentinel-bans-count">0</strong>
+                    </div>
+                    <button id="vgt-sentinel-toggle-btn" class="vgt-btn-primary" style="margin-top: 6px; width: 100%; padding: 6px 12px; font-size: 11px; border-radius: 8px; background: linear-gradient(135deg, #f43f5e, #e11d48); border: none; cursor: pointer; color: #fff; font-weight: 700; transition: all 0.2s; box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);">
+                        Sentinel aktivieren
+                    </button>
+                </div>
+            </div>
+
             <!-- FREI ANORDNBARE DESKTOP ICONS LAYER -->
             <div id="desktop-icons-area" class="vgt-icons-area">
                 
@@ -101,7 +235,7 @@ if (!defined('ABSPATH')) {
                             <span class="vgt-window-dot dot-amber" onclick="VGTDeskEngine.minimizeWindow('welcome')"></span>
                             <span class="vgt-window-dot dot-emerald" onclick="VGTDeskEngine.maximizeWindow('welcome')"></span>
                         </div>
-                        <span class="vgt-window-title" id="welcome-title-accent">Willkommen bei VGT WP-Desk — V1.0 Beta</span>
+                        <span class="vgt-window-title" id="welcome-title-accent">Willkommen bei VGT WP-Desk — V1.0 Beta v2</span>
                         <div class="vgt-window-spacer"></div>
                     </div>
                     <!-- Body Content -->
@@ -160,7 +294,7 @@ if (!defined('ABSPATH')) {
                         <!-- BRANDING FOOTER -->
                         <div class="vgt-popup-footer">
                             <span class="vgt-footer-branding">Powered by VisionGaiaTechnology</span>
-                            <span class="vgt-footer-version">V1.0 Beta</span>
+                            <span class="vgt-footer-version">V1.0 Beta v2</span>
                         </div>
                     </div>
                 </div>
@@ -185,7 +319,7 @@ if (!defined('ABSPATH')) {
                             <span class="vgt-window-dot dot-amber" onclick="VGTDeskEngine.minimizeWindow('settings')"></span>
                             <span class="vgt-window-dot dot-emerald" onclick="VGTDeskEngine.maximizeWindow('settings')"></span>
                         </div>
-                        <span class="vgt-window-title" id="settings-title-accent">Systemeinstellungen — V1.0 Beta</span>
+                        <span class="vgt-window-title" id="settings-title-accent">Systemeinstellungen — V1.0 Beta v2</span>
                         <div class="vgt-window-spacer"></div>
                     </div>
                     <!-- Body Content -->

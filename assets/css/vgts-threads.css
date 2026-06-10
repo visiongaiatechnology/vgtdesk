@@ -1,0 +1,149 @@
+/**
+ * VGT SENTINEL - THREADS (RADAR) MODULE STYLES
+ * STATUS: PLATIN STATUS
+ */
+
+.vgts-radar-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.vgts-gauge-card {
+    background: rgba(13, 17, 30, 0.65);
+    border: 1px solid var(--vgts-border);
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.02);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.vgts-gauge-card:hover {
+    transform: translateY(-4px);
+}
+
+.vgts-circular-chart {
+    display: block;
+    margin: 0 auto;
+    max-width: 140px;
+    max-height: 140px;
+}
+
+.vgts-circle-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.05);
+    stroke-width: 2.5;
+}
+
+.vgts-circle {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: 0, 100;
+    transition: stroke-dasharray 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vgts-percentage {
+    fill: #fff;
+    font-family: 'JetBrains Mono', monospace, sans-serif;
+    font-size: 8px;
+    font-weight: 800;
+    text-anchor: middle;
+    text-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+
+.vgts-gauge-label {
+    margin-top: 15px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+.vgts-gauge-desc {
+    font-size: 11px;
+    color: var(--vgts-text-secondary);
+    margin-top: 5px;
+    line-height: 1.4;
+}
+
+/* Card Specifics */
+.vgts-card-aegis { border-top: 3px solid #00e5ff; }
+.vgts-card-aegis:hover { border-color: rgba(0, 229, 255, 0.4); box-shadow: 0 10px 30px rgba(0, 229, 255, 0.1); }
+.vgts-card-aegis .vgts-circle { stroke: #00e5ff; filter: drop-shadow(0 0 4px rgba(0,229,255,0.6)); }
+
+.vgts-card-cerberus { border-top: 3px solid #ff2a5f; }
+.vgts-card-cerberus:hover { border-color: rgba(255, 42, 95, 0.4); box-shadow: 0 10px 30px rgba(255, 42, 95, 0.1); }
+.vgts-card-cerberus .vgts-circle { stroke: #ff2a5f; filter: drop-shadow(0 0 4px rgba(255,42,95,0.6)); }
+
+.vgts-card-trap { border-top: 3px solid #ffb703; }
+.vgts-card-trap:hover { border-color: rgba(255, 183, 3, 0.4); box-shadow: 0 10px 30px rgba(255, 183, 3, 0.1); }
+.vgts-card-trap .vgts-circle { stroke: #ffb703; filter: drop-shadow(0 0 4px rgba(255,183,3,0.6)); }
+
+/* Platinum Upsell Card */
+.vgts-card-upsell {
+    background: repeating-linear-gradient(45deg, rgba(15,23,42,0.4), rgba(15,23,42,0.4) 10px, rgba(2,6,23,0.6) 10px, rgba(2,6,23,0.6) 20px);
+    border: 1px dashed rgba(176, 38, 255, 0.4);
+    opacity: 0.85;
+}
+.vgts-card-upsell:hover { opacity: 1; border-color: #b026ff; box-shadow: 0 0 20px rgba(176, 38, 255, 0.15); }
+.vgts-card-upsell .vgts-circle { stroke: #334155; }
+.vgts-card-upsell .vgts-percentage { fill: #ef4444; font-size: 5px; }
+
+.vgts-upsell-lock {
+    position: absolute;
+    top: 15px; right: 15px;
+    color: #b026ff;
+    font-size: 18px;
+}
+
+@keyframes vgtsGlitch {
+    0% { transform: translate(0) }
+    20% { transform: translate(-2px, 2px) }
+    40% { transform: translate(-2px, -2px) }
+    60% { transform: translate(2px, 2px) }
+    80% { transform: translate(2px, -2px) }
+    100% { transform: translate(0) }
+}
+.vgts-glitch-text { animation: vgtsGlitch 3s infinite alternate; }
+
+/* Threat Stream */
+.vgts-stream-container {
+    margin-top: 10px;
+    background: rgba(13, 17, 30, 0.4);
+    border: 1px solid var(--vgts-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.vgts-stream-row {
+    display: grid;
+    grid-template-columns: 140px 110px 1fr 130px;
+    gap: 15px;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    align-items: center;
+    transition: background 0.2s;
+}
+.vgts-stream-row:last-child { border-bottom: none; }
+.vgts-stream-row:hover { background: rgba(255, 255, 255, 0.02); }
+
+.vgts-stream-time { color: var(--vgts-text-secondary); font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+.vgts-stream-ip { color: #fff; font-size: 12px; font-family: 'JetBrains Mono', monospace; font-weight: bold; text-align: right; }
+.vgts-stream-msg { color: var(--vgts-text-secondary); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.vgts-badge-stream { 
+    padding: 4px 8px; border-radius: 4px; font-size: 10px; 
+    font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; 
+    text-align: center; white-space: nowrap;
+}
+
+.vgts-stream-type-aegis { color: #00e5ff; background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.2); }
+.vgts-stream-type-ban { color: #ff2a5f; background: rgba(255, 42, 95, 0.1); border: 1px solid rgba(255, 42, 95, 0.2); }
+.vgts-stream-type-trap { color: #ffb703; background: rgba(255, 183, 3, 0.1); border: 1px solid rgba(255, 183, 3, 0.2); }

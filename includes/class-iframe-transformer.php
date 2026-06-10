@@ -134,7 +134,7 @@ final class IframeTransformer
             .plugins-php .page-title-action,
             .themes-php .page-title-action,
             .themes-php .add-new-theme {
-                background: #4f46e5 !important;
+                background: var(--vgt-accent) !important;
                 border: none !important;
                 color: #ffffff !important;
                 padding: 6px 16px !important;
@@ -148,7 +148,7 @@ final class IframeTransformer
             }
             .edit-php .page-title-action:hover,
             .themes-php .page-title-action:hover {
-                background: #4338ca !important;
+                background: var(--vgt-accent-hover) !important;
                 transform: translateY(-1px);
             }
 
@@ -228,8 +228,8 @@ final class IframeTransformer
             .edit-comments-php .subsubsub li a.current, 
             .plugins-php .subsubsub li a.current,
             .themes-php .subsubsub li a.current {
-                background: rgba(99, 102, 241, 0.15) !important;
-                border-color: #6366f1 !important;
+                background: var(--vgt-accent-rgba15) !important;
+                border-color: var(--vgt-accent) !important;
                 color: #ffffff !important;
                 font-weight: 700 !important;
             }
@@ -247,8 +247,7 @@ final class IframeTransformer
             body.edit-php table.wp-list-table, 
             body.post-type-post table.wp-list-table,
             body.post-type-page table.wp-list-table,
-            body.edit-comments-php table.wp-list-table, 
-            body.plugins-php table.wp-list-table {
+            body.edit-comments-php table.wp-list-table {
                 display: block !important;
                 width: 100% !important;
                 background: transparent !important;
@@ -261,8 +260,8 @@ final class IframeTransformer
             body.post-type-post table.wp-list-table tbody,
             body.post-type-page table.wp-list-table tbody,
             body.edit-comments-php table.wp-list-table tbody,
-            body.plugins-php table.wp-list-table tbody,
-            table.wp-list-table #the-list {
+            body.edit-php #the-list,
+            body.edit-comments-php #the-list {
                 display: grid !important;
                 grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
                 gap: 18px !important;
@@ -270,8 +269,14 @@ final class IframeTransformer
                 box-sizing: border-box !important;
             }
             
-            table.wp-list-table thead, 
-            table.wp-list-table tfoot {
+            body.edit-php table.wp-list-table thead, 
+            body.post-type-post table.wp-list-table thead,
+            body.post-type-page table.wp-list-table thead,
+            body.edit-comments-php table.wp-list-table thead,
+            body.edit-php table.wp-list-table tfoot, 
+            body.post-type-post table.wp-list-table tfoot,
+            body.post-type-page table.wp-list-table tfoot,
+            body.edit-comments-php table.wp-list-table tfoot {
                 display: none !important;
             }
 
@@ -378,8 +383,8 @@ final class IframeTransformer
             body.post-type-post table.wp-list-table tr:hover,
             body.post-type-page table.wp-list-table tr:hover {
                 transform: translateY(-2px) !important;
-                border-color: rgba(99, 102, 241, 0.3) !important;
-                box-shadow: 0 8px 30px rgba(99, 102, 241, 0.12) !important;
+                border-color: var(--vgt-accent) !important;
+                box-shadow: 0 8px 30px var(--vgt-accent-rgba15) !important;
             }
 
             /* Seitliche Akzente für Status */
@@ -474,8 +479,8 @@ final class IframeTransformer
             body.post-type-page table.wp-list-table td.column-categories a,
             body.post-type-page table.wp-list-table td.column-tags a {
                 display: inline-block !important;
-                background: rgba(99, 102, 241, 0.08) !important;
-                color: #818cf8 !important;
+                background: var(--vgt-accent-rgba8) !important;
+                color: var(--vgt-accent-hover) !important;
                 padding: 2px 8px !important;
                 border-radius: 6px !important;
                 margin-right: 4px !important;
@@ -595,39 +600,155 @@ final class IframeTransformer
             /* ==========================================================================
                4. PLUGINS APP-STORE TRANSFORMER (.plugins-php)
                ========================================================================== */
+            body.plugins-php .wrap {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 16px !important;
+            }
+            body.plugins-php table.wp-list-table.plugins {
+                display: table !important;
+                border-collapse: separate !important;
+                border-spacing: 0 8px !important;
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                width: 100% !important;
+            }
+            body.plugins-php table.wp-list-table.plugins thead {
+                display: table-header-group !important;
+            }
+            body.plugins-php table.wp-list-table.plugins thead th {
+                background: rgba(15, 23, 42, 0.6) !important;
+                border: 1px solid rgba(255, 255, 255, 0.05) !important;
+                color: #ffffff !important;
+                font-weight: 700 !important;
+                font-size: 11px !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.05em !important;
+                padding: 12px 16px !important;
+                border-bottom: none !important;
+            }
+            body.plugins-php table.wp-list-table.plugins thead th:first-child {
+                border-radius: 8px 0 0 8px !important;
+            }
+            body.plugins-php table.wp-list-table.plugins thead th:last-child {
+                border-radius: 0 8px 8px 0 !important;
+            }
+            body.plugins-php table.wp-list-table.plugins tbody {
+                display: table-row-group !important;
+            }
             body.plugins-php table.wp-list-table.plugins tr {
-                display: flex !important;
-                flex-direction: column !important;
-                background: rgba(15, 23, 42, 0.5) !important;
-                border: 1px solid rgba(255, 255, 255, 0.08) !important;
-                border-radius: 14px !important;
-                padding: 20px !important;
-                margin-bottom: 0 !important;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
-                transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
-                position: relative !important;
-                box-sizing: border-box !important;
+                display: table-row !important;
+                transition: background-color 0.15s ease !important;
             }
-            body.plugins-php table.wp-list-table.plugins tr:hover {
-                transform: translateY(-2px) !important;
-                border-color: rgba(99, 102, 241, 0.3) !important;
-                box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1) !important;
+            body.plugins-php table.wp-list-table.plugins tr td,
+            body.plugins-php table.wp-list-table.plugins tr th {
+                background: rgb(9 13 22) !important;
+                color: #ffffff !important;
             }
-            body.plugins-php table.wp-list-table.plugins tr.active {
-                border-left: 4px solid #10b981 !important;
+            body.plugins-php table.wp-list-table.plugins tr:hover td,
+            body.plugins-php table.wp-list-table.plugins tr:hover th {
+                background: rgba(255, 255, 255, 0.03) !important;
             }
-            body.plugins-php table.wp-list-table.plugins tr.inactive {
-                border-left: 4px solid #475569 !important;
-                opacity: 0.9 !important;
+            body.plugins-php table.wp-list-table.plugins td {
+                display: table-cell !important;
+                padding: 16px !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+                color: #ffffff !important;
+                font-size: 12px !important;
+                vertical-align: top !important;
+            }
+            body.plugins-php table.wp-list-table.plugins td:first-child {
+                border-left: 1px solid rgba(255, 255, 255, 0.04) !important;
+                border-radius: 8px 0 0 8px !important;
+            }
+            body.plugins-php table.wp-list-table.plugins td:last-child {
+                border-right: 1px solid rgba(255, 255, 255, 0.04) !important;
+                border-radius: 0 8px 8px 0 !important;
+            }
+            
+            /* Status Accents on first TD of row */
+            body.plugins-php table.wp-list-table.plugins tr.active td,
+            body.plugins-php table.wp-list-table.plugins tr.active th {
+                background: rgb(9 13 22) !important;
+            }
+            body.plugins-php table.wp-list-table.plugins tr.active td:first-child {
+                box-shadow: inset 4px 0 0 #10b981 !important;
+            }
+            body.plugins-php table.wp-list-table.plugins tr.inactive td,
+            body.plugins-php table.wp-list-table.plugins tr.inactive th {
+                background: rgb(9 13 22) !important;
+                opacity: 0.85 !important;
+            }
+            body.plugins-php table.wp-list-table.plugins tr.inactive td:first-child {
+                box-shadow: inset 4px 0 0 #475569 !important;
             }
 
-            /* Update Notice Cards */
-            body.plugins-php table.wp-list-table.plugins tr.plugin-update-tr {
-                background: rgba(245, 158, 11, 0.04) !important;
-                border: 1px dashed rgba(245, 158, 11, 0.25) !important;
-                border-left: 4px solid #f59e0b !important;
-                border-radius: 12px !important;
-                padding: 14px !important;
+            /* Plugin Titel & Action links */
+            body.plugins-php table.wp-list-table.plugins .plugin-title strong {
+                font-size: 14px !important;
+                font-weight: 700 !important;
+                color: #ffffff !important;
+            }
+            body.plugins-php table.wp-list-table.plugins .row-actions {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 6px !important;
+                margin-top: 8px !important;
+            }
+            body.plugins-php table.wp-list-table.plugins .row-actions span a {
+                background: rgba(255, 255, 255, 0.03) !important;
+                border: 1px solid rgba(255, 255, 255, 0.06) !important;
+                color: #94a3b8 !important;
+                padding: 4px 10px !important;
+                border-radius: 6px !important;
+                font-size: 10px !important;
+                font-weight: 600 !important;
+                text-decoration: none !important;
+                transition: all 0.15s ease !important;
+            }
+            body.plugins-php table.wp-list-table.plugins .row-actions span a:hover {
+                background: rgba(255, 255, 255, 0.08) !important;
+                color: #ffffff !important;
+                border-color: rgba(255, 255, 255, 0.15) !important;
+            }
+            body.plugins-php table.wp-list-table.plugins .row-actions span.activate a {
+                color: #34d399 !important;
+                border-color: rgba(16, 185, 129, 0.2) !important;
+                background: rgba(16, 185, 129, 0.05) !important;
+            }
+            body.plugins-php table.wp-list-table.plugins .row-actions span.activate a:hover {
+                background: rgba(16, 185, 129, 0.15) !important;
+                color: #ffffff !important;
+            }
+            body.plugins-php table.wp-list-table.plugins .row-actions span.deactivate a {
+                color: #fb7185 !important;
+                border-color: rgba(244, 63, 94, 0.2) !important;
+                background: rgba(244, 63, 94, 0.05) !important;
+            }
+            body.plugins-php table.wp-list-table.plugins .row-actions span.deactivate a:hover {
+                background: rgba(244, 63, 94, 0.15) !important;
+                color: #ffffff !important;
+            }
+            body.plugins-php table.wp-list-table.plugins .row-actions span.delete a {
+                color: #f43f5e !important;
+            }
+
+            /* Update row styling */
+            body.plugins-php table.wp-list-table.plugins tr.plugin-update-tr td {
+                border-top: none !important;
+                background: rgba(245, 158, 11, 0.03) !important;
+                padding: 10px 16px !important;
+            }
+            body.plugins-php table.wp-list-table.plugins tr.plugin-update-tr td .update-message {
+                border: 1px dashed rgba(245, 158, 11, 0.2) !important;
+                background: rgba(245, 158, 11, 0.05) !important;
+                border-radius: 8px !important;
+                padding: 10px 14px !important;
+                color: #f59e0b !important;
+                font-size: 11px !important;
+                margin: 0 !important;
             }
 
 
@@ -723,19 +844,19 @@ final class IframeTransformer
             
             /* Theme Buttons stylen */
             body.themes-php .theme-browser .theme .theme-actions .button {
-                background: #4f46e5 !important;
+                background: var(--vgt-accent) !important;
                 border: none !important;
                 color: #ffffff !important;
                 padding: 8px 16px !important;
                 border-radius: 8px !important;
                 font-size: 11px !important;
                 font-weight: 700 !important;
-                box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3) !important;
+                box-shadow: 0 4px 12px var(--vgt-accent-rgba15) !important;
                 cursor: pointer !important;
                 transition: background-color 0.15s ease !important;
             }
             body.themes-php .theme-browser .theme .theme-actions .button:hover {
-                background: #4338ca !important;
+                background: var(--vgt-accent-hover) !important;
             }
             body.themes-php .theme-browser .theme .theme-actions .button.activate {
                 background: #10b981 !important;
@@ -764,8 +885,8 @@ final class IframeTransformer
                 cursor: pointer !important;
             }
             body.themes-php .theme-browser .theme.add-new-theme:hover {
-                border-color: #6366f1 !important;
-                background: rgba(99, 102, 241, 0.05) !important;
+                border-color: var(--vgt-accent) !important;
+                background: var(--vgt-accent-rgba8) !important;
             }
 
             /* Theme Details Overlay/Popups stylen */
@@ -828,8 +949,8 @@ final class IframeTransformer
                 transition: all 0.15s ease !important;
             }
             body.themes-php .filter-links li a.current {
-                background: rgba(99, 102, 241, 0.15) !important;
-                border-color: #6366f1 !important;
+                background: var(--vgt-accent-rgba15) !important;
+                border-color: var(--vgt-accent) !important;
                 color: #ffffff !important;
                 font-weight: 700 !important;
             }

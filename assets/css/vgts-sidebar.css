@@ -1,0 +1,100 @@
+/**
+ * VGT SENTINEL - SIDEBAR COMPONENT STYLES
+ * STATUS: PLATIN STATUS
+ */
+
+.vgts-sidebar {
+    width: 260px;
+    background: var(--vgts-bg-sidebar);
+    border-right: 1px solid var(--vgts-border);
+    display: flex !important;
+    flex-direction: column !important;
+    flex-shrink: 0;
+    
+    /* VGT VIEWPORT FIX: Absolut fixiert, zieht die WP-Adminbar ab */
+    position: fixed; 
+    top: 32px;            /* Unterhalb der WP Admin-Bar */
+    left: 5;              /* Bei WP meistens noch anpassen, wenn das Menü offen ist, aber der Wrapper fängt es ab */
+    height: calc(100vh - 32px); /* 100% Höhe minus WP Admin-Bar */
+    z-index: 50;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6);
+}
+
+/* Spezifische Anpassung für WP-Mobile (falls die Admin-Bar auf 46px wächst) */
+@media screen and (max-width: 782px) {
+    .vgts-sidebar {
+        top: 46px;
+        height: calc(100vh - 46px);
+    }
+}
+
+.vgts-brand {
+    padding: 30px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.vgts-nav {
+    flex-grow: 1;
+    padding: 20px 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--vgts-border) transparent;
+}
+
+/* Custom Scrollbar for Sidebar Navigation */
+.vgts-nav::-webkit-scrollbar { width: 4px; }
+.vgts-nav::-webkit-scrollbar-track { background: transparent; }
+.vgts-nav::-webkit-scrollbar-thumb { 
+    background: rgba(6, 182, 212, 0.2); 
+    border-radius: 10px; 
+}
+
+/* Navigation Links */
+.vgts-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: var(--vgts-text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.vgts-nav-item:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.02);
+}
+
+.vgts-nav-item.active {
+    color: var(--vgts-accent);
+    background: rgba(6, 182, 212, 0.05);
+}
+
+.vgts-active-indicator {
+    position: absolute;
+    right: 0;
+    top: 15%;
+    height: 70%;
+    width: 3px;
+    background: var(--vgts-accent);
+    box-shadow: -2px 0 10px var(--vgts-accent-glow);
+    border-radius: 3px 0 0 3px;
+}
+
+/* Footer Section */
+.vgts-sidebar-footer {
+    padding: 20px;
+    background: #020617;
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+    margin-top: auto;
+}
+
+.vgts-sidebar-footer span {
+    font-family: 'JetBrains Mono', monospace;
+}

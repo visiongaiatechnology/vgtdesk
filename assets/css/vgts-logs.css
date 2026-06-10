@@ -1,0 +1,53 @@
+/**
+ * VGT SENTINEL - LOGS MODULE STYLES
+ * STATUS: PLATIN STATUS
+ */
+
+.vgts-logs-table td {
+    vertical-align: middle;
+    padding: 12px 16px;
+}
+
+.vgts-log-module-badge {
+    background: rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vgts-log-timestamp {
+    color: var(--vgts-text-secondary);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.vgts-log-ip {
+    color: var(--vgts-accent);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.vgts-log-message {
+    color: #e2e8f0;
+    line-height: 1.4;
+}
+
+/* Empty State */
+.vgts-logs-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--vgts-text-secondary);
+}
+
+.vgts-logs-empty .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 15px;
+    opacity: 0.3;
+}

@@ -1074,3 +1074,622 @@ body.vgt-dragging, body.vgt-dragging * {
         display: none !important;
     }
 }
+
+/* ==========================================================================
+   CSS CUSTOM VARIABLES & FOCUS STYLE UPGRADE (PHASE 2)
+   ========================================================================== */
+:root {
+    --vgt-accent-color: #6366f1;
+    --vgt-accent-rgba15: rgba(99, 102, 241, 0.15);
+    --vgt-accent-rgba8: rgba(99, 102, 241, 0.08);
+}
+
+/* Window Transitions & Active state */
+.vgt-window {
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                opacity 0.2s ease, 
+                width 0.22s cubic-bezier(0.25, 1, 0.5, 1), 
+                height 0.22s cubic-bezier(0.25, 1, 0.5, 1), 
+                top 0.22s cubic-bezier(0.25, 1, 0.5, 1), 
+                left 0.22s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.vgt-window.resizing, 
+.vgt-window.dragging {
+    transition: none !important;
+}
+
+.vgt-window.vgt-window-active {
+    border-color: var(--vgt-accent-color) !important;
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8), 0 0 20px var(--vgt-accent-rgba15) !important;
+}
+
+/* ==========================================================================
+   PHASE 3 — STARTMENÜ / APP LAUNCHER STYLES
+   ========================================================================== */
+.vgt-start-menu {
+    position: fixed;
+    bottom: 80px;
+    left: 14px;
+    width: 380px;
+    height: 480px;
+    border-radius: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transform-origin: bottom left;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+}
+
+.vgt-start-menu.hidden {
+    transform: scale(0.8) translateY(40px);
+    opacity: 0;
+    pointer-events: none;
+    display: none !important; /* Force hide */
+}
+
+.vgt-start-menu-header {
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.vgt-start-menu-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.vgt-start-favorites-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin-bottom: 12px;
+}
+
+.vgt-start-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.vgt-start-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+.vgt-start-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+.vgt-start-item:active {
+    transform: scale(0.95);
+}
+
+.vgt-start-icon-tile {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.vgt-start-icon-dashicon {
+    color: #ffffff;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.vgt-start-icon-img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    filter: invert(1) brightness(2);
+}
+
+.vgt-start-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin-top: 6px;
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   PHASE 3 — DESKTOP WIDGETS STYLES
+   ========================================================================== */
+.vgt-widgets-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 12;
+}
+
+.vgt-widget {
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
+    pointer-events: auto;
+}
+
+#widget-clock {
+    top: 16px;
+    left: calc(100% - 276px);
+}
+#widget-system {
+    top: 120px;
+    left: calc(100% - 276px);
+}
+#widget-notes {
+    top: 250px;
+    left: calc(100% - 276px);
+}
+#widget-sentinel {
+    top: 430px;
+    left: calc(100% - 276px);
+}
+
+.vgt-widget-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--vgt-accent-color);
+    margin: 0 0 10px 0;
+}
+
+/* Clock Widget Details */
+.widget-clock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+#vgt-widget-clock-time {
+    font-size: 32px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.025em;
+}
+#vgt-widget-clock-date {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+/* System Widget Details */
+.widget-system {
+    display: flex;
+    flex-direction: column;
+}
+.vgt-widget-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    padding-bottom: 4px;
+}
+.vgt-widget-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+.vgt-widget-row span {
+    color: #94a3b8;
+}
+.vgt-widget-row strong {
+    color: #ffffff;
+}
+
+/* Notes Widget Details */
+.widget-notes {
+    display: flex;
+    flex-direction: column;
+    height: 160px;
+}
+.vgt-widget-textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    resize: none;
+    color: #cbd5e1;
+    font-size: 11px;
+    line-height: 1.5;
+    outline: none;
+    padding: 0;
+    width: 100%;
+}
+.vgt-widget-textarea::placeholder {
+    color: #475569;
+}
+/* Verstecke den Maximieren-Punkt (grün) auf Handys, da ohnehin Fullscreen */
+.dot-emerald {
+    display: none !important;
+}
+
+/* ==========================================================================
+   WELLE 2 — AERO SPOTLIGHT SEARCH
+   ========================================================================== */
+.vgt-spotlight {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%) scale(1);
+    width: 500px;
+    max-height: 350px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+}
+
+.vgt-spotlight.hidden {
+    transform: translateX(-50%) scale(0.9) translateY(-20px);
+    opacity: 0;
+    pointer-events: none;
+    display: none !important;
+}
+
+.vgt-spotlight-input-wrap {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.vgt-spotlight-search-icon {
+    font-size: 18px;
+    color: #94a3b8;
+    margin-right: 12px;
+}
+
+#vgt-spotlight-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 16px;
+    outline: none;
+    font-weight: 500;
+}
+#vgt-spotlight-input::placeholder {
+    color: #475569;
+}
+
+.vgt-spotlight-results {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    background: rgba(10, 13, 22, 0.95);
+    max-height: 280px;
+}
+
+.vgt-spotlight-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 4px;
+    transition: background-color 0.15s ease;
+}
+.vgt-spotlight-item:last-child {
+    margin-bottom: 0;
+}
+.vgt-spotlight-item:hover,
+.vgt-spotlight-item.active {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.vgt-spotlight-item-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    font-size: 14px;
+}
+
+.vgt-spotlight-item-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.vgt-spotlight-item-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.vgt-spotlight-item-desc {
+    font-size: 10px;
+    color: #64748b;
+    margin-top: 1px;
+}
+
+/* ==========================================================================
+   WELLE 2 — PREMIUM CONTROL CENTER
+   ========================================================================== */
+.vgt-control-center {
+    position: fixed;
+    top: 56px;
+    right: 14px;
+    width: 260px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    box-sizing: border-box;
+    transform-origin: top right;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+}
+
+.vgt-control-center.hidden {
+    transform: scale(0.8) translateY(-30px);
+    opacity: 0;
+    pointer-events: none;
+    display: none !important;
+}
+
+.vgt-cc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.vgt-cc-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.vgt-cc-status {
+    font-size: 9px;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+}
+
+.vgt-cc-toggles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.vgt-cc-toggle {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.vgt-cc-toggle:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+.vgt-cc-toggle.active {
+    background: var(--vgt-accent-rgba15);
+    border-color: var(--vgt-accent-color);
+}
+
+.vgt-cc-toggle-icon {
+    font-size: 16px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+.vgt-cc-toggle.active .vgt-cc-toggle-icon {
+    background: var(--vgt-accent-color);
+    color: #ffffff;
+}
+
+.vgt-cc-toggle-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #cbd5e1;
+}
+
+.vgt-cc-section {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 14px;
+}
+.vgt-cc-section:last-child {
+    margin-bottom: 0;
+}
+
+.vgt-cc-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+.vgt-cc-canvas {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.vgt-cc-row-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+/* ==========================================================================
+   WELLE 2 — WINDOW SNAP LAYOUTS
+   ========================================================================== */
+.vgt-snap-menu {
+    position: absolute;
+    top: 24px;
+    left: 44px;
+    width: 140px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    padding: 6px;
+    box-sizing: border-box;
+    transform-origin: top left;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease;
+}
+
+.vgt-snap-menu.hidden {
+    transform: scale(0.9) translateY(-10px);
+    opacity: 0;
+    pointer-events: none;
+    display: none !important;
+}
+
+.vgt-snap-option {
+    display: flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    gap: 8px;
+    transition: background-color 0.15s ease;
+}
+.vgt-snap-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+.vgt-snap-option span {
+    font-size: 11px;
+    font-weight: 600;
+    color: #cbd5e1;
+}
+
+.vgt-snap-preview {
+    width: 16px;
+    height: 12px;
+    border: 1px solid #64748b;
+    border-radius: 2px;
+    position: relative;
+    background: rgba(255, 255, 255, 0.02);
+}
+.vgt-snap-option:hover .vgt-snap-preview {
+    border-color: var(--vgt-accent-color);
+}
+
+/* Preview layouts */
+.option-left .vgt-snap-preview::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0; width: 50%;
+    background: var(--vgt-accent-rgba15);
+}
+.option-right .vgt-snap-preview::before {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0; width: 50%;
+    background: var(--vgt-accent-rgba15);
+}
+.option-topleft .vgt-snap-preview::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; width: 50%; height: 50%;
+    background: var(--vgt-accent-rgba15);
+}
+.option-bottomleft .vgt-snap-preview::before {
+    content: '';
+    position: absolute;
+    left: 0; bottom: 0; width: 50%; height: 50%;
+    background: var(--vgt-accent-rgba15);
+}
+
+/* Tiling alignment snap classes for active window transitions */
+.vgt-window-snap-left {
+    width: 50% !important;
+    height: calc(100% - 60px) !important;
+    top: 44px !important;
+    left: 0px !important;
+}
+.vgt-window-snap-right {
+    width: 50% !important;
+    height: calc(100% - 60px) !important;
+    top: 44px !important;
+    left: 50% !important;
+}
+.vgt-window-snap-topleft {
+    width: 50% !important;
+    height: calc(50% - 30px) !important;
+    top: 44px !important;
+    left: 0px !important;
+}
+.vgt-window-snap-bottomleft {
+    width: 50% !important;
+    height: calc(50% - 30px) !important;
+    top: calc(50% + 14px) !important;
+    left: 0px !important;
+}
+
+/* ==========================================================================
+   WELLE 2 — DRAGGABLE WIDGETS
+   ========================================================================== */
+.vgt-widget {
+    cursor: grab !important;
+}
+.vgt-widget:active {
+    cursor: grabbing !important;
+}
+.vgt-widget.dragging {
+    opacity: 0.8;
+    transform: scale(1.02);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+    z-index: 99 !important;
+}
+
+/* Mobil-Anpassung: Widgets auf kleinen Screens ausblenden */
+@media (max-width: 1024px) {
+    .vgt-widgets-container {
+        display: none !important;
+    }
+}

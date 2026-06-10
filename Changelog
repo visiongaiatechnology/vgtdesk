@@ -1,0 +1,47 @@
+🛠 VGT SENTINEL CE: CHANGELOG – SECURITY PATCH 2026.05.31
+1. HADES PHP8.* Fix 
+PHP 8+ Safe-Guard (deny_access): Added type, empty string, and existence checks (file_exists) for the 404 template to prevent the fatal ValueError: Path cannot be empty.
+Cascading Fallback System: If no 404 template exists in the active theme, the code now safely falls back to the theme's index.php, or as a last resort, to a clean wp_die().
+
+2. Antibot Engine & Worker Hotfix
+Fixed Syntax Parse Errors (Trailing Braces)
+Removed illegal trailing closing braces (}) at the bottom of both vis-antibot-worker.js and vis-antibot-engine.js that caused an immediate browser-level crash (Uncaught SyntaxError: Unexpected token '}').
+Resolved Async Form Submission Block (User-Trust Loss)
+Switched from programmatic btn.click() inside an async/awaited scope to bypassing the browser's untrusted action filters.
+The engine now intercepts the submit event, dynamically appends the submit button's name and value as hidden input elements (preventing WordPress from losing track of which button triggered the request), and securely dispatches the form using the native HTMLFormElement.prototype.submit.call(form).
+Hardened Web Worker Sandbox Fallback
+Added a strict try-catch wrapper around the Worker constructor. If a browser blocks the Web Worker due to restrictive Content Security Policies (CSP), Sandbox constraints, or CORS-issues, the engine instantly and silently falls back to synchronous main-thread mining without hanging or throwing errors.
+Secured Fetch Interceptors for GET/HEAD Requests
+Optimized the Fetch hijacking layer to bypass cloning/injecting bodies for GET and HEAD requests, strictly adhering to the W3C spec and preventing TypeError aborts on AJAX routines.
+
+
+
+
+
+🛠 VGT SENTINEL CE: CHANGELOG – SECURITY PATCH 2026.04.14
+1. CERBERUS: ATOMIC LOCKING ENGINE (RACE CONDITION FIX)
+Vector: Time-of-Check to Time-of-Use (TOCTOU) Bypass.
+
+Problem: During synchronous brute-force waves, multiple PHP workers were able to read the status of "0 failed attempts" simultaneously and write "1 failed attempt" at the same time. This mathematically bypassed the 3-strike rule, allowing unauthorized extended attempt windows.
+
+Solution: Implementation of an exclusive filesystem lock (flock). The read and write cycle is now strictly atomic. One thread blocks access for all others until the count and potential ban are finalized and committed.
+
+Status: Fixed
+
+2. HADES: PCRE FAIL-SAFE GUARD (.HTACCESS INTEGRITY)
+Vector: Filesystem corruption through resource exhaustion.
+
+Problem: With excessively large .htaccess files, the regex engine (preg_replace) could exceed the backtracking limit and return NULL. This caused the deletion of the entire file during the save process (wipeout).
+
+Solution: A Strict-Null-Check now validates the transformation result. If the engine fails or hits a limit, the original content is retained (Fail-Closed Integrity).
+
+Status: Fixed
+
+3. AEGIS: PAYLOAD EXHAUSTION TERMINATION (PADDING PROTECTION)
+Vector: WAF Bypass via Stream Padding.
+
+Problem: The scan process previously utilized a break command upon reaching the limit (512KB), while the underlying application continued to process the remaining (potentially malicious) segment of a 1MB+ payload.
+
+Solution: Replaced the scan break with Immediate Termination. If a request reaches the scan limit, it is classified as an anomaly and discarded instantly.
+
+Status: Fixed
