@@ -39,7 +39,7 @@ class VGTS_Hades {
 
         // AUTO-SYNC: .htaccess aktualisieren beim Speichern
         // [WP.ORG COMPLIANCE]: Sanitization of $_GET
-        if (is_admin() && isset($_GET['settings-updated'])) {
+        if (is_admin() && isset($_GET['settings-updated']) && current_user_can('manage_options')) {
             $updated = sanitize_text_field(wp_unslash($_GET['settings-updated']));
             if ($updated === 'true') {
                 $this->update_server_rules();
