@@ -149,7 +149,7 @@ final class MasterUserControlPlugin {
         
         // CSP so konfiguriert, dass sie im Admin-Bereich kompatibel bleibt, auf dem Frontend jedoch hart sperrt
         if (is_admin()) {
-            $headers['Content-Security-Policy'] = "default-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-{$nonce}'; style-src 'self' 'unsafe-inline' 'nonce-{$nonce}'; object-src 'none'; base-uri 'self';";
+            $headers['Content-Security-Policy'] = "default-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self';";
         } else {
             $headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'nonce-{$nonce}'; style-src 'self' 'nonce-{$nonce}'; object-src 'none'; base-uri 'self';";
         }

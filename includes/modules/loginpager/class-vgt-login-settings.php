@@ -61,8 +61,13 @@ final class VGTLoginSettings {
         $sanitized = [];
         $sanitized['login_bg_color'] = sanitize_hex_color((string)($input['login_bg_color'] ?? '')) ?: '#09090b';
         $sanitized['login_accent']   = sanitize_hex_color((string)($input['login_accent'] ?? '')) ?: '#00f0ff';
-        $sanitized['login_bg_image'] = esc_url_raw((string)($input['login_bg_image'] ?? ''));
-        $sanitized['login_logo']     = esc_url_raw((string)($input['login_logo'] ?? ''));
+        
+        $bg_image_raw = esc_url_raw((string)($input['login_bg_image'] ?? ''));
+        $logo_url_raw = esc_url_raw((string)($input['login_logo'] ?? ''));
+        
+        // VGT SUPREME HARDENING: Brutale Eliminierung von CSS-Injection Vektoren.
+        $sanitized['login_bg_image'] = preg_replace('/[()\'\"\\\\]/', '', $bg_image_raw);
+        $sanitized['login_logo']     = preg_replace('/[()\'\"\\\\]/', '', $logo_url_raw);
         
         return $sanitized;
     }
@@ -135,14 +140,18 @@ final class VGTLoginSettings {
                     <div class="vgt-panel vgt-simulation-panel">
                         <h2>Simulation Matrix <span class="vgt-badge">LIVE</span></h2>
                         
+                        <?php
+                        $sim_bg_image_safe = preg_replace('/[()\'\"\\\\]/', '', $options['login_bg_image']);
+                        $sim_logo_safe     = preg_replace('/[()\'\"\\\\]/', '', $options['login_logo']);
+                        ?>
                         <div id="vgt-sim-environment" class="vgt-sim-environment" 
                              style="--sim-bg: <?php echo esc_attr($options['login_bg_color']); ?>; 
                                     --sim-accent: <?php echo esc_attr($options['login_accent']); ?>;
-                                    --sim-bg-img: url('<?php echo esc_url($options['login_bg_image']); ?>');">
+                                    --sim-bg-img: url('<?php echo esc_url($sim_bg_image_safe); ?>');">
                             
                             <!-- Mock WP Login Form -->
                             <div class="vgt-mock-login">
-                                <div class="vgt-mock-logo" style="--sim-logo-img: url('<?php echo esc_url($options['login_logo']); ?>');"></div>
+                                <div class="vgt-mock-logo" style="--sim-logo-img: url('<?php echo esc_url($sim_logo_safe); ?>');"></div>
                                 <div class="vgt-mock-form-box">
                                     <div class="vgt-mock-input-group">
                                         <div class="vgt-mock-label">Username or Email Address</div>

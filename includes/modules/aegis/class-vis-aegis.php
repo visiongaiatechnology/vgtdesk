@@ -126,6 +126,22 @@ class VGTS_Aegis {
             $this->pattern_weights['probes'] = 0;
             $this->pattern_weights['db_direct'] = 0;
             $this->pattern_weights['gql_recon'] = 0;
+
+            // Wenn der Benutzer Beiträge/Seiten bearbeitet oder speichert, deaktivieren wir auch RCE/LFI-Filter,
+            // da Beiträge legitimen Programmcode oder System-Begriffe enthalten können.
+            $uri = $_SERVER['REQUEST_URI'] ?? '';
+            $path = parse_url($uri, PHP_URL_PATH) ?? '';
+            if (
+                stripos($path, '/wp-json/wp/v2/') !== false || 
+                stripos($path, '/wp-admin/post.php') !== false || 
+                stripos($path, '/wp-admin/edit.php') !== false
+            ) {
+                $this->pattern_weights['rce'] = 0;
+                $this->pattern_weights['lfi'] = 0;
+                $this->pattern_weights['framework'] = 0;
+                $this->pattern_weights['array_bypass'] = 0;
+                $this->pattern_weights['rce_source_hijack'] = 0;
+            }
         }
 
         // 2. Pfad- & URL-Kontext-Ausnahmen (z. B. WooCommerce Checkout oder Gutenberg REST-APIs)
