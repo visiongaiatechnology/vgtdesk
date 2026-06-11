@@ -125,7 +125,8 @@ Persistent Settings (Relational DB)
 → Migration: wp_usermeta data imported on first load
 ```
 
-<img width="1914" height="911" alt="VGT Architecture Layer" src="https://github.com/user-attachments/assets/10f41efb-4b27-4e33-ac6d-dd9d3b127797" />
+<img width="1870" height="1142" alt="image" src="https://github.com/user-attachments/assets/fbbb1b7f-cfce-45b7-86f3-28878a32cc09" />
+
 
 ---
 
