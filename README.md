@@ -25,9 +25,10 @@ Found a bug or have an improvement? **Open an issue or contact us.**
 
 ---
 
-https://github.com/user-attachments/assets/c7c1bde7-a178-4dff-8d09-a3ace3f77c14
 
-<img width="1916" height="908" alt="VGT WP-Desk Main Desktop" src="https://github.com/user-attachments/assets/b0776d5f-4dcc-4939-bf0f-215de8d87cd7" />
+
+<img width="2559" height="1227" alt="image" src="https://github.com/user-attachments/assets/565f660f-0c8a-4d98-bc22-cf45e9b149be" />
+
 
 ---
 
@@ -117,7 +118,20 @@ Persistent Workspace Sync (wp_usermeta)
 → Per-user profiles — no global option overwrites
 ```
 
-<img width="1914" height="911" alt="VGT Architecture Layer" src="https://github.com/user-attachments/assets/10f41efb-4b27-4e33-ac6d-dd9d3b127797" />
+<img width="2558" height="1232" alt="image" src="https://github.com/user-attachments/assets/3c73df33-4695-4bbf-9d2c-0e073f1fa297" />
+
+
+<img width="445" height="910" alt="image" src="https://github.com/user-attachments/assets/fc37497f-6f3d-4d72-a5ea-d6c9bdec5607" />
+
+
+<img width="794" height="478" alt="image" src="https://github.com/user-attachments/assets/0d3c0ed1-7c58-4674-8136-12ababf28caa" />
+
+
+<img width="1075" height="708" alt="image" src="https://github.com/user-attachments/assets/237c5c5a-1aac-44ad-91fc-a1f9c2de6e3f" />
+
+
+<img width="702" height="576" alt="image" src="https://github.com/user-attachments/assets/41ab1782-1cf5-40bc-9184-003c8f971e32" />
+
 
 ---
 
