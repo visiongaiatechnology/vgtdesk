@@ -87,7 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (val === '') return;
 
-            printLine(`<span style="color: #64748b;">root@vgts-nexus:~$</span> <span style="color:#fff;">${val}</span>`);
+            const escapedVal = val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            printLine(`<span style="color: #64748b;">root@vgts-nexus:~$</span> <span style="color:#fff;">${escapedVal}</span>`);
 
             if (val === 'clear') {
                 output.innerHTML = '';

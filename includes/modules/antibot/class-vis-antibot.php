@@ -2,6 +2,13 @@
 declare(strict_types=1);
 if (!defined('ABSPATH')) exit;
 
+// ✅ REQUIRED — Typed hierarchy with explicit disclosure policy
+class AppException        extends Exception {}
+class ValidationException extends AppException {}  // USER-FACING: Message shown verbatim
+class SecurityException   extends AppException {}  // INTERNAL: Generic message to client, full detail to error_log
+class StorageException    extends AppException {}  // INTERNAL: Generic message to client, full detail to error_log
+
+
 /**
  * MODULE: ANTIBOT (VGT SHIELD V2)
  * Status: DIAMANT SUPREME (Zero-UI Proof-of-Work)
@@ -230,43 +237,69 @@ class VGTS_Antibot {
     // --- DEEP PLUGIN SCANNER (AJAX) ---
 
     public function ajax_scan_plugin(): void {
-        check_ajax_referer('vgts_nonce', 'nonce');
-        if (!current_user_can('manage_options')) wp_send_json_error('Unauthorized');
+        try {
+            if (!check_ajax_referer('vgts_nonce', 'nonce', false)) {
+                throw new SecurityException('CSRF token validation failed.');
+            }
+            if (!current_user_can('manage_options')) {
+                throw new SecurityException('Insufficient capabilities.');
+            }
 
-        $plugin_file = sanitize_text_field(wp_unslash($_POST['plugin_file'] ?? ''));
-        if (empty($plugin_file)) wp_send_json_error('No plugin selected');
+            $plugin_file = isset($_POST['plugin_file']) ? sanitize_text_field(wp_unslash($_POST['plugin_file'])) : '';
+            if (empty($plugin_file)) {
+                throw new ValidationException('No plugin selected.');
+            }
 
-        // Sandbox Check & Path Normalization
-        $base_dir       = wp_normalize_path(WP_PLUGIN_DIR);
-        $requested_path = wp_normalize_path($base_dir . '/' . dirname($plugin_file));
-        $real_path      = realpath($requested_path);
-        
-        if (!$real_path || strpos(wp_normalize_path($real_path), $base_dir) !== 0 || !is_dir($real_path)) {
-            wp_send_json_error(esc_html__('VGT SENTINEL: Sandbox Escape Detektiert und Blockiert.', 'vgt-sentinel-ce'));
-        }
+            // Sandbox Check & Path Normalization (PATTERN 1.5.E)
+            $base_dir = wp_normalize_path(realpath(WP_PLUGIN_DIR) ?: WP_PLUGIN_DIR);
+            $requested_path = wp_normalize_path($base_dir . '/' . dirname($plugin_file));
+            
+            $resolvedDir = realpath($requested_path);
+            if ($resolvedDir === false || !is_dir($resolvedDir)) {
+                throw new ValidationException('Invalid directory target.');
+            }
+            
+            $base_dir_jail = rtrim($base_dir, '/') . '/';
+            $normalized_resolved = rtrim(wp_normalize_path($resolvedDir), '/') . '/';
+            if (!str_starts_with($normalized_resolved, $base_dir_jail)) {
+                throw new SecurityException('Path escaped jail.');
+            }
 
-        $hooks   = [];
-        $files   = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($real_path));
-        $pattern = '/(?:do_action|apply_filters)\s*\(\s*[\'"]([a-zA-Z0-9_\-]+)[\'"]/S';
+            $hooks   = [];
+            $files   = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($resolvedDir));
+            $pattern = '/(?:do_action|apply_filters)\s*\(\s*[\'"]([a-zA-Z0-9_\-]+)[\'"]/S';
 
-        foreach ($files as $file) {
-            if ($file->isDir() || $file->getExtension() !== 'php') continue;
+            foreach ($files as $file) {
+                if ($file->isDir() || $file->getExtension() !== 'php') continue;
 
-            $handle = @fopen($file->getRealPath(), 'r');
-            if ($handle) {
-                while (($line = fgets($handle)) !== false) {
-                    if (preg_match_all($pattern, $line, $matches)) {
-                        foreach ($matches[1] as $match) {
-                            $hooks[$match] = true;
+                $handle = @fopen($file->getRealPath(), 'r');
+                if ($handle) {
+                    while (($line = fgets($handle)) !== false) {
+                        if (preg_match_all($pattern, $line, $matches)) {
+                            foreach ($matches[1] as $match) {
+                                $hooks[$match] = true;
+                            }
                         }
                     }
+                    fclose($handle);
                 }
-                fclose($handle);
             }
-        }
 
-        $unique_hooks = array_keys($hooks);
-        sort($unique_hooks);
-        wp_send_json_success(['hooks' => $unique_hooks]);
+            $unique_hooks = array_keys($hooks);
+            sort($unique_hooks);
+            wp_send_json_success(['hooks' => $unique_hooks]);
+
+        } catch (ValidationException $e) {
+            wp_send_json_error($e->getMessage());
+        } catch (SecurityException $e) {
+            error_log('[SEC] ' . $e->getMessage());
+            wp_send_json_error('Request rejected for security reasons.');
+        } catch (StorageException $e) {
+            error_log('[STORAGE] ' . $e->getMessage());
+            wp_send_json_error('A server error occurred.');
+        } catch (Throwable $e) {
+            error_log('[FATAL] ' . $e->getMessage());
+            wp_send_json_error('Critical system fault.');
+        }
     }
 }

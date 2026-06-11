@@ -1,12 +1,12 @@
 # 🖥️ VGT WP-Desk — Premium Slim Desktop Layer
 
 [![License](https://img.shields.io/badge/License-AGPLv3-green?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.0.0--Beta__v2-brightgreen?style=for-the-badge)](#)
+[![Version](https://img.shields.io/badge/Version-1.0.0--Beta__v3-brightgreen?style=for-the-badge)](#)
 [![Platform](https://img.shields.io/badge/Platform-WordPress-21759B?style=for-the-badge&logo=wordpress)](#)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php)](#)
 [![Architecture](https://img.shields.io/badge/Architecture-Zero--Overheat_OS--Layer-blue?style=for-the-badge)](#)
 [![Engine](https://img.shields.io/badge/Engine-Vanilla_JS_%2F_CSS3-orange?style=for-the-badge)](#)
-[![Status](https://img.shields.io/badge/Status-BETA__V2-yellow?style=for-the-badge)](#)
+[![Status](https://img.shields.io/badge/Status-BETA__V3-yellow?style=for-the-badge)](#)
 [![Security](https://img.shields.io/badge/Security-Diamant_VGT_Supreme-red?style=for-the-badge)](#)
 [![VGT](https://img.shields.io/badge/VGT-VisionGaia_Technology-red?style=for-the-badge)](https://visiongaiatechnology.de)
 
@@ -256,7 +256,14 @@ git clone https://github.com/visiongaiatechnology/vgtdesk
 
 ## 📜 Changelog
 
-### v1.0.0-Beta v2 (Current)
+### v1.0.0-Beta v3 (Current)
+*   **Control Center Toggle Fix:** Fixed desynchronization in Control Center toggles (Sound, Widgets, Icons, Blur) by strictly normalizing all state variables to JavaScript booleans and resolving string/boolean coercion bugs.
+*   **Widget Visibility Manager:** Fully styled the Widget Visibility selection grid in the Control Center allowing immediate visual toggling of individual widgets (Clock, System, Notes, Sentinel).
+*   **VGT Omega Login Engine Module:** Integrated the standalone VGT Omega Login Engine module with a custom settings matrix and live simulation environment inside chromeless iframe views.
+*   **Plugin Overview Styling Overrides:** Added custom inline CSS overrides to force plugin list table rows to display with a premium `rgb(9 13 22)` background and high-contrast `#ffffff` text inside chromeless frames.
+
+### v1.0.0-Beta v2
+*   **Security Hotfix (Hades Module):** Added `current_user_can('manage_options')` validation in `VGTS_Hades::__construct()` to prevent unauthenticated guests or automated scripts from triggering infinite `.htaccess` rewrites and causing Denial of Service (DoS) or file corruption.
 *   **Throne Guard Integration:** Ported capability manager, Superkey session vault gate, and Jailed upload vault into the core dashboard structure.
 *   **Premium Lock Screen Design:** Added a beautiful glassmorphism dark-mode lock screen for session decryption.
 *   **Contrast Adjustments:** Forced plugin page rows in the iframe to render with a `rgb(9 13 22)` background and `#ffffff` high-contrast text color.
@@ -315,4 +322,4 @@ VisionGaia Technology builds enterprise-grade infrastructure — engineered to t
 
 ---
 
-*Version 1.0.0-Beta v2 — VGT WP-Desk // Premium Slim Desktop Layer // Zero-Overheat Architecture // Hook-Preserving IframeTransformer // Glassmorphic OS UI // Diamant VGT Supreme // AGPLv3*
+*Version 1.0.0-Beta v3 — VGT WP-Desk // Premium Slim Desktop Layer // Zero-Overheat Architecture // Hook-Preserving IframeTransformer // Glassmorphic OS UI // Diamant VGT Supreme // AGPLv3*

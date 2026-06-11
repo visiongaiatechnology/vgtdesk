@@ -1,0 +1,313 @@
+/* * STATUS: DIAMANT VGT SUPREME
+ * UI/UX Masterpiece. Glassmorphism, CSS Grid Architektur, Zero-Bloat.
+ */
+
+:root {
+    --vgt-sys-bg: #09090b;
+    --vgt-sys-surface: #18181b;
+    --vgt-sys-border: rgba(255, 255, 255, 0.08);
+    --vgt-sys-text: #ffffff;
+    --vgt-sys-muted: #a1a1aa;
+    --vgt-accent: #00f0ff;
+    --vgt-sim-grid: rgba(255, 255, 255, 0.03);
+}
+
+/* Base Override for Plugin Page */
+.vgt-matrix-wrapper {
+    margin: 20px 20px 0 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--vgt-sys-text);
+}
+
+.vgt-matrix-wrapper * {
+    box-sizing: border-box;
+}
+
+.vgt-matrix-header {
+    background: var(--vgt-sys-surface);
+    padding: 20px 30px;
+    border-radius: 12px;
+    border: 1px solid var(--vgt-sys-border);
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.vgt-matrix-header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--vgt-sys-text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.vgt-status-bar {
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--vgt-sys-muted);
+}
+
+.vgt-pulse-green {
+    color: #00ff66;
+    text-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+    animation: pulse 2s infinite;
+}
+
+/* Grid Layout Architecture */
+.vgt-grid-layout {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 25px;
+    align-items: start;
+}
+
+.vgt-panel {
+    background: var(--vgt-sys-surface);
+    border: 1px solid var(--vgt-sys-border);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+}
+
+.vgt-panel h2 {
+    margin: 0 0 25px 0;
+    color: var(--vgt-sys-text);
+    font-size: 18px;
+    border-bottom: 1px solid var(--vgt-sys-border);
+    padding-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Inputs & Forms */
+.vgt-input-group {
+    margin-bottom: 20px;
+}
+
+.vgt-input-group label {
+    display: block;
+    font-size: 13px;
+    color: var(--vgt-sys-muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.color-picker-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(0,0,0,0.3);
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--vgt-sys-border);
+}
+
+input[type="color"] {
+    appearance: none;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    background: transparent;
+    padding: 0;
+}
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; box-shadow: 0 0 8px rgba(0,0,0,0.5); }
+
+.color-hex { font-family: monospace; font-size: 14px; }
+
+.vgt-text-input {
+    width: 100%;
+    background: rgba(0,0,0,0.3) !important;
+    border: 1px solid var(--vgt-sys-border) !important;
+    color: var(--vgt-sys-text) !important;
+    padding: 10px 15px !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease;
+}
+
+.vgt-text-input:focus {
+    border-color: var(--vgt-accent) !important;
+    box-shadow: inset 0 0 0 1px var(--vgt-accent), 0 0 10px rgba(0, 240, 255, 0.1) !important;
+    outline: none;
+}
+
+.vgt-btn-execute {
+    width: 100%;
+    background: var(--vgt-accent);
+    color: #000;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 240, 255, 0.2);
+}
+
+.vgt-btn-execute:hover {
+    transform: translateY(-2px);
+    background: #fff;
+    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+}
+
+.vgt-badge {
+    background: rgba(0, 240, 255, 0.1);
+    color: var(--vgt-accent);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+/* ==========================================================================
+   SIMULATION MATRIX KERNEL
+   ========================================================================== */
+.vgt-sim-environment {
+    width: 100%;
+    height: 600px;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+    /* Dynamische Variablen aus JS/PHP */
+    background-color: var(--sim-bg);
+    background-image: var(--sim-bg-img);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    /* Cyber-Grid Overlay zur Verdeutlichung der Simulation */
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+}
+
+.vgt-sim-environment::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: 
+        linear-gradient(var(--vgt-sim-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--vgt-sim-grid) 1px, transparent 1px);
+    background-size: 30px 30px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.vgt-mock-login {
+    position: relative;
+    z-index: 2;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.vgt-mock-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.1);
+    background-image: var(--sim-logo-img);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+/* Die Simulation des Formulars (Glassmorphism exakt wie Frontend) */
+.vgt-mock-form-box {
+    width: 100%;
+    background: rgba(24, 24, 27, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 30px 25px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+}
+
+.vgt-mock-label {
+    font-size: 12px;
+    color: #fff;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.vgt-mock-input {
+    width: 100%;
+    height: 38px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.vgt-mock-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.vgt-mock-checkbox {
+    font-size: 12px;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.vgt-mock-checkbox .check {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #666;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.3);
+}
+
+.vgt-mock-button {
+    background: var(--sim-accent);
+    color: #000;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.vgt-mock-links {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.vgt-mock-links span {
+    font-size: 12px;
+    color: var(--sim-accent);
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+@media (max-width: 1200px) {
+    .vgt-grid-layout { grid-template-columns: 1fr; }
+}

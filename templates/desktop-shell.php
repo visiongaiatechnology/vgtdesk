@@ -77,6 +77,28 @@ if (!defined('ABSPATH')) {
         </div>
         
         <div class="vgt-cc-section">
+            <span class="vgt-cc-section-title">Widget-Sichtbarkeit</span>
+            <div class="vgt-cc-widget-toggles">
+                <div class="vgt-cc-widget-toggle active" id="cc-widget-toggle-clock" onclick="VGTDeskEngine.toggleCCWidget('clock')">
+                    <span class="vgt-cc-wt-icon">🕐</span>
+                    <span class="vgt-cc-wt-label">Uhr</span>
+                </div>
+                <div class="vgt-cc-widget-toggle active" id="cc-widget-toggle-system" onclick="VGTDeskEngine.toggleCCWidget('system')">
+                    <span class="vgt-cc-wt-icon">📊</span>
+                    <span class="vgt-cc-wt-label">System</span>
+                </div>
+                <div class="vgt-cc-widget-toggle active" id="cc-widget-toggle-notes" onclick="VGTDeskEngine.toggleCCWidget('notes')">
+                    <span class="vgt-cc-wt-icon">📝</span>
+                    <span class="vgt-cc-wt-label">Notizen</span>
+                </div>
+                <div class="vgt-cc-widget-toggle active" id="cc-widget-toggle-sentinel" onclick="VGTDeskEngine.toggleCCWidget('sentinel')">
+                    <span class="vgt-cc-wt-icon">🛡️</span>
+                    <span class="vgt-cc-wt-label">Sentinel</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="vgt-cc-section">
             <span class="vgt-cc-section-title">System-Latenz (Live)</span>
             <canvas id="vgt-cc-graph" width="230" height="70" class="vgt-cc-canvas"></canvas>
         </div>
@@ -123,10 +145,11 @@ if (!defined('ABSPATH')) {
                 </div>
                 <span class="vgt-topbar-separator">|</span>
                 <span class="vgt-topbar-branding">Powered by VisionGaiaTechnology</span>
-                <span class="vgt-topbar-version-badge">V1.0 Beta v2</span>
+                <span class="vgt-topbar-version-badge">V1.0 Beta v3</span>
                 <span class="vgt-topbar-separator">|</span>
                 <div class="vgt-topbar-nav">
                     <button class="vgt-topbar-btn" onclick="VGTDeskEngine.openWindow('welcome')">Home</button>
+                    <button class="vgt-topbar-btn" onclick="VGTDeskEngine.openWindow('vgt-login-omega')">Login-Design</button>
                     <button class="vgt-topbar-btn" onclick="VGTDeskEngine.openWindow('settings')">Einstellungen</button>
                 </div>
             </div>
@@ -235,7 +258,7 @@ if (!defined('ABSPATH')) {
                             <span class="vgt-window-dot dot-amber" onclick="VGTDeskEngine.minimizeWindow('welcome')"></span>
                             <span class="vgt-window-dot dot-emerald" onclick="VGTDeskEngine.maximizeWindow('welcome')"></span>
                         </div>
-                        <span class="vgt-window-title" id="welcome-title-accent">Willkommen bei VGT WP-Desk — V1.0 Beta v2</span>
+                        <span class="vgt-window-title" id="welcome-title-accent">Willkommen bei VGT WP-Desk — V1.0 Beta v3</span>
                         <div class="vgt-window-spacer"></div>
                     </div>
                     <!-- Body Content -->
@@ -294,7 +317,7 @@ if (!defined('ABSPATH')) {
                         <!-- BRANDING FOOTER -->
                         <div class="vgt-popup-footer">
                             <span class="vgt-footer-branding">Powered by VisionGaiaTechnology</span>
-                            <span class="vgt-footer-version">V1.0 Beta v2</span>
+                            <span class="vgt-footer-version">V1.0 Beta v3</span>
                         </div>
                     </div>
                 </div>
@@ -319,7 +342,7 @@ if (!defined('ABSPATH')) {
                             <span class="vgt-window-dot dot-amber" onclick="VGTDeskEngine.minimizeWindow('settings')"></span>
                             <span class="vgt-window-dot dot-emerald" onclick="VGTDeskEngine.maximizeWindow('settings')"></span>
                         </div>
-                        <span class="vgt-window-title" id="settings-title-accent">Systemeinstellungen — V1.0 Beta v2</span>
+                        <span class="vgt-window-title" id="settings-title-accent">Systemeinstellungen — V1.0 Beta v3</span>
                         <div class="vgt-window-spacer"></div>
                     </div>
                     <!-- Body Content -->

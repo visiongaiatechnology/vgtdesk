@@ -477,28 +477,35 @@ class VGTS_Scanner_Engine {
 
     private function load_manifest(): array {
         if (file_exists($this->manifest_file)) {
-            // SECURITY: Include statt file_get_contents. 
-            // Die Datei muss validen PHP Code enthalten: <?php return [...];
-            $data = include $this->manifest_file;
-            return is_array($data) ? $data : [];
+            $content = file_get_contents($this->manifest_file);
+            if ($content !== false) {
+                $php_tag_end = strpos($content, '?>');
+                if ($php_tag_end !== false) {
+                    $json_part = substr($content, $php_tag_end + 2);
+                    try {
+                        $data = json_decode($json_part, true, 512, JSON_THROW_ON_ERROR);
+                        return is_array($data) ? $data : [];
+                    } catch (\JsonException) {
+                        return [];
+                    }
+                }
+            }
         }
         return [];
     }
 
     private function save_manifest(array $data): void {
-        // ATOMIC WRITE OPERATION mit Locking
-        // Wir speichern es als executable PHP, das das Array returned.
-        // Das verhindert Direct-Access-Leaks via Browser.
-        $content = "<?php defined('ABSPATH') || exit; return " . var_export($data, true) . ";";
-        
-        $temp_file = $this->manifest_file . '_tmp.php';
-        
-        if (file_put_contents($temp_file, $content, LOCK_EX) !== false) {
-            rename($temp_file, $this->manifest_file);
-            // Optional: OpCache invalidieren, damit Änderungen sofort greifen
-            if (function_exists('opcache_invalidate') && file_exists($this->manifest_file)) {
-                opcache_invalidate($this->manifest_file, true);
+        try {
+            $json_data = json_encode($data, JSON_THROW_ON_ERROR);
+            $content = "<?php defined('ABSPATH') || exit; ?>\n" . $json_data;
+            
+            $temp_file = $this->manifest_file . '_tmp.php';
+            
+            if (file_put_contents($temp_file, $content, LOCK_EX) !== false) {
+                rename($temp_file, $this->manifest_file);
             }
+        } catch (\JsonException) {
+            // Suppress encoding failures to maintain stability
         }
     }
 

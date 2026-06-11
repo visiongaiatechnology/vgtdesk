@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       VGT WP-Desk — Premium Slim Desktop (Modular)
  * Description:       Ein eleganter, modularer Desktop-Mode für das WordPress-Backend. Schlank, unzerstörbar und hochkompatibel.
- * Version:           1.0.0-Beta v2 (Hardened Edition)
+ * Version:           1.0.0-Beta v3 (Hardened Edition)
  * Author:            VisionGaiaTechnology
  * Text Domain:       vgt-wp-desk
  */
@@ -75,6 +75,10 @@ final class WPDeskPlugin
             require_once VGT_WPDESK_PATH . 'includes/class-vgt-throne-guard.php';
         }
 
+        if (file_exists(VGT_WPDESK_PATH . 'includes/modules/loginpager/login-engine.php')) {
+            require_once VGT_WPDESK_PATH . 'includes/modules/loginpager/login-engine.php';
+        }
+
         $this->init_hooks();
         
         if (class_exists(__NAMESPACE__ . '\\IframeTransformer')) {
@@ -126,7 +130,7 @@ final class WPDeskPlugin
 
     public function build_dynamic_plugin_apps(): void
     {
-        global $menu;
+        global $menu, $submenu;
         if (empty($menu)) {
             return;
         }
@@ -191,12 +195,47 @@ final class WPDeskPlugin
             $color        = $color_presets[$preset_index];
             $app_id       = sanitize_key($slug);
             
+            // Submenu-Erfassung für das Portal-Pop-Up
+            $submenus_data = [];
+            if (!empty($submenu[$slug])) {
+                foreach ($submenu[$slug] as $sub_item) {
+                    if (empty($sub_item[0]) || empty($sub_item[2])) {
+                        continue;
+                    }
+                    if (!empty($sub_item[1]) && !current_user_can($sub_item[1])) {
+                        continue;
+                    }
+
+                    $sub_title = wp_strip_all_tags($sub_item[0]);
+
+                    if (preg_match('/^https?:\/\//', $sub_item[2])) {
+                        $sub_url = $sub_item[2];
+                    } elseif (strpos($sub_item[2], '.php') !== false) {
+                        $sub_url = admin_url($sub_item[2]);
+                    } else {
+                        if (strpos($slug, '.php') !== false) {
+                            $sub_url = admin_url($slug . '?page=' . $sub_item[2]);
+                        } else {
+                            $sub_url = admin_url('admin.php?page=' . $sub_item[2]);
+                        }
+                    }
+
+                    $sub_id = sanitize_key($slug . '_' . $sub_item[2]);
+                    $submenus_data[] = [
+                        'id'    => $sub_id,
+                        'title' => $sub_title,
+                        'url'   => $sub_url
+                    ];
+                }
+            }
+
             $parsed_apps[$app_id] = [
                 'title'     => $title,
                 'url'       => $url,
                 'icon_type' => $icon_type,
                 'icon_val'  => $icon_val,
-                'color'     => $color
+                'color'     => $color,
+                'submenus'  => $submenus_data
             ];
         }
 
@@ -224,7 +263,8 @@ final class WPDeskPlugin
             'widgets_visible'  => get_user_meta($user_id, 'vgt_desk_widgets_visible', true) !== 'false',
             'icons_visible'    => get_user_meta($user_id, 'vgt_desk_icons_visible', true) !== 'false',
             'audio_enabled'    => get_user_meta($user_id, 'vgt_desk_audio_enabled', true) !== 'false',
-            'widget_positions' => json_decode(get_user_meta($user_id, 'vgt_desk_widget_positions', true) ?: '{}', true)
+            'widget_positions' => json_decode(get_user_meta($user_id, 'vgt_desk_widget_positions', true) ?: '{}', true),
+            'folders'          => json_decode(get_user_meta($user_id, 'vgt_desk_folders', true) ?: '{}', true)
         ];
 
         global $wpdb;
@@ -253,7 +293,8 @@ final class WPDeskPlugin
             'userSettings' => $user_settings,
             'sentinelEnabled' => $sentinel_active,
             'sentinelBans'    => $bans_count,
-            'isSentinelV7'    => $sentinel_v7_active
+            'isSentinelV7'    => $sentinel_v7_active,
+            'apps'            => $this->apps
         ]);
     }
 
@@ -275,7 +316,7 @@ final class WPDeskPlugin
             $type  = isset($_POST['setting_type']) ? sanitize_key($_POST['setting_type']) : '';
             $value = isset($_POST['value']) ? wp_unslash($_POST['value']) : '';
 
-            if (!in_array($type, ['wallpaper', 'accent_color', 'blur', 'icon_positions', 'window_settings', 'widgets_visible', 'icons_visible', 'audio_enabled', 'widget_positions'], true)) {
+            if (!in_array($type, ['wallpaper', 'accent_color', 'blur', 'icon_positions', 'window_settings', 'widgets_visible', 'icons_visible', 'audio_enabled', 'widget_positions', 'folders'], true)) {
                 throw new ValidationException('Invalid configuration parameters submitted.');
             }
 
@@ -288,7 +329,7 @@ final class WPDeskPlugin
                 $value = ($value === 'true' || $value === '1') ? 'true' : 'false';
             }
 
-            if (in_array($type, ['icon_positions', 'window_settings', 'widget_positions'], true)) {
+            if (in_array($type, ['icon_positions', 'window_settings', 'widget_positions', 'folders'], true)) {
                 if (!is_string($value)) {
                     throw new ValidationException('Expected string payload for JSON fields.');
                 }
@@ -296,6 +337,25 @@ final class WPDeskPlugin
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     throw new ValidationException('Malformed JSON structural payload.');
                 }
+                
+                // Härtung für Ordner-Strukturen (XSS-Prävention)
+                if ($type === 'folders') {
+                    $sanitized_folders = [];
+                    foreach ($decoded as $folder_id => $folder_data) {
+                        $f_id = sanitize_key((string)$folder_id);
+                        if (empty($f_id) || !is_array($folder_data)) {
+                            continue;
+                        }
+                        $sanitized_folders[$f_id] = [
+                            'title' => sanitize_text_field($folder_data['title'] ?? ''),
+                            'apps'  => array_map('sanitize_key', (array)($folder_data['apps'] ?? [])),
+                            'left'  => sanitize_text_field($folder_data['left'] ?? ''),
+                            'top'   => sanitize_text_field($folder_data['top'] ?? '')
+                        ];
+                    }
+                    $decoded = $sanitized_folders;
+                }
+                
                 $value = json_encode($decoded, JSON_FORCE_OBJECT);
             } elseif ($type === 'wallpaper') {
                 $value = esc_url_raw($value);
@@ -475,6 +535,9 @@ final class WPDeskPlugin
             ::-webkit-scrollbar-track { background: #090d16; }
             ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 99px; border: 2px solid #090d16; }
             ::-webkit-scrollbar-thumb:hover { background: #334155; }
+            body.plugins-php table.wp-list-table.plugins tr.active td, body.plugins-php table.wp-list-table.plugins tr.active th { background: rgb(9 13 22) !important; }
+            body.plugins-php table.wp-list-table.plugins tr.inactive td, body.plugins-php table.wp-list-table.plugins tr.inactive th { background: rgb(9 13 22) !important; }
+            body.plugins-php table.wp-list-table.plugins tr td, body.plugins-php table.wp-list-table.plugins tr th { background: rgb(9 13 22) !important; color: #ffffff !important; }
         </style>';
     }
 

@@ -102,7 +102,16 @@ final class IframeTransformer
         }
 
         echo '<!-- VGT MULTI-SCREEN IFRAME TRANSFORMER ACTIVE -->';
-        echo '<style>
+        
+        $nonce_attr = '';
+        if (function_exists('vgt_get_csp_nonce')) {
+            $nonce = vgt_get_csp_nonce();
+            if (!empty($nonce)) {
+                $nonce_attr = ' nonce="' . esc_attr($nonce) . '"';
+            }
+        }
+        echo '<style' . $nonce_attr . '>';
+        ?>
             /* ==========================================================================
                1. GEMEINSAME DESIGN-TOKENS FÜR ALLE LISTENTABELLEN (RESET)
                ========================================================================== */
@@ -970,6 +979,7 @@ final class IframeTransformer
                 width: 100% !important;
                 max-width: 300px !important;
             }
-        </style>';
+        </style>
+        <?php
     }
 }

@@ -123,7 +123,7 @@ class VGTS_Dashboard_View {
             echo '</form>';
         }
         
-        echo '</form></main></div>';
+        echo '</main></div>';
     }
 
     /**

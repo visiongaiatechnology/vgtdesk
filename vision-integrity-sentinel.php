@@ -295,3 +295,13 @@ add_action('plugins_loaded', function() {
     new VGTS_Antibot($options);
     
 }, -9999);
+
+if (!function_exists('vgt_get_csp_nonce')) {
+    function vgt_get_csp_nonce(): string {
+        if (class_exists('VisionGaia\ThroneGuard\MasterUserControlPlugin')) {
+            return \VisionGaia\ThroneGuard\MasterUserControlPlugin::get_csp_nonce();
+        }
+        return '';
+    }
+}
+

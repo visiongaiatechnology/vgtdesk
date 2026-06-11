@@ -1693,3 +1693,217 @@ body.vgt-dragging, body.vgt-dragging * {
         display: none !important;
     }
 }
+
+/* Control Center Widget Toggles */
+.vgt-cc-widget-toggles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.vgt-cc-widget-toggle {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.vgt-cc-widget-toggle:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.vgt-cc-widget-toggle.active {
+    background: var(--vgt-accent-rgba15);
+    border-color: var(--vgt-accent-color);
+}
+
+.vgt-cc-wt-icon {
+    font-size: 14px;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.vgt-cc-widget-toggle.active .vgt-cc-wt-icon {
+    background: var(--vgt-accent-color);
+    color: #ffffff;
+}
+
+.vgt-cc-wt-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #cbd5e1;
+}
+
+/* ==========================================================================
+   FOLDER MODE, CONTEXT MENU, SUBMENU POPUP STYLES
+   ========================================================================== */
+.vgt-context-menu {
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 6px;
+    min-width: 160px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: none;
+    position: absolute !important;
+    z-index: 999999 !important;
+    pointer-events: auto !important;
+}
+.vgt-context-menu-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #cbd5e1;
+    border-radius: 8px;
+    transition: background-color 0.15s, color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.vgt-context-menu-item:hover {
+    background-color: var(--vgt-accent-rgba15);
+    color: #ffffff;
+}
+
+.vgt-submenu-popup {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    min-width: 180px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    animation: vgtPopupIn 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    position: absolute !important;
+    z-index: 999999 !important;
+    pointer-events: auto !important;
+}
+@keyframes vgtPopupIn {
+    0% { transform: scale(0.95); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.vgt-color-gradient-folder {
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.25), rgba(234, 179, 8, 0.45)) !important;
+    border: 1px solid rgba(234, 179, 8, 0.3) !important;
+}
+
+.desktop-folder {
+    cursor: pointer;
+}
+
+.folder-window-body {
+    background: rgba(10, 13, 22, 0.5);
+    border-radius: 12px;
+    height: calc(100% - 56px);
+    box-sizing: border-box;
+}
+
+.remove-from-folder-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Custom Modal Overlay & Box */
+.vgt-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000000 !important;
+    animation: vgtFadeIn 0.2s ease-out;
+}
+@keyframes vgtFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.vgt-modal-box {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: vgtScaleIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-sizing: border-box;
+}
+@keyframes vgtScaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.vgt-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+}
+
+.vgt-modal-message {
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.vgt-modal-input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 10px 12px !important;
+}
+
+.vgt-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.vgt-modal-btn {
+    padding: 8px 16px !important;
+    font-size: 12px !important;
+    border-radius: 8px !important;
+    cursor: pointer;
+}
+
+/* Aero Snap Preview Indicator */
+.vgt-snap-preview-indicator {
+    position: absolute;
+    background: var(--vgt-accent-rgba15);
+    border: 2px dashed var(--vgt-accent-color);
+    border-radius: 12px;
+    z-index: 99999 !important;
+    pointer-events: none;
+    opacity: 0;
+    box-sizing: border-box;
+    transition: opacity 0.15s ease, left 0.15s ease, top 0.15s ease, width 0.15s ease, height 0.15s ease;
+}
+.vgt-snap-preview-indicator.visible {
+    opacity: 1;
+}
+
+

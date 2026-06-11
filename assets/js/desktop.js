@@ -41,7 +41,12 @@ const VGTDeskEngine = {
             this.preventClick = false; // Reset-Schutz für nachfolgende Klick-Events
             return;
         }
-        this.openWindow(id);
+        const app = (typeof vgtConfig !== 'undefined' && vgtConfig.apps) ? vgtConfig.apps[id] : null;
+        if (app && app.submenus && app.submenus.length > 0) {
+            this.openSubmenuPopup(e, id);
+        } else {
+            this.openWindow(id);
+        }
     },
 
     /**
@@ -77,14 +82,27 @@ const VGTDeskEngine = {
     saveUserSetting(type, value) {
         if (typeof vgtConfig === 'undefined' || !vgtConfig.ajaxUrl) return;
 
-        // Speicher-Objekt aktualisieren
-        this.userSettings[type] = value;
+        // Speicher-Objekt als Boolean normalisieren falls anwendbar
+        let normalizedValue = value;
+        if (type === 'blur' || type === 'widgets_visible' || type === 'icons_visible' || type === 'audio_enabled') {
+            normalizedValue = (value === 'true' || value === true);
+        }
+        this.userSettings[type] = normalizedValue;
 
         const formData = new FormData();
         formData.append('action', 'vgt_save_user_settings');
         formData.append('nonce', vgtConfig.nonce);
         formData.append('setting_type', type);
-        formData.append('value', typeof value === 'object' ? JSON.stringify(value) : String(value));
+
+        let sendVal = value;
+        if (typeof value === 'boolean') {
+            sendVal = value ? 'true' : 'false';
+        } else if (typeof value === 'object') {
+            sendVal = JSON.stringify(value);
+        } else {
+            sendVal = String(value);
+        }
+        formData.append('value', sendVal);
 
         fetch(vgtConfig.ajaxUrl, {
             method: 'POST',
@@ -145,6 +163,7 @@ const VGTDeskEngine = {
         this.arrangeDesktopIcons();
         
         this.initIconDraggable();
+        this.initWorkspaceContextMenu();
         this.initDockMagnification();
         this.initWidgets();
         this.initWidgetDraggables();
@@ -162,13 +181,11 @@ const VGTDeskEngine = {
         document.addEventListener('click', playStartup);
         document.addEventListener('keydown', playStartup);
         
-        // Deep Links verarbeiten oder standardmäßig Willkommensfenster laden
+        // Deep Links verarbeiten. Welcome-Fenster nicht mehr standardmäßig öffnen, um Workspace clean zu halten.
         const urlParams = new URLSearchParams(window.location.search);
         const redirectTo = urlParams.get('vgt_redirect_to');
         if (redirectTo) {
             this.openDeepLink(redirectTo);
-        } else {
-            this.openWindow('welcome');
         }
 
         // Icons im Raster neu berechnen, wenn sich die Fenstergröße ändert
@@ -225,15 +242,46 @@ const VGTDeskEngine = {
         }
     },
 
+    _isTruthy(val) {
+        return val === true || val === 'true' || val === 1 || val === '1';
+    },
+
     /**
      * DESKTOP ICON LAYOUT-ARRANGER:
      * Sortiert Symbole spaltenweise in ein unsichtbares Raster wie bei Windows.
      * Nutzt die benutzerprofilspezifischen Icon-Positionen.
      */
     arrangeDesktopIcons() {
-        const icons = document.querySelectorAll('.desktop-icon');
+        // First make sure folders are rendered in DOM
+        this.renderFolders();
+
+        // Get all app IDs inside folders
+        const appsInFolders = new Set();
+        if (this.userSettings.folders) {
+            for (let folderId in this.userSettings.folders) {
+                const folderData = this.userSettings.folders[folderId];
+                if (folderData && folderData.apps) {
+                    folderData.apps.forEach(appId => appsInFolders.add(appId));
+                }
+            }
+        }
         
-        // Sicherung gegen Array-Verzerrung beim Laden
+        // Hide apps inside folders, show the rest
+        const appIcons = document.querySelectorAll('.desktop-icon:not(.desktop-folder)');
+        appIcons.forEach(icon => {
+            const appId = icon.dataset.id;
+            if (appsInFolders.has(appId)) {
+                icon.style.display = 'none';
+                icon.classList.add('in-folder');
+            } else {
+                icon.style.display = '';
+                icon.classList.remove('in-folder');
+            }
+        });
+
+        // Select all visible icons (visible app icons + folder icons)
+        const visibleIcons = document.querySelectorAll('.desktop-icon:not(.in-folder)');
+        
         if (!this.userSettings.icon_positions || Array.isArray(this.userSettings.icon_positions)) {
             this.userSettings.icon_positions = {};
         }
@@ -248,7 +296,7 @@ const VGTDeskEngine = {
         let currentRow = 0;
         let currentCol = 0;
         
-        icons.forEach(icon => {
+        visibleIcons.forEach(icon => {
             const id = icon.dataset.id;
             
             if (savedPositions[id]) {
@@ -274,216 +322,295 @@ const VGTDeskEngine = {
      */
     initIconDraggable() {
         const icons = document.querySelectorAll('.desktop-icon');
+        icons.forEach(icon => this.makeIconDraggable(icon));
+    },
+
+    makeIconDraggable(icon) {
         const workspace = document.getElementById('desktop-workspace');
         if (!workspace) return;
 
-        icons.forEach(icon => {
-            let isDragging = false;
-            let offsetX = 0, offsetY = 0;
+        let isDragging = false;
+        let offsetX = 0, offsetY = 0;
 
-            const onMouseDown = (e) => {
-                if (e.button !== 0) return;
+        const onMouseDown = (e) => {
+            if (e.button !== 0) return;
 
-                isDragging = true;
-                this.preventClick = false;
-                let hasMoved = false;
+            isDragging = true;
+            this.preventClick = false;
+            let hasMoved = false;
+            
+            const rect = icon.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            
+            let startX = e.clientX;
+            let startY = e.clientY;
+
+            const onMouseMove = (ev) => {
+                if (!isDragging) return;
                 
-                const rect = icon.getBoundingClientRect();
-                offsetX = e.clientX - rect.left;
-                offsetY = e.clientY - rect.top;
+                const dx = ev.clientX - startX;
+                const dy = ev.clientY - startY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (!hasMoved) {
+                    if (distance > 8) {
+                        hasMoved = true;
+                        this.preventClick = true; 
+                        icon.style.zIndex = 999;
+                        icon.style.transition = 'none';
+                        document.body.classList.add('vgt-dragging');
+                        icon.classList.add('dragging');
+                    } else {
+                        return; 
+                    }
+                }
                 
-                let startX = e.clientX;
-                let startY = e.clientY;
-
-                const onMouseMove = (ev) => {
-                    if (!isDragging) return;
-                    
-                    const dx = ev.clientX - startX;
-                    const dy = ev.clientY - startY;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-
-                    if (!hasMoved) {
-                        if (distance > 8) {
-                            hasMoved = true;
-                            this.preventClick = true; 
-                            icon.style.zIndex = 999;
-                            icon.style.transition = 'none';
-                            document.body.classList.add('vgt-dragging');
-                            icon.classList.add('dragging');
-                        } else {
-                            return; 
-                        }
-                    }
-                    
-                    const wsRect = workspace.getBoundingClientRect();
-                    let left = ev.clientX - wsRect.left - offsetX;
-                    let top = ev.clientY - wsRect.top - offsetY;
-                    
-                    if (left < 10) left = 10;
-                    if (top < 10) top = 10;
-                    if (left > wsRect.width - rect.width - 10) left = wsRect.width - rect.width - 10;
-                    if (top > wsRect.height - rect.height - 10) top = wsRect.height - rect.height - 10;
-                    
-                    icon.style.left = `${left}px`;
-                    icon.style.top = `${top}px`;
-                };
-
-                const onMouseUp = () => {
-                    isDragging = false;
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', onMouseUp);
-                    
-                    if (!hasMoved) {
-                        return;
-                    }
-
-                    document.body.classList.remove('vgt-dragging');
-                    icon.classList.remove('dragging');
-                    icon.style.zIndex = '';
-                    
-                    const currentLeft = parseFloat(icon.style.left);
-                    const currentTop = parseFloat(icon.style.top);
-                    
-                    let targetCol = Math.round((currentLeft - this.gridX) / this.cellWidth);
-                    let targetRow = Math.round((currentTop - this.gridY) / this.cellHeight);
-                    
-                    const maxCols = Math.floor((workspace.clientWidth - this.gridX) / this.cellWidth) || 1;
-                    const maxRows = Math.floor((workspace.clientHeight - this.gridY) / this.cellHeight) || 1;
-                    
-                    targetCol = Math.max(0, Math.min(targetCol, maxCols - 1));
-                    targetRow = Math.max(0, Math.min(targetRow, maxRows - 1));
-                    
-                    const finalCell = this.findNearestFreeCell(targetCol, targetRow, icon.dataset.id, maxCols, maxRows);
-                    
-                    const snappedLeft = this.gridX + finalCell.col * this.cellWidth;
-                    const snappedTop = this.gridY + finalCell.row * this.cellHeight;
-                    
-                    icon.style.transition = 'left 0.2s cubic-bezier(0.25, 1, 0.5, 1), top 0.2s cubic-bezier(0.25, 1, 0.5, 1)';
-                    icon.style.left = `${snappedLeft}px`;
-                    icon.style.top = `${snappedTop}px`;
-                    
-                    // Sicherung gegen Array-Verzerrung beim Schreiben
-                    if (!this.userSettings.icon_positions || Array.isArray(this.userSettings.icon_positions)) {
-                        this.userSettings.icon_positions = {};
-                    }
-                    
-                    this.userSettings.icon_positions[icon.dataset.id] = {
-                        left: `${snappedLeft}px`,
-                        top: `${snappedTop}px`
-                    };
-                    
-                    this.saveUserSetting('icon_positions', this.userSettings.icon_positions);
-                    
-                    setTimeout(() => {
-                        icon.style.transition = 'transform 0.15s ease, background-color 0.15s ease';
-                    }, 200);
-                };
-
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
+                const wsRect = workspace.getBoundingClientRect();
+                let left = ev.clientX - wsRect.left - offsetX;
+                let top = ev.clientY - wsRect.top - offsetY;
+                
+                if (left < 10) left = 10;
+                if (top < 10) top = 10;
+                if (left > wsRect.width - rect.width - 10) left = wsRect.width - rect.width - 10;
+                if (top > wsRect.height - rect.height - 10) top = wsRect.height - rect.height - 10;
+                
+                icon.style.left = `${left}px`;
+                icon.style.top = `${top}px`;
             };
 
-            icon.addEventListener('mousedown', onMouseDown);
-
-            // Touch Support
-            icon.addEventListener('touchstart', (e) => {
-                isDragging = true;
-                this.preventClick = false;
-                let hasMoved = false;
-                const touch = e.touches[0];
-                const rect = icon.getBoundingClientRect();
-                offsetX = touch.clientX - rect.left;
-                offsetY = touch.clientY - rect.top;
+            const onMouseUp = () => {
+                isDragging = false;
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
                 
-                let startX = touch.clientX;
-                let startY = touch.clientY;
+                if (!hasMoved) {
+                    return;
+                }
 
-                const onTouchMove = (ev) => {
-                    if (!isDragging) return;
-                    const t = ev.touches[0];
+                document.body.classList.remove('vgt-dragging');
+                icon.classList.remove('dragging');
+                icon.style.zIndex = '';
+                
+                const currentLeft = parseFloat(icon.style.left);
+                const currentTop = parseFloat(icon.style.top);
+                
+                let targetCol = Math.round((currentLeft - this.gridX) / this.cellWidth);
+                let targetRow = Math.round((currentTop - this.gridY) / this.cellHeight);
+                
+                const maxCols = Math.floor((workspace.clientWidth - this.gridX) / this.cellWidth) || 1;
+                const maxRows = Math.floor((workspace.clientHeight - this.gridY) / this.cellHeight) || 1;
+                
+                targetCol = Math.max(0, Math.min(targetCol, maxCols - 1));
+                targetRow = Math.max(0, Math.min(targetRow, maxRows - 1));
+                
+                const finalCell = this.findNearestFreeCell(targetCol, targetRow, icon.dataset.id, maxCols, maxRows);
+                
+                const snappedLeft = this.gridX + finalCell.col * this.cellWidth;
+                const snappedTop = this.gridY + finalCell.row * this.cellHeight;
+                
+                icon.style.transition = 'left 0.2s cubic-bezier(0.25, 1, 0.5, 1), top 0.2s cubic-bezier(0.25, 1, 0.5, 1)';
+                icon.style.left = `${snappedLeft}px`;
+                icon.style.top = `${snappedTop}px`;
+
+                // Overlap check
+                if (!icon.classList.contains('desktop-folder')) {
+                    const iconRect = icon.getBoundingClientRect();
+                    const folders = document.querySelectorAll('.desktop-folder');
+                    let overlappedFolder = null;
                     
-                    const dx = t.clientX - startX;
-                    const dy = t.clientY - startY;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (!hasMoved) {
-                        if (distance > 8) {
-                            hasMoved = true;
-                            this.preventClick = true;
-                            icon.style.zIndex = 999;
-                            icon.style.transition = 'none';
-                            document.body.classList.add('vgt-dragging');
-                            icon.classList.add('dragging');
-                        } else {
-                            return;
+                    folders.forEach(folder => {
+                        const folderRect = folder.getBoundingClientRect();
+                        const overlap = !(iconRect.right < folderRect.left || 
+                                          iconRect.left > folderRect.right || 
+                                          iconRect.bottom < folderRect.top || 
+                                          iconRect.top > folderRect.bottom);
+                        if (overlap) {
+                            overlappedFolder = folder;
                         }
-                    }
-                    
-                    const wsRect = workspace.getBoundingClientRect();
-                    let left = t.clientX - wsRect.left - offsetX;
-                    let top = t.clientY - wsRect.top - offsetY;
+                    });
 
-                    if (left < 10) left = 10;
-                    if (top < 10) top = 10;
-                    if (left > wsRect.width - rect.width - 10) left = wsRect.width - rect.width - 10;
-                    if (top > wsRect.height - rect.height - 10) top = wsRect.height - rect.height - 10;
-
-                    icon.style.left = `${left}px`;
-                    icon.style.top = `${top}px`;
-                };
-
-                const onTouchEnd = () => {
-                    isDragging = false;
-                    document.removeEventListener('touchmove', onTouchMove);
-                    document.removeEventListener('touchend', onTouchEnd);
-
-                    if (!hasMoved) {
+                    if (overlappedFolder) {
+                        const folderId = overlappedFolder.dataset.id;
+                        const appId = icon.dataset.id;
+                        
+                        if (!this.userSettings.folders[folderId].apps) {
+                            this.userSettings.folders[folderId].apps = [];
+                        }
+                        if (!this.userSettings.folders[folderId].apps.includes(appId)) {
+                            this.userSettings.folders[folderId].apps.push(appId);
+                        }
+                        delete this.userSettings.icon_positions[appId];
+                        
+                        this.saveUserSetting('folders', this.userSettings.folders);
+                        this.saveUserSetting('icon_positions', this.userSettings.icon_positions);
+                        
+                        this.playSound('click');
+                        this.addLog(`App '${appId}' in Ordner '${this.userSettings.folders[folderId].title}' verschoben.`);
+                        this.arrangeDesktopIcons();
                         return;
                     }
-
-                    document.body.classList.remove('vgt-dragging');
-                    icon.classList.remove('dragging');
-                    icon.style.zIndex = '';
-
-                    const currentLeft = parseFloat(icon.style.left);
-                    const currentTop = parseFloat(icon.style.top);
-                    
-                    let targetCol = Math.round((currentLeft - this.gridX) / this.cellWidth);
-                    let targetRow = Math.round((currentTop - this.gridY) / this.cellHeight);
-                    
-                    const maxCols = Math.floor((workspace.clientWidth - this.gridX) / this.cellWidth) || 1;
-                    const maxRows = Math.floor((workspace.clientHeight - this.gridY) / this.cellHeight) || 1;
-                    
-                    targetCol = Math.max(0, Math.min(targetCol, maxCols - 1));
-                    targetRow = Math.max(0, Math.min(targetRow, maxRows - 1));
-                    
-                    const finalCell = this.findNearestFreeCell(targetCol, targetRow, icon.dataset.id, maxCols, maxRows);
-                    
-                    const snappedLeft = this.gridX + finalCell.col * this.cellWidth;
-                    const snappedTop = this.gridY + finalCell.row * this.cellHeight;
-                    
-                    icon.style.transition = 'left 0.2s cubic-bezier(0.25, 1, 0.5, 1), top 0.2s cubic-bezier(0.25, 1, 0.5, 1)';
-                    icon.style.left = `${snappedLeft}px`;
-                    icon.style.top = `${snappedTop}px`;
-
-                    if (!this.userSettings.icon_positions || Array.isArray(this.userSettings.icon_positions)) {
-                        this.userSettings.icon_positions = {};
-                    }
-
-                    this.userSettings.icon_positions[icon.dataset.id] = {
-                        left: `${snappedLeft}px`,
-                        top: `${snappedTop}px`
-                    };
-                    this.saveUserSetting('icon_positions', this.userSettings.icon_positions);
-                    
-                    setTimeout(() => {
-                        icon.style.transition = 'transform 0.15s ease, background-color 0.15s ease';
-                    }, 200);
+                }
+                
+                if (!this.userSettings.icon_positions || Array.isArray(this.userSettings.icon_positions)) {
+                    this.userSettings.icon_positions = {};
+                }
+                
+                this.userSettings.icon_positions[icon.dataset.id] = {
+                    left: `${snappedLeft}px`,
+                    top: `${snappedTop}px`
                 };
+                
+                this.saveUserSetting('icon_positions', this.userSettings.icon_positions);
+                
+                setTimeout(() => {
+                    icon.style.transition = 'transform 0.15s ease, background-color 0.15s ease';
+                }, 200);
+            };
 
-                document.addEventListener('touchmove', onTouchMove, { passive: false });
-                document.addEventListener('touchend', onTouchEnd);
-            });
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        };
+
+        icon.addEventListener('mousedown', onMouseDown);
+
+        // Touch Support
+        icon.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            this.preventClick = false;
+            let hasMoved = false;
+            const touch = e.touches[0];
+            const rect = icon.getBoundingClientRect();
+            offsetX = touch.clientX - rect.left;
+            offsetY = touch.clientY - rect.top;
+            
+            let startX = touch.clientX;
+            let startY = touch.clientY;
+
+            const onTouchMove = (ev) => {
+                if (!isDragging) return;
+                const t = ev.touches[0];
+                
+                const dx = t.clientX - startX;
+                const dy = t.clientY - startY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (!hasMoved) {
+                    if (distance > 8) {
+                        hasMoved = true;
+                        this.preventClick = true;
+                        icon.style.zIndex = 999;
+                        icon.style.transition = 'none';
+                        document.body.classList.add('vgt-dragging');
+                        icon.classList.add('dragging');
+                    } else {
+                        return;
+                    }
+                }
+                
+                const wsRect = workspace.getBoundingClientRect();
+                let left = t.clientX - wsRect.left - offsetX;
+                let top = t.clientY - wsRect.top - offsetY;
+
+                if (left < 10) left = 10;
+                if (top < 10) top = 10;
+                if (left > wsRect.width - rect.width - 10) left = wsRect.width - rect.width - 10;
+                if (top > wsRect.height - rect.height - 10) top = wsRect.height - rect.height - 10;
+
+                icon.style.left = `${left}px`;
+                icon.style.top = `${top}px`;
+            };
+
+            const onTouchEnd = () => {
+                isDragging = false;
+                document.removeEventListener('touchmove', onTouchMove);
+                document.removeEventListener('touchend', onTouchEnd);
+
+                if (!hasMoved) {
+                    return;
+                }
+
+                document.body.classList.remove('vgt-dragging');
+                icon.classList.remove('dragging');
+                icon.style.zIndex = '';
+
+                const currentLeft = parseFloat(icon.style.left);
+                const currentTop = parseFloat(icon.style.top);
+                
+                let targetCol = Math.round((currentLeft - this.gridX) / this.cellWidth);
+                let targetRow = Math.round((currentTop - this.gridY) / this.cellHeight);
+                
+                const maxCols = Math.floor((workspace.clientWidth - this.gridX) / this.cellWidth) || 1;
+                const maxRows = Math.floor((workspace.clientHeight - this.gridY) / this.cellHeight) || 1;
+                
+                targetCol = Math.max(0, Math.min(targetCol, maxCols - 1));
+                targetRow = Math.max(0, Math.min(targetRow, maxRows - 1));
+                
+                const finalCell = this.findNearestFreeCell(targetCol, targetRow, icon.dataset.id, maxCols, maxRows);
+                
+                const snappedLeft = this.gridX + finalCell.col * this.cellWidth;
+                const snappedTop = this.gridY + finalCell.row * this.cellHeight;
+                
+                icon.style.transition = 'left 0.2s cubic-bezier(0.25, 1, 0.5, 1), top 0.2s cubic-bezier(0.25, 1, 0.5, 1)';
+                icon.style.left = `${snappedLeft}px`;
+                icon.style.top = `${snappedTop}px`;
+
+                // Overlap check
+                if (!icon.classList.contains('desktop-folder')) {
+                    const iconRect = icon.getBoundingClientRect();
+                    const folders = document.querySelectorAll('.desktop-folder');
+                    let overlappedFolder = null;
+                    
+                    folders.forEach(folder => {
+                        const folderRect = folder.getBoundingClientRect();
+                        const overlap = !(iconRect.right < folderRect.left || 
+                                          iconRect.left > folderRect.right || 
+                                          iconRect.bottom < folderRect.top || 
+                                          iconRect.top > folderRect.bottom);
+                        if (overlap) {
+                            overlappedFolder = folder;
+                        }
+                    });
+
+                    if (overlappedFolder) {
+                        const folderId = overlappedFolder.dataset.id;
+                        const appId = icon.dataset.id;
+                        
+                        if (!this.userSettings.folders[folderId].apps) {
+                            this.userSettings.folders[folderId].apps = [];
+                        }
+                        if (!this.userSettings.folders[folderId].apps.includes(appId)) {
+                            this.userSettings.folders[folderId].apps.push(appId);
+                        }
+                        delete this.userSettings.icon_positions[appId];
+                        
+                        this.saveUserSetting('folders', this.userSettings.folders);
+                        this.saveUserSetting('icon_positions', this.userSettings.icon_positions);
+                        
+                        this.playSound('click');
+                        this.addLog(`App '${appId}' in Ordner '${this.userSettings.folders[folderId].title}' verschoben.`);
+                        this.arrangeDesktopIcons();
+                        return;
+                    }
+                }
+
+                if (!this.userSettings.icon_positions || Array.isArray(this.userSettings.icon_positions)) {
+                    this.userSettings.icon_positions = {};
+                }
+
+                this.userSettings.icon_positions[icon.dataset.id] = {
+                    left: `${snappedLeft}px`,
+                    top: `${snappedTop}px`
+                };
+                this.saveUserSetting('icon_positions', this.userSettings.icon_positions);
+                
+                setTimeout(() => {
+                    icon.style.transition = 'transform 0.15s ease, background-color 0.15s ease';
+                }, 200);
+            };
+
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
         });
     },
 
@@ -729,62 +856,133 @@ const VGTDeskEngine = {
         let isDragging = false;
         let offsetX = 0;
         let offsetY = 0;
+        let startX = 0, startY = 0;
+        let currentSnapZone = null;
         const overlay = win.querySelector('.drag-overlay');
+        const winId = win.id.replace('win-', '');
 
         const onMouseMove = (e) => {
             if (!isDragging) return;
 
-            // Check snap classes and unsnap if dragging
-            const snapClasses = ['vgt-window-snap-left', 'vgt-window-snap-right', 'vgt-window-snap-topleft', 'vgt-window-snap-bottomleft'];
-            const hasSnap = snapClasses.some(cls => win.classList.contains(cls));
-            if (hasSnap) {
-                win.classList.remove(...snapClasses);
-                // Restore previous dimensions
-                win.style.width = win.dataset.prevWidth || "850px";
-                win.style.height = win.dataset.prevHeight || "550px";
-                
-                // Adjust offsets so mouse points to the title bar center
-                offsetX = parseFloat(win.style.width) / 2;
-                offsetY = 15;
+            // Start dragging only after exceeding movement threshold (4px)
+            if (!win.classList.contains('dragging')) {
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                if (Math.sqrt(dx * dx + dy * dy) > 4) {
+                    win.classList.add('dragging');
+                    if (overlay) overlay.classList.remove('hidden');
+                    
+                    const globalOverlay = document.getElementById('vgt-global-drag-overlay');
+                    if (globalOverlay) globalOverlay.style.display = 'block';
+                    
+                    // Un-maximize if dragging a maximized window (width = 100%)
+                    if (win.style.width === "100%") {
+                        win.style.width = win.dataset.prevWidth || "850px";
+                        win.style.height = win.dataset.prevHeight || "550px";
+                        offsetX = parseFloat(win.style.width) / 2;
+                        offsetY = 15;
+                    }
+
+                    // Check snap classes and unsnap if dragging
+                    const snapClasses = ['vgt-window-snap-left', 'vgt-window-snap-right', 'vgt-window-snap-topleft', 'vgt-window-snap-bottomleft'];
+                    const hasSnap = snapClasses.some(cls => win.classList.contains(cls));
+                    if (hasSnap) {
+                        win.classList.remove(...snapClasses);
+                        win.style.width = win.dataset.prevWidth || "850px";
+                        win.style.height = win.dataset.prevHeight || "550px";
+                        offsetX = parseFloat(win.style.width) / 2;
+                        offsetY = 15;
+                    }
+                } else {
+                    return; // Threshold not exceeded
+                }
             }
 
             let top = e.clientY - offsetY;
             let left = e.clientX - offsetX;
             
-            // Ermöglicht das Gleiten unter die Topbar bis zu -70px
-            if (top < -70) top = -70; 
+            // Verhindert das Rutschen unter die Topbar (Capped bei 0)
+            if (top < 0) top = 0; 
             
             win.style.left = `${left}px`;
             win.style.top = `${top}px`;
+
+            // Aero Snap Preview Detection
+            let preview = document.getElementById('vgt-snap-preview-indicator');
+            if (!preview) {
+                preview = document.createElement('div');
+                preview.id = 'vgt-snap-preview-indicator';
+                preview.className = 'vgt-snap-preview-indicator';
+                (document.getElementById('vgt-shell-root') || document.body).appendChild(preview);
+            }
+
+            if (e.clientY < 60) {
+                // Top Snap (Maximize Preview)
+                currentSnapZone = 'top';
+                preview.style.left = '0';
+                preview.style.top = '44px';
+                preview.style.width = '100%';
+                preview.style.height = 'calc(100% - 60px)';
+                preview.classList.add('visible');
+            } else if (e.clientX < 40) {
+                // Left Snap (Half Screen Preview)
+                currentSnapZone = 'left';
+                preview.style.left = '0';
+                preview.style.top = '44px';
+                preview.style.width = '50%';
+                preview.style.height = 'calc(100% - 60px)';
+                preview.classList.add('visible');
+            } else if (e.clientX > window.innerWidth - 40) {
+                // Right Snap (Half Screen Preview)
+                currentSnapZone = 'right';
+                preview.style.left = '50%';
+                preview.style.top = '44px';
+                preview.style.width = '50%';
+                preview.style.height = 'calc(100% - 60px)';
+                preview.classList.add('visible');
+            } else {
+                currentSnapZone = null;
+                preview.classList.remove('visible');
+            }
         };
 
         const onMouseUp = () => {
-            if (!isDragging) return;
             isDragging = false;
             
-            // Event-Listener sauber de-registrieren
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
             
             if (overlay) overlay.classList.add('hidden');
             
-            // Hide global Drag/Resize Protection Overlay
             const globalOverlay = document.getElementById('vgt-global-drag-overlay');
             if (globalOverlay) globalOverlay.style.display = 'none';
-            win.classList.remove('dragging');
+            
+            // Hide Snap Preview
+            const preview = document.getElementById('vgt-snap-preview-indicator');
+            if (preview) preview.classList.remove('visible');
 
-            // Koordinaten im Datenbankprofil sichern
-            const winId = win.id.replace('win-', '');
-            this.saveWindowPosition(winId, win.style.left, win.style.top, win.style.width, win.style.height);
+            if (win.classList.contains('dragging')) {
+                win.classList.remove('dragging');
+                
+                // Execute Snap Drop Action
+                if (currentSnapZone === 'top') {
+                    if (win.style.width !== "100%") {
+                        this.maximizeWindow(winId);
+                    }
+                } else if (currentSnapZone === 'left' || currentSnapZone === 'right') {
+                    this.activeSnapWindowId = winId;
+                    this.snapActiveWindow(currentSnapZone);
+                } else {
+                    this.saveWindowPosition(winId, win.style.left, win.style.top, win.style.width, win.style.height);
+                }
+            }
+            
+            currentSnapZone = null;
         };
 
         header.addEventListener('mousedown', (e) => {
-            // Drag-Schnittstelle auf mobilen Viewports bypassen
-            if (window.innerWidth <= 768) {
-                return;
-            }
+            if (window.innerWidth <= 768) return;
 
-            // Dragging bei Klicks auf Funktionselemente unterbinden
             if (
                 e.target.tagName === 'BUTTON' || 
                 e.target.classList.contains('cursor-pointer') || 
@@ -797,20 +995,19 @@ const VGTDeskEngine = {
             }
             
             isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
             offsetX = e.clientX - win.offsetLeft;
             offsetY = e.clientY - win.offsetTop;
-            this.focusWindow(win.id.replace('win-', ''));
-
-            if (overlay) overlay.classList.remove('hidden');
+            this.focusWindow(winId);
             
-            // Show global Drag/Resize Protection Overlay
-            const globalOverlay = document.getElementById('vgt-global-drag-overlay');
-            if (globalOverlay) globalOverlay.style.display = 'block';
-            win.classList.add('dragging');
-            
-            // Globale Maus-Überwachung sicher aktivieren
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
+        });
+
+        // Double click to maximize/restore (Aero fullscreen-like toggling within workspace OS)
+        header.addEventListener('dblclick', () => {
+            this.maximizeWindow(winId);
         });
     },
 
@@ -1213,7 +1410,8 @@ const VGTDeskEngine = {
             widget_positions: {},
             widgets_visible: true,
             icons_visible: true,
-            audio_enabled: true
+            audio_enabled: true,
+            folders: {}
         };
 
         // RIGOROSE SCHLÜSSEL-KORREKTUR: Verhindert die zerstörerische Array-Konvertierung von leeren PHP-Objekten
@@ -1226,6 +1424,15 @@ const VGTDeskEngine = {
         if (!this.userSettings.widget_positions || Array.isArray(this.userSettings.widget_positions)) {
             this.userSettings.widget_positions = {};
         }
+        if (!this.userSettings.folders || Array.isArray(this.userSettings.folders)) {
+            this.userSettings.folders = {};
+        }
+
+        // Strikte Normalisierung auf echte Boolean-Werte
+        this.userSettings.blur = this._isTruthy(this.userSettings.blur);
+        this.userSettings.widgets_visible = this._isTruthy(this.userSettings.widgets_visible);
+        this.userSettings.icons_visible = this._isTruthy(this.userSettings.icons_visible);
+        this.userSettings.audio_enabled = this._isTruthy(this.userSettings.audio_enabled);
 
         const savedWall = this.userSettings.wallpaper || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop';
         this.changeWallpaper(savedWall, false);
@@ -1233,10 +1440,9 @@ const VGTDeskEngine = {
         const savedAccent = this.userSettings.accent_color || 'indigo';
         this.changeAccentColor(savedAccent, false);
 
-        const blurState = this.userSettings.blur !== false;
         const checkbox = document.getElementById('blur-toggle');
-        if (checkbox) checkbox.checked = blurState;
-        this.applyBlur(blurState, false);
+        if (checkbox) checkbox.checked = this.userSettings.blur;
+        this.applyBlur(this.userSettings.blur, false);
 
         this.applyWidgetsVisibility();
         this.applyIconsVisibility();
@@ -1246,7 +1452,8 @@ const VGTDeskEngine = {
     toggleBlur() {
         const checkbox = document.getElementById('blur-toggle');
         const state = checkbox ? checkbox.checked : true;
-        this.saveUserSetting('blur', state ? 'true' : 'false');
+        this.userSettings.blur = state;
+        this.saveUserSetting('blur', state);
         this.applyBlur(state);
         this.updateControlCenterToggles();
     },
@@ -1378,6 +1585,10 @@ const VGTDeskEngine = {
         } else if (dir.includes('n')) {
             newHeight = this.startHeight - dy;
             newTop = this.startTop + dy;
+            if (newTop < 0) {
+                newHeight = this.startHeight + this.startTop;
+                newTop = 0;
+            }
         }
 
         if (newWidth > 380) {
@@ -1486,7 +1697,12 @@ const VGTDeskEngine = {
     },
 
     handleStartItemClick(key) {
-        this.openWindow(key);
+        const app = (typeof vgtConfig !== 'undefined' && vgtConfig.apps) ? vgtConfig.apps[key] : null;
+        if (app && app.submenus && app.submenus.length > 0) {
+            this.openSubmenuPopup(null, key);
+        } else {
+            this.openWindow(key);
+        }
         const menu = document.getElementById('vgt-start-menu');
         if (menu) menu.classList.add('hidden');
     },
@@ -1946,24 +2162,30 @@ const VGTDeskEngine = {
     },
     
     resetAllSettings() {
-        if (confirm("Möchten Sie wirklich alle Einstellungen auf Werkseinstellungen zurücksetzen?")) {
-            localStorage.removeItem('vgt_widget_notes');
-            
-            this.saveUserSetting('wallpaper', '');
-            this.saveUserSetting('accent_color', 'indigo');
-            this.saveUserSetting('blur', 'true');
-            this.saveUserSetting('icon_positions', {});
-            this.saveUserSetting('window_settings', {});
-            this.saveUserSetting('widgets_visible', 'true');
-            this.saveUserSetting('icons_visible', 'true');
-            this.saveUserSetting('audio_enabled', 'true');
-            this.saveUserSetting('widget_positions', {});
-            
-            this.addLog("System zurückgesetzt. Lade neu...");
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        }
+        this.showModal({
+            title: 'System zurücksetzen',
+            message: 'Möchten Sie wirklich alle Einstellungen auf Werkseinstellungen zurücksetzen?',
+            confirmText: 'Zurücksetzen',
+            confirmClass: 'vgt-btn-danger',
+            onConfirm: () => {
+                localStorage.removeItem('vgt_widget_notes');
+                
+                this.saveUserSetting('wallpaper', '');
+                this.saveUserSetting('accent_color', 'indigo');
+                this.saveUserSetting('blur', 'true');
+                this.saveUserSetting('icon_positions', {});
+                this.saveUserSetting('window_settings', {});
+                this.saveUserSetting('widgets_visible', 'true');
+                this.saveUserSetting('icons_visible', 'true');
+                this.saveUserSetting('audio_enabled', 'true');
+                this.saveUserSetting('widget_positions', {});
+                
+                this.addLog("System zurückgesetzt. Lade neu...");
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            }
+        });
     },
 
     /* ==========================================================================
@@ -2080,59 +2302,85 @@ const VGTDeskEngine = {
             this.stopLatencyGraph();
         }
     },
-    
+
     toggleCCToggle(key) {
         this.playSound('click');
         if (key === 'sound') {
-            const state = this.userSettings.audio_enabled !== false;
-            this.saveUserSetting('audio_enabled', state ? 'false' : 'true');
+            this.userSettings.audio_enabled = !this.userSettings.audio_enabled;
+            this.saveUserSetting('audio_enabled', this.userSettings.audio_enabled);
         } else if (key === 'widgets') {
-            const state = this.userSettings.widgets_visible !== false;
-            this.saveUserSetting('widgets_visible', state ? 'false' : 'true');
+            this.userSettings.widgets_visible = !this.userSettings.widgets_visible;
+            this.saveUserSetting('widgets_visible', this.userSettings.widgets_visible);
             this.applyWidgetsVisibility();
         } else if (key === 'icons') {
-            const state = this.userSettings.icons_visible !== false;
-            this.saveUserSetting('icons_visible', state ? 'false' : 'true');
+            this.userSettings.icons_visible = !this.userSettings.icons_visible;
+            this.saveUserSetting('icons_visible', this.userSettings.icons_visible);
             this.applyIconsVisibility();
         } else if (key === 'blur') {
-            const state = this.userSettings.blur !== false;
-            this.saveUserSetting('blur', state ? 'false' : 'true');
-            this.applyBlur(!state);
+            this.userSettings.blur = !this.userSettings.blur;
+            this.saveUserSetting('blur', this.userSettings.blur);
+            this.applyBlur(this.userSettings.blur);
         }
         this.updateControlCenterToggles();
     },
     
     updateControlCenterToggles() {
-        const soundActive = this.userSettings.audio_enabled !== false;
-        const widgetsActive = this.userSettings.widgets_visible !== false;
-        const iconsActive = this.userSettings.icons_visible !== false;
-        const blurActive = this.userSettings.blur !== false;
+        const soundActive = this.userSettings.audio_enabled === true;
+        const widgetsActive = this.userSettings.widgets_visible === true;
+        const iconsActive = this.userSettings.icons_visible === true;
+        const blurActive = this.userSettings.blur === true;
         
-        const toggleSound = document.getElementById('cc-toggle-sound')?.parentElement;
-        const toggleWidgets = document.getElementById('cc-toggle-widgets')?.parentElement;
-        const toggleIcons = document.getElementById('cc-toggle-icons')?.parentElement;
-        const toggleBlur = document.getElementById('cc-toggle-blur')?.parentElement;
+        const toggleSound = document.getElementById('cc-toggle-sound');
+        const toggleWidgets = document.getElementById('cc-toggle-widgets');
+        const toggleIcons = document.getElementById('cc-toggle-icons');
+        const toggleBlur = document.getElementById('cc-toggle-blur');
         
-        if (toggleSound) toggleSound.classList.toggle('active', soundActive);
-        if (toggleWidgets) toggleWidgets.classList.toggle('active', widgetsActive);
-        if (toggleIcons) toggleIcons.classList.toggle('active', iconsActive);
-        if (toggleBlur) toggleBlur.classList.toggle('active', blurActive);
+        if (toggleSound) {
+            toggleSound.parentElement.classList.toggle('active', soundActive);
+            toggleSound.textContent = soundActive ? '🔊' : '🔇';
+        }
+        if (toggleWidgets) toggleWidgets.parentElement.classList.toggle('active', widgetsActive);
+        if (toggleIcons) toggleIcons.parentElement.classList.toggle('active', iconsActive);
+        if (toggleBlur) toggleBlur.parentElement.classList.toggle('active', blurActive);
+
+        this.updateCCWidgetToggles();
     },
     
     applyWidgetsVisibility() {
         const container = document.getElementById('vgt-widgets-container');
         if (container) {
-            const visible = this.userSettings.widgets_visible !== false;
-            container.style.display = visible ? '' : 'none';
+            container.style.display = (this.userSettings.widgets_visible === true) ? '' : 'none';
         }
     },
     
     applyIconsVisibility() {
         const container = document.getElementById('desktop-icons-area');
         if (container) {
-            const visible = this.userSettings.icons_visible !== false;
-            container.style.display = visible ? '' : 'none';
+            container.style.display = (this.userSettings.icons_visible === true) ? '' : 'none';
         }
+    },
+
+    /**
+     * CONTROL CENTER: Aktualisiert die Widget-Visibility-Mini-Toggles.
+     */
+    updateCCWidgetToggles() {
+        const widgetIds = ['clock', 'system', 'notes', 'sentinel'];
+        widgetIds.forEach(id => {
+            const toggle = document.getElementById(`cc-widget-toggle-${id}`);
+            if (!toggle) return;
+            const widget = document.getElementById(`widget-${id}`);
+            const isVisible = widget ? widget.style.display !== 'none' : true;
+            toggle.classList.toggle('active', isVisible);
+        });
+    },
+
+    /**
+     * CONTROL CENTER: Toggled ein einzelnes Widget aus dem CC heraus.
+     */
+    toggleCCWidget(id) {
+        this.playSound('click');
+        this.toggleWidgetVisibility(id);
+        this.updateCCWidgetToggles();
     },
     
     toggleWidgetVisibility(id) {
@@ -2261,7 +2509,7 @@ const VGTDeskEngine = {
     },
     
     playSound(type) {
-        if (this.userSettings.audio_enabled === false) return;
+        if (!this._isTruthy(this.userSettings.audio_enabled)) return;
         this.initAudio();
         if (!this.audioCtx) return;
         
@@ -2361,6 +2609,640 @@ const VGTDeskEngine = {
                 }
             }
         });
+    },
+
+    initWorkspaceContextMenu() {
+        const workspace = document.getElementById('desktop-workspace');
+        if (!workspace) return;
+
+        workspace.addEventListener('contextmenu', (e) => {
+            const isIcon = e.target.closest('.desktop-icon') || e.target.closest('.vgt-widget') || e.target.closest('.window');
+            if (isIcon) return; // let default or other handlers run
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            let menu = document.getElementById('vgt-workspace-context-menu');
+            if (!menu) {
+                menu = document.createElement('div');
+                menu.id = 'vgt-workspace-context-menu';
+                menu.className = 'vgt-context-menu glassmorphism absolute';
+                
+                const optNewFolder = document.createElement('div');
+                optNewFolder.className = 'vgt-context-menu-item';
+                optNewFolder.textContent = '📁 Neuer Ordner';
+                optNewFolder.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    this.createNewFolder();
+                    menu.style.display = 'none';
+                });
+                
+                const optCleanGrid = document.createElement('div');
+                optCleanGrid.className = 'vgt-context-menu-item';
+                optCleanGrid.textContent = '🧹 Symbole aufräumen';
+                optCleanGrid.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    this.resetIconGrid();
+                    menu.style.display = 'none';
+                });
+                
+                const optSettings = document.createElement('div');
+                optSettings.className = 'vgt-context-menu-item';
+                optSettings.textContent = '⚙️ Einstellungen';
+                optSettings.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    this.openWindow('settings');
+                    menu.style.display = 'none';
+                });
+                
+                menu.appendChild(optNewFolder);
+                menu.appendChild(optCleanGrid);
+                menu.appendChild(optSettings);
+                
+                (document.getElementById('vgt-shell-root') || document.body).appendChild(menu);
+            }
+            
+            // Position menu at cursor
+            menu.style.left = `${e.clientX}px`;
+            menu.style.top = `${e.clientY}px`;
+            menu.style.display = 'block';
+            
+            // Close on click elsewhere
+            const closeMenu = (event) => {
+                if (!menu.contains(event.target)) {
+                    menu.style.display = 'none';
+                    document.removeEventListener('click', closeMenu);
+                }
+            };
+            setTimeout(() => {
+                document.addEventListener('click', closeMenu);
+            }, 50);
+        });
+    },
+
+    showModal(options) {
+        // Remove any existing modal first
+        const existing = document.getElementById('vgt-custom-modal');
+        if (existing) existing.remove();
+
+        const modal = document.createElement('div');
+        modal.id = 'vgt-custom-modal';
+        modal.className = 'vgt-modal-overlay';
+        
+        const box = document.createElement('div');
+        box.className = 'vgt-modal-box glassmorphism';
+        
+        const titleEl = document.createElement('h3');
+        titleEl.className = 'vgt-modal-title';
+        titleEl.textContent = options.title || 'System';
+        box.appendChild(titleEl);
+        
+        if (options.message) {
+            const msgEl = document.createElement('p');
+            msgEl.className = 'vgt-modal-message';
+            msgEl.textContent = options.message;
+            box.appendChild(msgEl);
+        }
+        
+        let inputEl = null;
+        if (options.inputType === 'text') {
+            inputEl = document.createElement('input');
+            inputEl.type = 'text';
+            inputEl.className = 'vgt-input-text vgt-modal-input';
+            inputEl.value = options.inputValue || '';
+            if (options.placeholder) inputEl.placeholder = options.placeholder;
+            box.appendChild(inputEl);
+            
+            // Focus input
+            setTimeout(() => inputEl.focus(), 100);
+        }
+        
+        const actions = document.createElement('div');
+        actions.className = 'vgt-modal-actions';
+        
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'vgt-btn-secondary vgt-modal-btn';
+        cancelBtn.textContent = options.cancelText || 'Abbrechen';
+        cancelBtn.addEventListener('click', () => {
+            this.playSound('click');
+            modal.remove();
+            if (options.onCancel) options.onCancel();
+        });
+        
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = `${options.confirmClass || 'vgt-btn-primary'} vgt-modal-btn`;
+        confirmBtn.textContent = options.confirmText || 'Bestätigen';
+        
+        const handleConfirm = () => {
+            this.playSound('click');
+            const value = inputEl ? inputEl.value.trim() : null;
+            modal.remove();
+            if (options.onConfirm) options.onConfirm(value);
+        };
+        
+        confirmBtn.addEventListener('click', handleConfirm);
+        
+        // Add Enter key listener for text input
+        if (inputEl) {
+            inputEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleConfirm();
+                } else if (e.key === 'Escape') {
+                    modal.remove();
+                    if (options.onCancel) options.onCancel();
+                }
+            });
+        }
+        
+        actions.appendChild(cancelBtn);
+        actions.appendChild(confirmBtn);
+        box.appendChild(actions);
+        modal.appendChild(box);
+        
+        (document.getElementById('vgt-shell-root') || document.body).appendChild(modal);
+    },
+
+    createNewFolder() {
+        this.showModal({
+            title: 'Neuer Ordner',
+            message: 'Geben Sie einen Namen für den neuen Ordner ein:',
+            inputType: 'text',
+            inputValue: 'Unbenannter Ordner',
+            confirmText: 'Erstellen',
+            onConfirm: (cleanTitle) => {
+                if (!cleanTitle) return;
+                const folderId = 'folder-' + Math.random().toString(36).substring(2, 9);
+                
+                if (!this.userSettings.folders) {
+                    this.userSettings.folders = {};
+                }
+
+                this.userSettings.folders[folderId] = {
+                    title: cleanTitle,
+                    apps: []
+                };
+
+                // Put the folder in the nearest free cell in the grid
+                const workspace = document.getElementById('desktop-workspace');
+                if (workspace) {
+                    const maxCols = Math.floor((workspace.clientWidth - this.gridX) / this.cellWidth) || 1;
+                    const maxRows = Math.floor((workspace.clientHeight - this.gridY) / this.cellHeight) || 1;
+                    const target = this.findNearestFreeCell(0, 0, folderId, maxCols, maxRows);
+                    const left = `${this.gridX + target.col * this.cellWidth}px`;
+                    const top = `${this.gridY + target.row * this.cellHeight}px`;
+
+                    if (!this.userSettings.icon_positions || Array.isArray(this.userSettings.icon_positions)) {
+                        this.userSettings.icon_positions = {};
+                    }
+                    this.userSettings.icon_positions[folderId] = { left, top };
+                    this.saveUserSetting('icon_positions', this.userSettings.icon_positions);
+                }
+
+                // Save folders
+                this.saveUserSetting('folders', this.userSettings.folders);
+                this.playSound('click');
+                this.addLog(`Ordner '${cleanTitle}' erstellt.`);
+
+                // Redraw
+                this.arrangeDesktopIcons();
+            }
+        });
+    },
+
+    renderFolders() {
+        // Remove folder elements that are not in this.userSettings.folders
+        const folderEls = document.querySelectorAll('.desktop-folder');
+        folderEls.forEach(el => {
+            const id = el.dataset.id;
+            if (!this.userSettings.folders || !this.userSettings.folders[id]) {
+                el.remove();
+            }
+        });
+
+        // Add or update folders
+        if (this.userSettings.folders) {
+            const iconsArea = document.getElementById('desktop-icons-area');
+            if (iconsArea) {
+                for (let folderId in this.userSettings.folders) {
+                    const folderData = this.userSettings.folders[folderId];
+                    let folderEl = document.getElementById(`folder-icon-${folderId}`);
+                    if (!folderEl) {
+                        folderEl = document.createElement('div');
+                        folderEl.id = `folder-icon-${folderId}`;
+                        folderEl.className = 'desktop-icon desktop-folder absolute vgt-icon-item';
+                        folderEl.dataset.id = folderId;
+                        folderEl.dataset.isFolder = 'true';
+                        
+                        folderEl.innerHTML = `
+                            <div class="vgt-icon-tile vgt-color-gradient-folder">
+                                <span class="vgt-icon-emoji">📁</span>
+                            </div>
+                            <span class="vgt-icon-label"></span>
+                        `;
+                        
+                        // Click handler
+                        folderEl.addEventListener('click', (e) => this.handleFolderClick(e, folderId));
+                        
+                        iconsArea.appendChild(folderEl);
+                        
+                        // Make draggable
+                        this.makeIconDraggable(folderEl);
+                    }
+                    // Update title
+                    folderEl.querySelector('.vgt-icon-label').textContent = folderData.title;
+                }
+            }
+        }
+    },
+
+    handleFolderClick(e, folderId) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        if (this.preventClick) {
+            this.preventClick = false;
+            return;
+        }
+        this.openFolderWindow(folderId);
+    },
+
+    openFolderWindow(folderId) {
+        const winId = `folder-win-${folderId}`;
+        const existing = document.getElementById(`win-${winId}`);
+        if (existing) {
+            existing.classList.remove('hidden');
+            existing.style.transform = 'none';
+            existing.style.opacity = '1';
+            this.focusWindow(winId);
+            this.renderFolderContents(folderId);
+            return;
+        }
+
+        const folderData = this.userSettings.folders[folderId];
+        if (!folderData) return;
+
+        const container = document.getElementById('vgt-dynamic-windows') || document.body;
+        
+        const escapedId = this.escapeHTML(winId);
+        const escapedFolderId = this.escapeHTML(folderId);
+
+        const windowHtml = `
+            <div id="win-${escapedId}" class="window absolute vgt-window folder-window" style="width: 500px; height: 350px; top: 20%; left: 30%; z-index: ${this.activeZIndex + 5};" onclick="VGTDeskEngine.focusWindow('${escapedId}')">
+                
+                <!-- Resize Handles -->
+                <div class="resize-handle resize-handle-n" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 'n')"></div>
+                <div class="resize-handle resize-handle-s" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 's')"></div>
+                <div class="resize-handle resize-handle-e" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 'e')"></div>
+                <div class="resize-handle resize-handle-w" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 'w')"></div>
+                
+                <!-- Titlebar -->
+                <div class="vgt-window-header cursor-move window-header">
+                    <div class="vgt-window-dots">
+                        <span class="vgt-window-dot dot-rose" onclick="VGTDeskEngine.closeWindow('${escapedId}')"></span>
+                        <span class="vgt-window-dot dot-amber" onclick="VGTDeskEngine.minimizeWindow('${escapedId}')"></span>
+                        <span class="vgt-window-dot dot-emerald" onclick="VGTDeskEngine.maximizeWindow('${escapedId}')"></span>
+                    </div>
+                    <span class="vgt-window-title"></span>
+                    <div class="vgt-window-badge-wrap" style="display:flex; align-items:center; gap:8px;">
+                        <button class="vgt-folder-rename-btn" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:12px;" onclick="VGTDeskEngine.renameFolder('${escapedFolderId}')">✏️</button>
+                        <button class="vgt-folder-delete-btn" style="background:none; border:none; color:#f43f5e; cursor:pointer; font-size:12px;" onclick="VGTDeskEngine.deleteFolder('${escapedFolderId}')">🗑️</button>
+                        <span class="vgt-badge-item vgt-accent-badge-item">Ordner</span>
+                    </div>
+                </div>
+                <!-- Body -->
+                <div class="vgt-window-body folder-window-body" style="padding: 20px; overflow-y: auto;">
+                    <div class="folder-apps-grid" id="folder-grid-${escapedFolderId}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 16px;">
+                        <!-- Apps will be dynamically rendered here -->
+                    </div>
+                </div>
+            </div>
+        `;
+
+        container.insertAdjacentHTML('beforeend', windowHtml);
+        
+        const winEl = document.getElementById(`win-${escapedId}`);
+        if (winEl) {
+            winEl.querySelector('.vgt-window-title').textContent = folderData.title;
+            this.makeWindowDraggable(winEl);
+        }
+
+        this.activeWindows[winId] = true;
+        this.minimizedWindows[winId] = false;
+        
+        this.focusWindow(winId);
+        this.renderFolderContents(folderId);
+    },
+
+    renderFolderContents(folderId) {
+        const grid = document.getElementById(`folder-grid-${folderId}`);
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        const folderData = this.userSettings.folders[folderId];
+        if (!folderData || !folderData.apps || folderData.apps.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'folder-empty-state';
+            empty.textContent = 'Ordner ist leer. Ziehe Symbole hinein.';
+            empty.style.color = '#64748b';
+            empty.style.gridColumn = '1 / -1';
+            empty.style.textAlign = 'center';
+            empty.style.padding = '20px';
+            grid.appendChild(empty);
+            return;
+        }
+
+        folderData.apps.forEach(appId => {
+            const app = vgtConfig.apps[appId];
+            if (!app) return;
+
+            const item = document.createElement('div');
+            item.className = 'folder-app-item relative';
+            item.style.display = 'flex';
+            item.style.flexDirection = 'column';
+            item.style.alignItems = 'center';
+            item.style.cursor = 'pointer';
+            item.style.padding = '8px';
+            item.style.borderRadius = '8px';
+            item.style.transition = 'background-color 0.2s';
+            
+            // Hover effect
+            item.addEventListener('mouseenter', () => {
+                item.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+            });
+            item.addEventListener('mouseleave', () => {
+                item.style.backgroundColor = 'transparent';
+            });
+
+            // Clicking the item opens the app
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('.remove-from-folder-btn')) return;
+                this.playSound('click');
+                this.openWindow(appId);
+            });
+
+            const tile = document.createElement('div');
+            tile.className = `vgt-icon-tile ${app.color}`;
+            tile.style.width = '48px';
+            tile.style.height = '48px';
+            tile.style.borderRadius = '12px';
+            tile.style.display = 'flex';
+            tile.style.alignItems = 'center';
+            tile.style.justifyContent = 'center';
+            tile.style.marginBottom = '6px';
+            tile.style.fontSize = '24px';
+            
+            if (app.icon_type === 'dashicons') {
+                const icon = document.createElement('span');
+                icon.className = `dashicons ${app.icon_val}`;
+                icon.style.color = '#ffffff';
+                icon.style.fontSize = '24px';
+                icon.style.width = '24px';
+                icon.style.height = '24px';
+                tile.appendChild(icon);
+            } else if (app.icon_type === 'svg' || app.icon_type === 'url') {
+                const img = document.createElement('img');
+                img.src = app.icon_val;
+                img.style.width = '24px';
+                img.style.height = '24px';
+                tile.appendChild(img);
+            }
+
+            const label = document.createElement('span');
+            label.className = 'vgt-icon-label';
+            label.style.fontSize = '11px';
+            label.style.color = '#cbd5e1';
+            label.style.textAlign = 'center';
+            label.style.wordBreak = 'break-word';
+            label.textContent = app.title;
+
+            // Remove button (small x on hover or top right)
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-from-folder-btn absolute';
+            removeBtn.innerHTML = '×';
+            removeBtn.title = 'Aus Ordner entfernen';
+            removeBtn.style.position = 'absolute';
+            removeBtn.style.top = '2px';
+            removeBtn.style.right = '2px';
+            removeBtn.style.width = '16px';
+            removeBtn.style.height = '16px';
+            removeBtn.style.borderRadius = '50%';
+            removeBtn.style.background = 'rgba(244, 63, 94, 0.8)';
+            removeBtn.style.border = 'none';
+            removeBtn.style.color = '#ffffff';
+            removeBtn.style.fontSize = '12px';
+            removeBtn.style.lineHeight = '14px';
+            removeBtn.style.cursor = 'pointer';
+            removeBtn.style.display = 'none'; // Will show on hover in CSS
+            
+            item.appendChild(tile);
+            item.appendChild(label);
+            item.appendChild(removeBtn);
+
+            item.addEventListener('mouseenter', () => { removeBtn.style.display = 'block'; });
+            item.addEventListener('mouseleave', () => { removeBtn.style.display = 'none'; });
+
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.removeAppFromFolder(appId, folderId);
+            });
+
+            grid.appendChild(item);
+        });
+    },
+
+    removeAppFromFolder(appId, folderId) {
+        const folderData = this.userSettings.folders[folderId];
+        if (!folderData) return;
+
+        folderData.apps = folderData.apps.filter(id => id !== appId);
+        
+        // Save settings
+        this.saveUserSetting('folders', this.userSettings.folders);
+        this.playSound('click');
+        this.addLog(`App '${appId}' aus Ordner '${folderData.title}' entfernt.`);
+
+        // Redraw contents & desktop icons
+        this.renderFolderContents(folderId);
+        this.arrangeDesktopIcons();
+    },
+
+    renameFolder(folderId) {
+        const folderData = this.userSettings.folders[folderId];
+        if (!folderData) return;
+
+        this.showModal({
+            title: 'Ordner umbenennen',
+            message: 'Geben Sie einen neuen Namen für den Ordner ein:',
+            inputType: 'text',
+            inputValue: folderData.title,
+            confirmText: 'Umbenennen',
+            onConfirm: (cleanTitle) => {
+                if (!cleanTitle) return;
+                folderData.title = cleanTitle;
+
+                // Save settings
+                this.saveUserSetting('folders', this.userSettings.folders);
+                this.playSound('click');
+                this.addLog(`Ordner '${folderId}' umbenannt in '${cleanTitle}'.`);
+
+                // Update titles in UI
+                const winId = `folder-win-${folderId}`;
+                const winEl = document.getElementById(`win-${winId}`);
+                if (winEl) {
+                    winEl.querySelector('.vgt-window-title').textContent = cleanTitle;
+                }
+
+                this.arrangeDesktopIcons();
+            }
+        });
+    },
+
+    deleteFolder(folderId) {
+        const folderData = this.userSettings.folders[folderId];
+        if (!folderData) return;
+
+        this.showModal({
+            title: 'Ordner löschen',
+            message: `Möchten Sie den Ordner '${folderData.title}' wirklich löschen? Alle Apps darin werden wieder auf den Desktop gelegt.`,
+            confirmText: 'Löschen',
+            confirmClass: 'vgt-btn-danger',
+            onConfirm: () => {
+                // Close the folder window first
+                const winId = `folder-win-${folderId}`;
+                this.closeWindow(winId);
+                const winEl = document.getElementById(`win-${winId}`);
+                if (winEl) winEl.remove();
+
+                // Delete from folders array
+                delete this.userSettings.folders[folderId];
+
+                // Delete position from icon_positions to avoid clutter
+                delete this.userSettings.icon_positions[folderId];
+
+                // Save settings
+                this.saveUserSetting('folders', this.userSettings.folders);
+                this.saveUserSetting('icon_positions', this.userSettings.icon_positions);
+                this.playSound('click');
+                this.addLog(`Ordner '${folderData.title}' gelöscht.`);
+
+                // Redraw desktop icons
+                this.arrangeDesktopIcons();
+            }
+        });
+    },
+
+    openSubmenuPopup(e, key) {
+        const appData = vgtConfig.apps[key];
+        if (!appData) return;
+
+        // Close any existing submenu popups first
+        const existing = document.getElementById('vgt-submenu-popup');
+        if (existing) existing.remove();
+
+        const popup = document.createElement('div');
+        popup.id = 'vgt-submenu-popup';
+        popup.className = 'vgt-submenu-popup glassmorphism absolute';
+        
+        const header = document.createElement('div');
+        header.className = 'vgt-submenu-header';
+        header.style.padding = '8px 12px';
+        header.style.borderBottom = '1px solid rgba(255, 255, 255, 0.08)';
+        header.style.fontSize = '11px';
+        header.style.color = '#64748b';
+        header.style.fontWeight = 'bold';
+        header.textContent = appData.title;
+        popup.appendChild(header);
+
+        const list = document.createElement('div');
+        list.className = 'vgt-submenu-list';
+        list.style.display = 'flex';
+        list.style.flexDirection = 'column';
+
+        appData.submenus.forEach(sub => {
+            const item = document.createElement('div');
+            item.className = 'vgt-submenu-item';
+            item.style.padding = '8px 12px';
+            item.style.cursor = 'pointer';
+            item.style.fontSize = '12px';
+            item.style.color = '#cbd5e1';
+            item.style.transition = 'background-color 0.15s, color 0.15s';
+            item.textContent = sub.title;
+
+            item.addEventListener('mouseenter', () => {
+                const hexColor = getComputedStyle(document.documentElement).getPropertyValue('--vgt-accent-color').trim() || '#6366f1';
+                item.style.backgroundColor = hexColor + '20';
+                item.style.color = '#ffffff';
+            });
+            item.addEventListener('mouseleave', () => {
+                item.style.backgroundColor = 'transparent';
+                item.style.color = '#cbd5e1';
+            });
+
+            item.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                this.openSubmenuWindow(key, sub.title, sub.url);
+                popup.remove();
+            });
+            list.appendChild(item);
+        });
+        popup.appendChild(list);
+
+        (document.getElementById('vgt-shell-root') || document.body).appendChild(popup);
+
+        // Position popup near cursor or clicked icon
+        const x = e ? e.clientX : window.innerWidth / 2 - 100;
+        const y = e ? e.clientY : window.innerHeight / 2 - 150;
+        popup.style.left = `${x}px`;
+        popup.style.top = `${y}px`;
+
+        // Check overflow
+        const rect = popup.getBoundingClientRect();
+        if (x + rect.width > window.innerWidth) {
+            popup.style.left = `${window.innerWidth - rect.width - 16}px`;
+        }
+        if (y + rect.height > window.innerHeight) {
+            popup.style.top = `${window.innerHeight - rect.height - 16}px`;
+        }
+
+        const closePopup = (event) => {
+            if (!popup.contains(event.target)) {
+                popup.remove();
+                document.removeEventListener('click', closePopup);
+            }
+        };
+        setTimeout(() => {
+            document.addEventListener('click', closePopup);
+        }, 50);
+    },
+
+    openSubmenuWindow(appKey, subTitle, subUrl) {
+        const appData = vgtConfig.apps[appKey];
+        if (!appData) return;
+
+        this.openWindow(appKey);
+        const iframe = document.getElementById(`iframe-${appKey}`);
+        if (iframe) {
+            const spinner = document.getElementById(`spinner-${appKey}`);
+            if (spinner) spinner.style.display = 'block';
+
+            let targetUrl = subUrl;
+            if (targetUrl.indexOf('vgt_iframe') === -1) {
+                targetUrl += (targetUrl.indexOf('?') === -1 ? '?' : '&') + 'vgt_iframe=true';
+            }
+            iframe.src = this.cleanUrl(targetUrl);
+            iframe.dataset.loaded = 'true';
+
+            // Update title
+            const win = document.getElementById(`win-${appKey}`);
+            if (win) {
+                const titleEl = win.querySelector('.vgt-window-title');
+                if (titleEl) {
+                    titleEl.textContent = `${appData.title} › ${subTitle}`;
+                }
+            }
+        }
     }
 };
 
