@@ -29,6 +29,7 @@ Found a bug or have an improvement? **Open an issue or contact us.**
 
 <img width="1920" height="1080" alt="vgt wp-desk" src="https://github.com/user-attachments/assets/b3bf35ca-fe0e-49cc-9957-adc127013183" />
 
+<img width="2560" height="1232" alt="image" src="https://github.com/user-attachments/assets/15f2d911-7f30-44db-b6b9-f322c5327042" />
 
 
 ---
