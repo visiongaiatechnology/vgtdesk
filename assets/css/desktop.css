@@ -338,7 +338,6 @@ html, html.wp-toolbar {
     width: 24px;
     height: 24px;
     object-fit: contain;
-    filter: invert(1) brightness(2);
 }
 
 .vgt-icon-label {
@@ -481,10 +480,17 @@ html, html.wp-toolbar {
 }
 
 .vgt-welcome-card {
-    padding: 14px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.03);
+    padding: 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.vgt-welcome-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--vgt-accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.5), 0 0 15px var(--vgt-accent-rgba15);
 }
 
 .vgt-card-h3 {
@@ -900,7 +906,6 @@ html, html.wp-toolbar {
     width: 24px;
     height: 24px;
     object-fit: contain;
-    filter: invert(1) brightness(2);
 }
 
 /* Tooltips */
@@ -1154,7 +1159,7 @@ body.vgt-dragging, body.vgt-dragging * {
 
 .vgt-start-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
 }
 
@@ -1166,6 +1171,7 @@ body.vgt-dragging, body.vgt-dragging * {
     border-radius: 12px;
     cursor: pointer;
     transition: background-color 0.15s ease, transform 0.1s ease;
+    position: relative !important;
 }
 .vgt-start-item:hover {
     background: rgba(255, 255, 255, 0.05);
@@ -1196,7 +1202,6 @@ body.vgt-dragging, body.vgt-dragging * {
     width: 20px;
     height: 20px;
     object-fit: contain;
-    filter: invert(1) brightness(2);
 }
 
 .vgt-start-label {
@@ -1648,26 +1653,26 @@ body.vgt-dragging, body.vgt-dragging * {
 /* Tiling alignment snap classes for active window transitions */
 .vgt-window-snap-left {
     width: 50% !important;
-    height: calc(100% - 60px) !important;
-    top: 44px !important;
+    height: calc(100% - 20px) !important;
+    top: 4px !important;
     left: 0px !important;
 }
 .vgt-window-snap-right {
     width: 50% !important;
-    height: calc(100% - 60px) !important;
-    top: 44px !important;
+    height: calc(100% - 20px) !important;
+    top: 4px !important;
     left: 50% !important;
 }
 .vgt-window-snap-topleft {
     width: 50% !important;
-    height: calc(50% - 30px) !important;
-    top: 44px !important;
+    height: calc(50% - 14px) !important;
+    top: 4px !important;
     left: 0px !important;
 }
 .vgt-window-snap-bottomleft {
     width: 50% !important;
-    height: calc(50% - 30px) !important;
-    top: calc(50% + 14px) !important;
+    height: calc(50% - 14px) !important;
+    top: calc(50% + 10px) !important;
     left: 0px !important;
 }
 
@@ -1906,4 +1911,1265 @@ body.vgt-dragging, body.vgt-dragging * {
     opacity: 1;
 }
 
+/* ==========================================================================
+   WORKSPACE MULTI-LAYOUT DESIGNS (PHASE 2)
+   ========================================================================== */
+
+/* Layout Selection Grid in Settings Window */
+.vgt-layout-grid {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+.vgt-layout-thumb {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.02);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+}
+.vgt-layout-thumb:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--vgt-accent);
+    transform: translateY(-2px);
+}
+.vgt-layout-thumb.active {
+    background: var(--vgt-accent-rgba15);
+    border-color: var(--vgt-accent);
+    box-shadow: 0 0 12px var(--vgt-accent-rgba15);
+}
+.vgt-layout-thumb-preview {
+    width: 100%;
+    height: 60px;
+    border-radius: 6px;
+    background: rgba(15, 23, 42, 0.6);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.vgt-layout-thumb-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #cbd5e1;
+}
+
+/* Preview decorations inside Settings grid */
+.macos-preview .preview-bar-top {
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    right: 4px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+.macos-preview .preview-dock-bottom {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+.windows-preview .preview-bar-bottom {
+    position: absolute;
+    bottom: 3px;
+    left: 4px;
+    right: 4px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+.linux-preview .preview-bar-top {
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    right: 4px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+.linux-preview .preview-dock-left {
+    position: absolute;
+    top: 10px;
+    bottom: 4px;
+    left: 4px;
+    width: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Layout Design Switchers
+   -------------------------------------------------------------------------- */
+
+/* Window Controls (Dots) Reordering (Windows/Linux Right-Aligned) */
+.vgt-layout-windows .vgt-window-title,
+.vgt-layout-linux .vgt-window-title {
+    order: 1 !important;
+    margin-right: auto;
+}
+.vgt-layout-windows .vgt-window-badge-wrap,
+.vgt-layout-linux .vgt-window-badge-wrap {
+    order: 2 !important;
+    margin-right: auto;
+}
+.vgt-layout-windows .vgt-window-spacer,
+.vgt-layout-linux .vgt-window-spacer {
+    display: none !important;
+}
+.vgt-layout-windows .vgt-window-dots,
+.vgt-layout-linux .vgt-window-dots {
+    order: 3 !important;
+}
+.vgt-layout-windows .vgt-window-dot.dot-rose,
+.vgt-layout-linux .vgt-window-dot.dot-rose {
+    order: 3 !important;
+}
+.vgt-layout-windows .vgt-window-dot.dot-emerald,
+.vgt-layout-linux .vgt-window-dot.dot-emerald {
+    order: 2 !important;
+}
+.vgt-layout-windows .vgt-window-dot.dot-amber,
+.vgt-layout-linux .vgt-window-dot.dot-amber {
+    order: 1 !important;
+}
+
+/* 🪟 WINDOWS REDMOND GRID */
+.vgt-layout-windows .vgt-interface-overlay {
+    flex-direction: column !important; /* normal layout, topbar placed absolute */
+}
+.vgt-layout-windows .vgt-topbar {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    height: 48px !important;
+    border-radius: 0 !important;
+    border: none !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    margin: 0 !important;
+    z-index: 99999 !important;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.4) !important;
+    background: rgba(15, 23, 42, 0.8) !important;
+    padding: 0 14px !important;
+}
+.vgt-layout-windows .vgt-footer {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: auto !important;
+    height: 48px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    z-index: 100000 !important;
+    pointer-events: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.vgt-layout-windows .vgt-dock {
+    height: 40px !important;
+    padding: 0 10px !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    pointer-events: auto !important;
+    gap: 8px !important;
+}
+.vgt-layout-windows .vgt-dock-divider {
+    display: none !important;
+}
+
+/* Windows taskbar scaled down icon styling */
+.vgt-layout-windows .vgt-dock-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 6px !important;
+}
+.vgt-layout-windows .vgt-dock-emoji {
+    font-size: 16px !important;
+}
+.vgt-layout-windows .vgt-dock-dashicon {
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+}
+.vgt-layout-windows .vgt-dock-img {
+    width: 18px !important;
+    height: 18px !important;
+}
+.vgt-layout-windows .vgt-dock-item:hover .vgt-dock-icon {
+    transform: scale(1.1) !important;
+}
+.vgt-layout-windows .vgt-dock-indicator {
+    width: 4px !important;
+    height: 4px !important;
+    margin-top: 2px !important;
+}
+
+.vgt-layout-windows .vgt-workspace {
+    margin-top: 0 !important;
+    margin-bottom: 48px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+.vgt-layout-windows .vgt-start-menu {
+    top: auto !important;
+    bottom: 54px !important;
+    left: 10px !important;
+    width: 560px !important;
+    height: 640px !important;
+}
+.vgt-layout-windows .vgt-start-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+}
+.vgt-layout-windows .vgt-control-center {
+    top: auto !important;
+    bottom: 54px !important;
+    right: 10px !important;
+}
+
+/* Windows custom snap layout overrides */
+.vgt-layout-windows .vgt-window-snap-left {
+    width: 50% !important;
+    height: calc(100% + 4px) !important;
+    top: 0px !important;
+    left: 0px !important;
+}
+.vgt-layout-windows .vgt-window-snap-right {
+    width: 50% !important;
+    height: calc(100% + 4px) !important;
+    top: 0px !important;
+    left: 50% !important;
+}
+.vgt-layout-windows .vgt-window-snap-topleft {
+    width: 50% !important;
+    height: calc(50% - 8px) !important;
+    top: 0px !important;
+    left: 0px !important;
+}
+.vgt-layout-windows .vgt-window-snap-bottomleft {
+    width: 50% !important;
+    height: calc(50% - 8px) !important;
+    top: calc(50% + 2px) !important;
+    left: 0px !important;
+}
+
+/* 🐧 LINUX TUX SIDEBAR */
+.vgt-layout-linux .vgt-interface-overlay {
+    flex-direction: column !important;
+}
+.vgt-layout-linux .vgt-footer {
+    position: absolute !important;
+    top: 70px !important;
+    bottom: 14px !important;
+    left: 14px !important;
+    width: 64px !important;
+    height: calc(100% - 84px) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    z-index: 10000 !important;
+    pointer-events: none !important;
+    display: flex !important;
+    align-items: center !important;
+}
+.vgt-layout-linux .vgt-dock {
+    flex-direction: column !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 12px 0 !important;
+    border-radius: 12px !important;
+    gap: 12px !important;
+    pointer-events: auto !important;
+    overflow: visible !important; /* Prevent scrollbar completely */
+}
+.vgt-layout-linux .vgt-dock-divider {
+    width: 24px !important;
+    height: 1px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    margin: 4px auto !important;
+}
+.vgt-layout-linux .vgt-dynamic-taskbar-flex {
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+}
+.vgt-layout-linux .vgt-workspace {
+    margin-left: 80px !important;
+}
+.vgt-layout-linux .vgt-start-menu {
+    top: 70px !important;
+    left: 80px !important;
+    bottom: auto !important;
+}
+.vgt-layout-linux .vgt-control-center {
+    top: 70px !important;
+    right: 14px !important;
+    bottom: auto !important;
+}
+
+/* Linux dock labels/names hidden to prevent any scrollbars */
+.vgt-layout-linux .vgt-dock-tooltip {
+    display: none !important;
+}
+.vgt-layout-linux .vgt-dock-indicator {
+    width: 3px !important;
+    height: 12px !important;
+    left: 3px !important;
+    bottom: 50% !important;
+    transform: translateY(50%) !important;
+}
+
+/* Linux custom snap layout overrides */
+.vgt-layout-linux .vgt-window-snap-left {
+    width: calc(50% - 40px) !important;
+    height: calc(100% - 20px) !important;
+    top: 4px !important;
+    left: 80px !important;
+}
+.vgt-layout-linux .vgt-window-snap-right {
+    width: calc(50% - 40px) !important;
+    height: calc(100% - 20px) !important;
+    top: 4px !important;
+    left: calc(80px + (100% - 80px) / 2) !important;
+}
+.vgt-layout-linux .vgt-window-snap-topleft {
+    width: calc(50% - 40px) !important;
+    height: calc(50% - 14px) !important;
+    top: 4px !important;
+    left: 80px !important;
+}
+.vgt-layout-linux .vgt-window-snap-bottomleft {
+    width: calc(50% - 40px) !important;
+    height: calc(50% - 14px) !important;
+    top: calc(50% + 10px) !important;
+    left: 80px !important;
+}
+
+/* Custom Scrollbars inside VGT Desk Shell to replace standard white scrollbars */
+.vgt-desk-shell *::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important;
+}
+.vgt-desk-shell *::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+.vgt-desk-shell *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 99px !important;
+}
+.vgt-desk-shell *::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+.vgt-desk-shell * {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent !important;
+}
+
+.vgt-start-menu-body {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+/* Windows 10 Start Menu Layout */
+.vgt-start-win10-layout {
+    display: flex !important;
+    height: calc(100% - 50px) !important;
+    width: 100% !important;
+}
+
+/* Left Sidebar strip */
+.vgt-start-win10-sidebar {
+    width: 48px !important;
+    background: rgba(0, 0, 0, 0.25) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 10px 0 !important;
+    box-sizing: border-box !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+    flex-shrink: 0 !important;
+}
+
+.vgt-start-win10-sidebar-top {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+.vgt-start-win10-sidebar-bottom {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin-bottom: 20px !important;
+}
+
+.vgt-start-win10-sidebar-icon {
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    border-radius: 6px !important;
+    transition: background-color 0.15s !important;
+    color: #cbd5e1 !important;
+    text-decoration: none !important;
+}
+.vgt-start-win10-sidebar-icon:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+}
+.vgt-start-win10-sidebar-icon.power-icon:hover {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+    color: #fca5a5 !important;
+}
+
+/* Center Column: All Apps List */
+.vgt-start-win10-all-apps {
+    width: 200px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+    flex-shrink: 0 !important;
+}
+
+.vgt-start-win10-list {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    padding-right: 4px !important;
+}
+
+/* Small List Item Style */
+.win10-list-item {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 6px 8px !important;
+    border-radius: 6px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    transition: background-color 0.15s ease, transform 0.1s ease !important;
+}
+.win10-list-item:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+.win10-list-icon {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 4px !important;
+    flex-shrink: 0 !important;
+    box-shadow: none !important;
+}
+.win10-list-icon .vgt-start-icon-dashicon {
+    font-size: 14px !important;
+    width: 14px !important;
+    height: 14px !important;
+}
+.win10-list-icon .vgt-start-icon-img {
+    width: 16px !important;
+    height: 16px !important;
+}
+.win10-list-label {
+    margin-top: 0 !important;
+    margin-left: 8px !important;
+    text-align: left !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    color: #cbd5e1 !important;
+}
+
+/* Right Column: Pinned Tiles */
+.vgt-start-win10-tiles {
+    width: calc(100% - 248px) !important;
+    max-width: calc(100% - 248px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+}
+
+.vgt-start-win10-grid {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    padding-right: 4px !important;
+}
+
+/* Pinned Tile Style */
+.win10-tile-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 8px !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    aspect-ratio: 1/1 !important;
+    box-sizing: border-box !important;
+    height: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+.win10-tile-item:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+.win10-tile-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+}
+.win10-tile-icon .vgt-start-icon-dashicon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+}
+.win10-tile-icon .vgt-start-icon-img {
+    width: 20px !important;
+    height: 20px !important;
+}
+.win10-tile-label {
+    font-size: 9px !important;
+    margin-top: 6px !important;
+    color: #cbd5e1 !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+}
+
+/* Section titles for Win10 column headers */
+.vgt-start-win10-section-title {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: #64748b !important;
+    margin-bottom: 8px !important;
+}
+
+/* About Window styling */
+.vgt-about-body {
+    padding: 24px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-sizing: border-box;
+}
+.vgt-about-profile-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    padding: 16px;
+}
+.vgt-about-avatar img {
+    border-radius: 50% !important;
+    border: 2px solid var(--vgt-accent);
+    box-shadow: 0 0 15px var(--vgt-accent-rgba15);
+}
+.vgt-about-name {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    margin: 0 !important;
+}
+.vgt-about-role {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--vgt-accent-hover);
+    font-weight: 700;
+}
+.vgt-about-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.vgt-about-info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #94a3b8;
+}
+.vgt-build-badge {
+    background: var(--vgt-accent-rgba15);
+    color: var(--vgt-accent-hover);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    border: 1px solid var(--vgt-accent);
+    transition: all 0.2s;
+}
+.vgt-build-badge:hover {
+    background: var(--vgt-accent);
+    color: #ffffff;
+    box-shadow: 0 0 10px var(--vgt-accent-rgba15);
+}
+.vgt-about-message {
+    font-size: 12px;
+    line-height: 1.6;
+    color: #cbd5e1;
+}
+.vgt-about-message p {
+    margin: 0 0 8px 0 !important;
+}
+.vgt-about-message p:last-child {
+    margin: 0 !important;
+}
+
+/* Easteregg container */
+.vgt-about-easteregg-container {
+    position: relative;
+    width: 100%;
+    height: 140px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: #000;
+}
+.vgt-about-easteregg-container.hidden {
+    display: none !important;
+}
+.vgt-matrix-overlay-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: monospace;
+    font-size: 11px;
+    font-weight: bold;
+    color: #10b981;
+    text-shadow: 0 0 8px #10b981;
+    pointer-events: none;
+    letter-spacing: 0.1em;
+}
+.vgt-about-actions {
+    display: flex;
+    justify-content: center;
+}
+
+/* Pin/Unpin button styling */
+.vgt-start-pin-btn {
+    position: absolute !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) scale(0) !important;
+    opacity: 0 !important;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease !important;
+    cursor: pointer !important;
+    font-size: 11px !important;
+    z-index: 10 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 50% !important;
+    width: 20px !important;
+    height: 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+.vgt-start-item:hover .vgt-start-pin-btn {
+    transform: translateY(-50%) scale(1) !important;
+    opacity: 1 !important;
+}
+.vgt-start-pin-btn:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-50%) scale(1.15) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Pinned Tile Style unpin btn overlay */
+.win10-tile-item .vgt-start-pin-btn {
+    right: 6px !important;
+    top: 6px !important;
+    transform: scale(0) !important;
+    position: absolute !important;
+}
+.win10-tile-item:hover .vgt-start-pin-btn {
+    transform: scale(1) !important;
+    opacity: 1 !important;
+}
+
+/* Prevent text selection during drag & resize */
+.select-none {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+body.vgt-dragging, 
+body.vgt-dragging *,
+.vgt-window.dragging,
+.vgt-window.resizing,
+.resizing,
+.dragging {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+/* ==========================================================================
+   PHASE 3: CENTRAL COMMAND CENTER & ADMINISTRATION
+   ========================================================================== */
+
+#vgt-shell-root {
+    font-size: var(--vgt-font-size, 14px);
+}
+
+.vgt-cc-container {
+    display: flex !important;
+    height: calc(100% - 44px) !important;
+    background: #090d16 !important;
+    color: #cbd5e1 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    overflow: hidden !important;
+}
+
+/* Left Sidebar Navigation */
+.vgt-cc-sidebar {
+    width: 200px !important;
+    background: rgba(15, 23, 42, 0.4) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    padding: 16px 8px !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+}
+
+.vgt-cc-nav-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    padding: 10px 12px !important;
+    background: transparent !important;
+    border: none !important;
+    border-left: 3px solid transparent !important;
+    color: #94a3b8 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    cursor: pointer !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+    margin-bottom: 4px !important;
+}
+
+.vgt-cc-nav-item:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+    color: #ffffff !important;
+}
+
+.vgt-cc-nav-item.active {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important;
+    border-left-color: var(--vgt-accent-color) !important;
+}
+
+.vgt-cc-sidebar-footer {
+    padding: 0 4px !important;
+}
+
+.vgt-cc-btn-classic {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    padding: 8px 10px !important;
+    background: rgba(244, 63, 94, 0.08) !important;
+    border: 1px solid rgba(244, 63, 94, 0.15) !important;
+    color: #f43f5e !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.025em !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+}
+
+.vgt-cc-btn-classic:hover {
+    background: rgba(244, 63, 94, 0.16) !important;
+    box-shadow: 0 0 10px rgba(244, 63, 94, 0.15) !important;
+    color: #ffffff !important;
+}
+
+/* Right Side Content Panel */
+.vgt-cc-content {
+    flex: 1 !important;
+    padding: 24px !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+}
+
+.vgt-cc-tab-panel {
+    display: none !important;
+}
+
+.vgt-cc-tab-panel.active {
+    display: block !important;
+    animation: vgtCcTabIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes vgtCcTabIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.vgt-cc-section-title {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    margin: 0 0 16px 0 !important;
+    letter-spacing: -0.02em !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding-bottom: 8px !important;
+}
+
+.vgt-cc-section-desc {
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+    margin: -10px 0 20px 0 !important;
+    line-height: 1.5 !important;
+}
+
+.vgt-cc-subtitle {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    margin: 20px 0 10px 0 !important;
+    letter-spacing: -0.01em !important;
+    text-transform: uppercase !important;
+    color: #64748b !important;
+}
+
+.vgt-cc-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    margin-bottom: 20px !important;
+}
+
+.vgt-cc-span-2 {
+    grid-column: span 2 !important;
+}
+
+/* Interactive System Cards */
+.vgt-cc-card {
+    background: rgba(15, 23, 42, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 10px !important;
+    padding: 14px 16px !important;
+    box-sizing: border-box !important;
+}
+
+.vgt-cc-card-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 4px !important;
+}
+
+.vgt-cc-card-title {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #94a3b8 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.025em !important;
+}
+
+.vgt-cc-card-value {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    font-family: monospace !important;
+}
+
+.vgt-cc-card-desc {
+    font-size: 11px !important;
+    color: #64748b !important;
+    line-height: 1.4 !important;
+    margin: 4px 0 0 0 !important;
+}
+
+/* Diagnostic Progress Meters */
+.vgt-cc-meter-track {
+    width: 100% !important;
+    height: 6px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-radius: 99px !important;
+    margin-top: 12px !important;
+    overflow: hidden !important;
+}
+
+.vgt-cc-meter-bar {
+    height: 100% !important;
+    background: var(--vgt-accent-color) !important;
+    border-radius: 99px !important;
+    width: 0%;
+    transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s !important;
+}
+
+/* Diagnostic Realtime Terminal Console */
+.vgt-cc-console {
+    font-family: Consolas, Monaco, monospace !important;
+    font-size: 11px !important;
+    background: #030712 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    height: 160px !important;
+    overflow-y: auto !important;
+    color: #10b981 !important;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.8) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+    box-sizing: border-box !important;
+}
+
+.vgt-cc-console span {
+    color: #34d399 !important;
+    line-height: 1.4 !important;
+    word-break: break-all !important;
+}
+
+/* Display & Personalization Settings Options */
+.vgt-cc-form-group {
+    margin-bottom: 20px !important;
+}
+
+.vgt-cc-label {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    margin-bottom: 8px !important;
+    display: block !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.025em !important;
+    color: #94a3b8 !important;
+}
+
+.vgt-cc-toggle-card {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    background: rgba(15, 23, 42, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    box-sizing: border-box !important;
+}
+
+.vgt-cc-toggle-info {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+}
+
+.vgt-cc-toggle-title {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+}
+
+.vgt-cc-toggle-desc {
+    font-size: 11px !important;
+    color: #64748b !important;
+}
+
+.vgt-cc-action-bar {
+    margin-top: 24px !important;
+    padding-top: 16px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Security Center Layout */
+.vgt-cc-sec-health-card {
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.02) 100%) !important;
+    border: 1px solid rgba(99, 102, 241, 0.18) !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
+    margin-bottom: 20px !important;
+    box-sizing: border-box !important;
+}
+
+.vgt-cc-sec-health-shield {
+    font-size: 32px !important;
+    filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5)) !important;
+}
+
+.vgt-cc-sec-health-details {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+}
+
+.vgt-cc-sec-health-status {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    letter-spacing: 0.025em !important;
+}
+
+.vgt-cc-sec-health-desc {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+}
+
+.vgt-cc-sec-badge {
+    background: rgba(16, 185, 129, 0.1) !important;
+    border: 1px solid rgba(16, 185, 129, 0.25) !important;
+    color: #10b981 !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    letter-spacing: 0.05em !important;
+}
+
+.vgt-cc-status-dot {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+    display: inline-block !important;
+    transition: all 0.3s !important;
+}
+
+.vgt-cc-status-dot.active {
+    background: #10b981 !important;
+    box-shadow: 0 0 8px #10b981 !important;
+}
+
+.vgt-cc-status-dot.inactive {
+    background: #ef4444 !important;
+    box-shadow: 0 0 8px #ef4444 !important;
+}
+
+.vgt-cc-form-card {
+    background: rgba(15, 23, 42, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 10px !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+}
+
+.vgt-cc-form-desc {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+    margin: 0 0 12px 0 !important;
+    line-height: 1.5 !important;
+}
+
+.vgt-cc-input-row {
+    margin-bottom: 12px !important;
+}
+
+.vgt-cc-input-label {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #94a3b8 !important;
+    margin-bottom: 4px !important;
+    display: block !important;
+}
+
+/* IP Ban List Table Styling */
+.vgt-cc-table-container {
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    background: rgba(15, 23, 42, 0.2) !important;
+    margin-top: 8px !important;
+}
+
+.vgt-cc-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    text-align: left !important;
+    font-size: 11px !important;
+}
+
+.vgt-cc-table th {
+    color: #94a3b8 !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    padding: 10px 12px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    font-weight: 700 !important;
+}
+
+.vgt-cc-table td {
+    padding: 10px 12px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+    color: #cbd5e1 !important;
+    vertical-align: middle !important;
+}
+
+.vgt-cc-table tr:last-child td {
+    border-bottom: none !important;
+}
+
+/* Customizable Keyboard Shortcuts Mapper */
+.vgt-cc-shortcuts-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+}
+
+.vgt-cc-shortcut-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    background: rgba(15, 23, 42, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 10px !important;
+    padding: 12px 16px !important;
+    box-sizing: border-box !important;
+}
+
+.vgt-cc-shortcut-info {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+}
+
+.vgt-cc-shortcut-name {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+}
+
+.vgt-cc-shortcut-desc {
+    font-size: 11px !important;
+    color: #64748b !important;
+}
+
+.vgt-cc-shortcut-input-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.vgt-cc-shortcut-input {
+    background: #0f172a !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    width: 150px !important;
+    text-align: center !important;
+    font-family: Consolas, Monaco, monospace !important;
+    font-weight: bold !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease !important;
+}
+
+.vgt-cc-shortcut-input.vgt-shortcut-capturing {
+    border-color: #ef4444 !important;
+    color: #ef4444 !important;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.2) !important;
+    animation: vgtCapturePulse 1.5s infinite !important;
+}
+
+.vgt-btn-capture.vgt-btn-capturing {
+    background: #ef4444 !important;
+    border-color: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+@keyframes vgtCapturePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Personalization Font Size Slider Layout */
+.vgt-font-size-slider-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+}
+
+.vgt-slider {
+    flex: 1 !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    height: 6px !important;
+    border-radius: 99px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    outline: none !important;
+}
+
+.vgt-slider::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 16px !important;
+    height: 16px !important;
+    border-radius: 50% !important;
+    background: var(--vgt-accent-color) !important;
+    cursor: pointer !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+    transition: transform 0.15s !important;
+}
+
+.vgt-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2) !important;
+}
+
+.vgt-font-size-badge {
+    background: var(--vgt-accent-rgba15) !important;
+    color: var(--vgt-accent-color) !important;
+    border: 1px solid var(--vgt-accent-rgba15) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+}
 
