@@ -1,6 +1,4 @@
-```md
-[![Security Review](https://img.shields.io/badge/Security_Posture-v4_Internal_Review-brightgreen?style=for-the-badge)](#security-posture--vgt-wp-desk-v4-stable)
-```
+
 
 
 # 🔐 Security Posture — VGT WP-Desk v4 Stable
