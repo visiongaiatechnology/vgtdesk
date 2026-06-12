@@ -27,6 +27,16 @@ Found a bug or have an improvement? **Open an issue or contact us.**
 
 ---
 
+## 🔐 Security Posture
+
+VGT WP-Desk v4 Stable has undergone an internal security posture review covering the desktop runtime, Security Center integrations, AJAX control layer, local telemetry, upload workflow and same-origin iframe workspace.
+
+Within the reviewed scope, no exploitable vulnerabilities were identified.
+
+See: [SECURITY_POSTURE.md](SECURITY_POSTURE.md)
+
+---
+
 <img width="2560" height="1232" alt="image" src="https://github.com/user-attachments/assets/336383e1-653c-4353-aaea-7414d909b3bf" />
 
 
