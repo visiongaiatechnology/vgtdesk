@@ -1,6 +1,14 @@
 <?php 
 declare(strict_types=1);
 if (!defined('ABSPATH')) exit; 
+
+if (isset($_GET['page']) && $_GET['page'] === 'vgt-security-center') {
+    if (class_exists('VisionGaia\WPDesk\VGTSecurityCenter')) {
+        \VisionGaia\WPDesk\VGTSecurityCenter::get_instance()->render_sidebar();
+        return;
+    }
+}
+?>
 /**
  * SIDEBAR VIEW: COMMUNITY CORE EDITION
  * STATUS: PLATIN VGT STATUS (Hardened & i18n)

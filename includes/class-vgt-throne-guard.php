@@ -41,6 +41,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 final class MasterUserControlPlugin {
     private const DB_VERSION = '1.0';
     private static ?string $csp_nonce = null;
+    private static ?self $instance = null;
     
     private const TOXIC_CAPABILITIES = [
         'activate_plugins', 'delete_plugins', 'install_plugins', 'edit_plugins', 'update_plugins',
@@ -48,7 +49,12 @@ final class MasterUserControlPlugin {
         'edit_users', 'delete_users', 'create_users', 'promote_users'
     ];
 
+    public static function get_instance(): ?self {
+        return self::$instance;
+    }
+
     public function __construct() {
+        self::$instance = $this;
         // Pre-Flight WAF Interceptor (Uralt-Sicherung bei Uploads)
         $this->pre_flight_waf();
 
@@ -737,7 +743,7 @@ EOT;
             'samesite' => 'Strict'
         ]);
 
-        wp_redirect(admin_url('admin.php?page=mcp-dashboard'));
+        wp_redirect(admin_url());
         exit;
     }
 
@@ -760,7 +766,7 @@ EOT;
      * SECTION 3 - ADMIN INTERFACE
      * ------------------------------------------------------------------------- */
     public function add_admin_menu(): void {
-        add_menu_page('Master User Control', 'Master User Control', 'mcp_master_access', 'mcp-dashboard', [$this, 'render_dashboard'], 'dashicons-shield', 81);
+        add_submenu_page('vgt-security-center', 'Master User Control', 'Throne Guard', 'mcp_master_access', 'mcp-dashboard', [$this, 'render_dashboard']);
     }
 
     public function render_dashboard(): void {

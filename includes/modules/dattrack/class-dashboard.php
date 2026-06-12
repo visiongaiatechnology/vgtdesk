@@ -471,6 +471,40 @@ final class VGT_Dashboard {
                     <div id="vgt-paths-container"></div>
                 </div>
             </div>
+
+            <!-- DSGVO OPT-OUT CONFIGURATION INSTRUCTIONS -->
+            <div class="vgt-no-print" style="margin-top: 24px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 24px; color: #cbd5e1; box-sizing: border-box;">
+                <h3 style="color: #ffffff; font-size: 14px; font-weight: 700; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                    <span class="dashicons dashicons-privacy" style="color: var(--vgt-cyan); font-size: 20px; width: 20px; height: 20px;"></span> DSGVO & Privacy: Dattrack Opt-Out einbinden
+                </h3>
+                <p style="font-size: 12.5px; line-height: 1.5; margin: 0 0 15px 0; color: #94a3b8;">
+                    In Deutschland und der EU ist die Bereitstellung einer Opt-Out-Möglichkeit für Web-Analytics in der Datenschutzerklärung gesetzlich vorgeschrieben. Dattrack bietet dafür zwei einfache Integrationswege an:
+                </p>
+                
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 5px;">
+                    <div style="flex: 1; min-width: 280px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); border-radius: 8px; padding: 15px; box-sizing: border-box;">
+                        <h4 style="color: #ffffff; font-size: 12px; font-weight: 700; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px;">Weg 1: WordPress Shortcode</h4>
+                        <p style="font-size: 11.5px; line-height: 1.4; color: #94a3b8; margin: 0 0 10px 0;">
+                            Füge einfach diesen Shortcode an der gewünschten Stelle in deine Datenschutzerklärung ein:
+                        </p>
+                        <pre style="background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #00f0ff; margin: 0;">[vgt_dattrack_optout]</pre>
+                        <p style="font-size: 11px; color: #64748b; margin: 8px 0 0 0;">
+                            Dies erzeugt ein fertiges, interaktives Kontrollzentrum für den Besucher zum Deaktivieren/Aktivieren.
+                        </p>
+                    </div>
+                    
+                    <div style="flex: 1; min-width: 280px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); border-radius: 8px; padding: 15px; box-sizing: border-box;">
+                        <h4 style="color: #ffffff; font-size: 12px; font-weight: 700; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px;">Weg 2: Manuelles JavaScript / Link</h4>
+                        <p style="font-size: 11.5px; line-height: 1.4; color: #94a3b8; margin: 0 0 10px 0;">
+                            Alternativ kannst du einen eigenen Link erstellen, der die Opt-Out-Funktion über den Browser-Speicher steuert:
+                        </p>
+                        <pre style="background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #00f0ff; margin: 0; white-space: pre-wrap; word-break: break-all;">&lt;a href="javascript:void(0);" onclick="localStorage.setItem('vgt_dt_consent', '0'); alert('Dattrack Analytics wurde deaktiviert.');"&gt;Hier klicken, um Dattrack zu deaktivieren&lt;/a&gt;</pre>
+                        <p style="font-size: 11px; color: #64748b; margin: 8px 0 0 0;">
+                            Dattrack blockiert daraufhin jegliche Ingestion-Pakete für diesen Browser sofort.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
         <?php
     }

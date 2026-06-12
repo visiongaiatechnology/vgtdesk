@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
 /**
  * MODULE: AEGIS (The Shield) - VGT SUPREME DIAMOND
  * STATUS: DIAMANT STATUS (WP.ORG COMPLIANT & OPEN SOURCE HARDENED)
- * KOGNITIVE UPGRADES (V3.1 HOTFIX EDITION):
+ * KOGNITIVE UPGRADES (V4.0 STABLE):
  * - [ FIXED ]: Localhost Proxy-Spoofing Bypass gelöst (Explizite Hostname-Filterung im IP-Validator).
  * - [ NEU ]: Anomaly Scoring System (Punkte-basiertes Modell statt binärem Block).
  * - [ NEU ]: Kryptografische JS-Challenge (Sanfter Schutz vor Spam/Bots, barrierefrei für echte Besucher).
@@ -433,7 +433,7 @@ class VGTS_Aegis {
                 <p style="font-size: 0.85rem; color: #6b7280;">Bitte aktivieren Sie JavaScript in Ihrem Browser, falls der Vorgang nicht automatisch fortgesetzt wird.</p>
                 
                 <div class="footer">
-                    VISIONGAIATECHNOLOGY AEGIS V3.1 • Secure Edge Protection
+                    VISIONGAIATECHNOLOGY AEGIS V4.0 • Secure Edge Protection
                 </div>
             </div>
 

@@ -3,7 +3,7 @@ declare(strict_types=1);
 if (!defined('ABSPATH')) exit;
 
 /**
- * MODULE: CHRONOS (APEX FUSION V3.0)
+ * MODULE: CHRONOS (APEX FUSION V4.0)
  * Status: ROBUST / TIME-SLICING (WP.ORG COMPLIANT)
  * Logic: Asynchrone State-Machine. Zerlegt Scans in mikroskopische Batches, 
  * um PHP-Timeouts zu umgehen. Resistent gegen Server-Restarts.

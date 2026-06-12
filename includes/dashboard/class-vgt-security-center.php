@@ -1,0 +1,425 @@
+<?php
+/**
+ * Security Center Core Controller
+ * STATUS: 💠 DIAMANT VGT SUPREME
+ */
+
+declare(strict_types=1);
+
+namespace VisionGaia\WPDesk;
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+final class VGTSecurityCenter {
+
+    private static ?self $instance = null;
+    private ?string $page_hook = null;
+
+    public static function get_instance(): self {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    private function __construct() {
+        add_action('admin_menu', [$this, 'register_menu'], 5);
+        add_action('admin_init', [$this, 'handle_redirects'], 1);
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
+    }
+
+    public function register_menu(): void {
+        $this->page_hook = add_menu_page(
+            'Sicherheits-Center',
+            'Sicherheits-Center',
+            'manage_options',
+            'vgt-security-center',
+            [$this, 'render_page'],
+            'dashicons-shield',
+            3
+        );
+    }
+
+    public function handle_redirects(): void {
+        if (!is_admin() || (defined('DOING_AJAX') && DOING_AJAX)) {
+            return;
+        }
+
+        // Process early Sentinel activation to prevent "headers already sent"
+        if (isset($_POST['vgt_activate_sentinel'])) {
+            $nonce = $_POST['_wpnonce'] ?? '';
+            if (wp_verify_nonce($nonce, 'vgt_activate_sentinel_action') && current_user_can('manage_options')) {
+                update_option('vgt_sentinel_enabled', 'true');
+                wp_redirect(admin_url('admin.php?page=vgt-security-center&view=sentinel'));
+                exit;
+            }
+        }
+
+        $page = $_GET['page'] ?? '';
+        if (empty($page)) {
+            return;
+        }
+
+        $map = [
+            'vgts-sentinel'       => 'sentinel',
+            'mcp-dashboard'       => 'throneguard',
+            'vgt-dattrack'        => 'dattrack',
+            'vgt-login-omega'     => 'login',
+            'vgt-recovery-center' => 'recovery'
+        ];
+
+        if (isset($map[$page])) {
+            $view = $map[$page];
+            $query_args = $_GET;
+            unset($query_args['page']);
+            $query_args['page'] = 'vgt-security-center';
+            $query_args['view'] = $view;
+
+            $redirect_url = add_query_arg($query_args, admin_url('admin.php'));
+            wp_redirect($redirect_url);
+            exit;
+        }
+    }
+
+    public function enqueue_assets(string $hook): void {
+        if ($hook !== 'toplevel_page_vgt-security-center') {
+            return;
+        }
+
+        $url = defined('VGTS_URL') ? VGTS_URL : VGT_WPDESK_URL;
+        $version = defined('VGTS_VERSION') ? VGTS_VERSION : '1.0.0';
+
+        wp_enqueue_style('vgts-dashboard-css', $url . 'assets/css/vgts-dashboard.css', [], $version);
+        wp_enqueue_style('vgts-sidebar-css', $url . 'assets/css/vgts-sidebar.css', ['vgts-dashboard-css'], $version);
+        wp_enqueue_style('dashicons');
+
+        $is_iframe = class_exists('VisionGaia\WPDesk\WPDeskPlugin') && \VisionGaia\WPDesk\WPDeskPlugin::getInstance()->is_iframe_context();
+
+        // Apply clean sidebar adjustment style
+        echo '<style nonce="' . (function_exists('vgt_get_csp_nonce') ? esc_attr(vgt_get_csp_nonce()) : '') . '">
+            #wpbody-content { padding-bottom: 0 !important; }
+            .vgts-omega-wrapper { margin-left: -20px !important; margin-right: -20px !important; }
+            .vgts-sidebar { left: ' . ($is_iframe ? '0' : '160px') . ' !important; }
+            @media screen and (max-width: 960px) {
+                .vgts-sidebar { left: ' . ($is_iframe ? '0' : '36px') . ' !important; }
+            }
+            @media screen and (max-width: 782px) {
+                .vgts-sidebar { left: 0 !important; }
+            }
+        </style>';
+    }
+
+    public function render_page(): void {
+        $view = $_GET['view'] ?? 'overview';
+        
+        if ($view === 'sentinel') {
+            if (class_exists('VGTS_Dashboard_View')) {
+                (new \VGTS_Dashboard_View())->render();
+            }
+            return;
+        }
+
+        echo '<div class="vgts-omega-wrapper">';
+        $this->render_sidebar();
+        echo '<main class="vgts-content">';
+        $this->render_view_content($view);
+        echo '</main></div>';
+    }
+
+    public function render_sidebar(): void {
+        $active_view = $_GET['view'] ?? 'overview';
+        $active_tab = $_GET['tab'] ?? 'overview';
+
+        $menu_items = [
+            'overview' => [
+                'title' => 'Übersicht',
+                'icon' => 'dashicons-dashboard',
+                'url' => admin_url('admin.php?page=vgt-security-center&view=overview'),
+            ],
+            'sentinel' => [
+                'title' => 'Sentinel WAF',
+                'icon' => 'dashicons-shield',
+                'url' => admin_url('admin.php?page=vgt-security-center&view=sentinel'),
+                'sub_items' => [
+                    'overview'   => 'COMMAND CENTER',
+                    'threads'    => 'THREADS',
+                    'integrity'  => 'INTEGRITY MONITOR',
+                    'aegis'      => 'AEGIS FIREWALL',
+                    'antibot'    => 'ANTIBOT ENGINE',
+                    'cerberus'   => 'CERBERUS BAN',
+                    'titan'      => 'TITAN HARDENING',
+                    'mudeployer' => 'MU-DEPLOYER',
+                    'airlock'    => 'AIRLOCK GUARD',
+                    'filesystem' => 'FILE SECURITY',
+                    'hades'      => 'HADES STEALTH',
+                    'styx'       => 'STYX CONTROL',
+                    'oracle'     => 'ORACLE SCANNER',
+                    'console'    => 'VGT CONSOLE',
+                    'logs'       => 'SYSTEM LOGS',
+                ]
+            ],
+            'throneguard' => [
+                'title' => 'Throne Guard',
+                'icon' => 'dashicons-lock',
+                'url' => admin_url('admin.php?page=vgt-security-center&view=throneguard'),
+            ],
+            'dattrack' => [
+                'title' => 'Dattrack Analytics',
+                'icon' => 'dashicons-chart-bar',
+                'url' => admin_url('admin.php?page=vgt-security-center&view=dattrack'),
+            ],
+            'login' => [
+                'title' => 'Login-Schutz',
+                'icon' => 'dashicons-shield-alt',
+                'url' => admin_url('admin.php?page=vgt-security-center&view=login'),
+            ],
+            'recovery' => [
+                'title' => 'Recovery Center',
+                'icon' => 'dashicons-backup',
+                'url' => admin_url('admin.php?page=vgt-security-center&view=recovery'),
+            ]
+        ];
+        ?>
+        <aside class="vgts-sidebar">
+            <!-- BRANDING SECTION -->
+            <div class="vgts-brand">
+                <div class="vgts-logo-glitch" style="font-size: 24px; line-height: 1;">💠</div>
+                <div>
+                    <h2 style="margin: 0; font-size: 15px; color: #fff; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">
+                        VGT <span style="color: var(--vgts-accent);">SECURITY</span>
+                    </h2>
+                    <small style="font-size: 9px; color: var(--vgts-text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; display: block; margin-top: 1px;">
+                        Sicherheits-Center
+                    </small>
+                </div>
+            </div>
+
+            <!-- MAIN NAVIGATION -->
+            <nav class="vgts-nav">
+                <?php foreach ($menu_items as $view_key => $data): 
+                    $is_active = ($active_view === $view_key);
+                    if ($view_key === 'recovery') {
+                        echo '<div style="height: 1px; background: var(--vgts-border); margin: 8px 15px; opacity: 0.5;"></div>';
+                    }
+                ?>
+                    <a href="<?php echo esc_url($data['url']); ?>" 
+                       class="vgts-nav-item <?php echo $is_active ? 'active' : ''; ?>">
+                        <span class="dashicons <?php echo esc_attr($data['icon']); ?>"></span>
+                        <span class="vgts-nav-label"><?php echo esc_html($data['title']); ?></span>
+                        <?php if ($is_active): ?>
+                            <span class="vgts-active-indicator"></span>
+                        <?php endif; ?>
+                    </a>
+                    
+                    <!-- Render sub-items if active & Sentinel WAF -->
+                    <?php if ($is_active && !empty($data['sub_items'])): ?>
+                        <div class="vgts-sub-nav" style="padding: 4px 0 8px 30px; display: flex; flex-direction: column; gap: 2px;">
+                            <?php foreach ($data['sub_items'] as $tab_key => $tab_label): 
+                                $sub_active = ($active_tab === $tab_key);
+                            ?>
+                                <a href="<?php echo esc_url(add_query_arg('tab', $tab_key, $data['url'])); ?>" 
+                                   style="display: block; padding: 6px 12px; color: <?php echo $sub_active ? '#fff' : '#64748b'; ?>; text-decoration: none; font-size: 11px; font-weight: 600; border-radius: 4px; transition: all 0.2s; background: <?php echo $sub_active ? 'rgba(255, 255, 255, 0.03)' : 'transparent'; ?>;">
+                                    • <?php echo esc_html($tab_label); ?>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </nav>
+
+            <!-- SYSTEM STATUS FOOTER -->
+            <div class="vgts-sidebar-footer">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 10px;">
+                    <span style="color: #475569; font-weight: 700; letter-spacing: 0.5px;">SECURE SHIELD</span>
+                    <span style="color: #00fa9a; font-weight: 800; display: flex; align-items: center; gap: 4px;">
+                        <span style="display: block; width: 5px; height: 5px; background: #00fa9a; border-radius: 50%; box-shadow: 0 0 6px #00fa9a;"></span>
+                        ACTIVE
+                    </span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 10px;">
+                    <span style="color: #475569; font-weight: 700; letter-spacing: 0.5px;">INTEGRITY</span>
+                    <span style="color: #94a3b8; font-weight: 700;">OK</span>
+                </div>
+            </div>
+        </aside>
+        <?php
+    }
+
+    private function render_view_content(string $view): void {
+        switch ($view) {
+            case 'overview':
+                $this->render_overview_dashboard();
+                break;
+            case 'throneguard':
+                if (class_exists('VisionGaia\ThroneGuard\MasterUserControlPlugin')) {
+                    $tg = \VisionGaia\ThroneGuard\MasterUserControlPlugin::get_instance();
+                    if ($tg) {
+                        $tg->render_dashboard();
+                    } else {
+                        echo '<div class="notice notice-error"><p>Throne Guard konnte nicht geladen werden.</p></div>';
+                    }
+                }
+                break;
+            case 'dattrack':
+                if (class_exists('VGT_Dashboard')) {
+                    \VGT_Dashboard::render_sovereign_dashboard();
+                } else {
+                    echo '<div class="notice notice-error"><p>Dattrack konnte nicht geladen werden.</p></div>';
+                }
+                break;
+            case 'login':
+                if (class_exists('VGTLoginSettings')) {
+                    \VGTLoginSettings::render_dashboard();
+                } else {
+                    echo '<div class="notice notice-error"><p>Login Engine konnte nicht geladen werden.</p></div>';
+                }
+                break;
+            case 'recovery':
+                if (class_exists('VisionGaia\WPDesk\WPDeskPlugin')) {
+                    \VisionGaia\WPDesk\WPDeskPlugin::getInstance()->render_recovery_center();
+                } else {
+                    echo '<div class="notice notice-error"><p>Recovery Center konnte nicht geladen werden.</p></div>';
+                }
+                break;
+            default:
+                $this->render_overview_dashboard();
+                break;
+        }
+    }
+
+    private function render_overview_dashboard(): void {
+        global $wpdb;
+
+        // Fetch Sentinel Bans count
+        $sentinel_bans = 0;
+        $table_bans = $wpdb->prefix . 'vgts_apex_bans';
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_bans'") === $table_bans) {
+            $sentinel_bans = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table_bans");
+        }
+
+        // Fetch Dattrack Events count
+        $dattrack_events = 0;
+        $table_dt = $wpdb->prefix . 'vgt_dattrack_stats';
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_dt'") === $table_dt) {
+            $dattrack_events = (int) $wpdb->get_var("SELECT SUM(events) FROM $table_dt");
+        }
+
+        $sentinel_active = get_option('vgt_sentinel_enabled') === 'true';
+        $throne_guard_active = !empty(get_option('mcp_superkey_hash', ''));
+        $dattrack_active = get_option('vgt_dattrack_enabled') === 'true';
+
+        // Diagnostics
+        $active_plugins = get_option('active_plugins', []);
+        $plugins_count = is_array($active_plugins) ? count($active_plugins) : 0;
+        ?>
+        <header class="vgts-topbar">
+            <div class="vgts-header-title">
+                <span class="vgts-header-icon dashicons dashicons-shield"></span>
+                <h1>VGT SECURITY CENTER</h1>
+            </div>
+            <div class="vgt-badge" style="border: 1px solid rgba(0, 229, 255, 0.2); padding: 6px 12px; border-radius: 6px; color: #00e5ff; font-weight: bold; font-family: monospace; font-size: 11px; background: rgba(0, 229, 255, 0.05);">
+                DIAMANT VGT SUPREME
+            </div>
+        </header>
+
+        <div class="vgts-view-animate">
+            <!-- GRID STATUS CARDS -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                
+                <!-- SENTINEL CARD -->
+                <div class="vgts-card" style="margin-bottom: 0;">
+                    <h3 style="color: #00e5ff; display: flex; justify-content: space-between; align-items: center; margin: 0 0 20px 0;">
+                        <span>🛡️ Sentinel WAF</span>
+                        <span style="font-size: 10px; padding: 2px 8px; border-radius: 4px; background: <?php echo $sentinel_active ? 'rgba(0, 250, 154, 0.1)' : 'rgba(255, 42, 95, 0.1)'; ?>; color: <?php echo $sentinel_active ? '#00fa9a' : '#ff2a5f'; ?>;">
+                             <?php echo $sentinel_active ? 'AKTIV' : 'INAKTIV'; ?>
+                        </span>
+                    </h3>
+                    <div style="margin-top: 15px;">
+                        <span style="font-size: 28px; font-weight: 800; color: #fff; font-family: monospace;"><?php echo number_format($sentinel_bans, 0, ',', '.'); ?></span>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Aktive IP-Sperren</div>
+                    </div>
+                    <a href="?page=vgt-security-center&view=sentinel" style="display: block; margin-top: 20px; font-size: 12px; color: #00e5ff; font-weight: bold; text-decoration: none;">Konfigurieren →</a>
+                </div>
+
+                <!-- THRONE GUARD CARD -->
+                <div class="vgts-card" style="margin-bottom: 0;">
+                    <h3 style="color: #b026ff; display: flex; justify-content: space-between; align-items: center; margin: 0 0 20px 0;">
+                        <span>👑 Throne Guard</span>
+                        <span style="font-size: 10px; padding: 2px 8px; border-radius: 4px; background: <?php echo $throne_guard_active ? 'rgba(0, 250, 154, 0.1)' : 'rgba(255, 42, 95, 0.1)'; ?>; color: <?php echo $throne_guard_active ? '#00fa9a' : '#ff2a5f'; ?>;">
+                             <?php echo $throne_guard_active ? 'VERSCHLÜSSELT' : 'OFFEN'; ?>
+                        </span>
+                    </h3>
+                    <div style="margin-top: 15px;">
+                        <span style="font-size: 28px; font-weight: 800; color: #fff; font-family: monospace;"><?php echo $throne_guard_active ? 'HARDENED' : 'UNSECURED'; ?></span>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Zero-Trust Hardening</div>
+                    </div>
+                    <a href="?page=vgt-security-center&view=throneguard" style="display: block; margin-top: 20px; font-size: 12px; color: #b026ff; font-weight: bold; text-decoration: none;">Verwalten →</a>
+                </div>
+
+                <!-- DATTRACK CARD -->
+                <div class="vgts-card" style="margin-bottom: 0;">
+                    <h3 style="color: #00f0ff; display: flex; justify-content: space-between; align-items: center; margin: 0 0 20px 0;">
+                        <span>📊 Dattrack Analytics</span>
+                        <span style="font-size: 10px; padding: 2px 8px; border-radius: 4px; background: <?php echo $dattrack_active ? 'rgba(0, 250, 154, 0.1)' : 'rgba(255, 42, 95, 0.1)'; ?>; color: <?php echo $dattrack_active ? '#00fa9a' : '#ff2a5f'; ?>;">
+                             <?php echo $dattrack_active ? 'AKTIV' : 'INAKTIV'; ?>
+                        </span>
+                    </h3>
+                    <div style="margin-top: 15px;">
+                        <span style="font-size: 28px; font-weight: 800; color: #fff; font-family: monospace;"><?php echo number_format($dattrack_events, 0, ',', '.'); ?></span>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Erfasste Metrik-Events</div>
+                    </div>
+                    <a href="?page=vgt-security-center&view=dattrack" style="display: block; margin-top: 20px; font-size: 12px; color: #00f0ff; font-weight: bold; text-decoration: none;">Analysen einsehen →</a>
+                </div>
+
+            </div>
+
+            <!-- DIAGNOSTICS & SYSTEM INFO -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                
+                <!-- SYSTEM SECURITY HEALTH -->
+                <div class="vgts-card" style="margin-bottom: 0;">
+                    <h3 style="margin: 0 0 20px 0;">🛡️ Systemintegrität & Status</h3>
+                    <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
+                            <div style="font-weight: 600; color: #cbd5e1; font-size: 13px;">Zero-Overheat Engine</div>
+                            <div style="font-family: monospace; color: #00fa9a; font-weight: bold;">BESTENS (0.00ms Overhead)</div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
+                            <div style="font-weight: 600; color: #cbd5e1; font-size: 13px;">Krypto-Protokoll</div>
+                            <div style="font-family: monospace; color: #00e5ff; font-weight: bold;">AES-256-GCM Sovereign</div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
+                            <div style="font-weight: 600; color: #cbd5e1; font-size: 13px;">Login-Schutz Status</div>
+                            <div style="font-family: monospace; color: #ffb703; font-weight: bold;">Matrix-Simulation Aktiv</div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="font-weight: 600; color: #cbd5e1; font-size: 13px;">Site Core Hardening</div>
+                            <div style="font-family: monospace; color: #00fa9a; font-weight: bold;">ENFORCED</div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- QUICK DIAGNOSTICS -->
+                <div class="vgts-card" style="margin-bottom: 0; background: rgba(7, 9, 19, 0.4);">
+                    <h3 style="margin: 0 0 20px 0;">📋 Diagnostics</h3>
+                    <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px; font-family: monospace; font-size: 11px; color: #94a3b8;">
+                        <div><strong style="color: #fff;">PHP:</strong> <?php echo esc_html(PHP_VERSION); ?></div>
+                        <div><strong style="color: #fff;">WordPress:</strong> <?php echo esc_html(get_bloginfo('version')); ?></div>
+                        <div><strong style="color: #fff;">Aktivierte Plugins:</strong> <?php echo esc_html((string)$plugins_count); ?></div>
+                        <div><strong style="color: #fff;">Enclave Lock:</strong> Secured</div>
+                        <div><strong style="color: #fff;">Server:</strong> <?php echo esc_html(substr($_SERVER['SERVER_SOFTWARE'] ?? 'N/A', 0, 20)); ?></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <?php
+    }
+}

@@ -29,14 +29,13 @@ class VGTS_Dashboard_Core {
             require_once VGTS_PATH . 'includes/dashboard/class-vis-dashboard-view.php';
         }
 
-        $this->page_hook = add_menu_page(
+        $this->page_hook = add_submenu_page(
+            'vgt-security-center',
             'Sentinel', 
-            'Sentinel', 
+            'Sentinel WAF', 
             'manage_options', 
             'vgts-sentinel', 
-            [new VGTS_Dashboard_View(), 'render'], 
-            defined('VGTS_SENTINEL_ICON') ? VGTS_SENTINEL_ICON : '', 
-            99
+            [new VGTS_Dashboard_View(), 'render']
         );
     }
 
@@ -69,7 +68,9 @@ class VGTS_Dashboard_Core {
     }
 
     public function enqueue_assets(string $hook): void {
-        if ($hook !== $this->page_hook) {
+        $is_sentinel = ($hook === $this->page_hook) || 
+                       ($hook === 'toplevel_page_vgt-security-center' && isset($_GET['view']) && $_GET['view'] === 'sentinel');
+        if (!$is_sentinel) {
             return;
         }
 

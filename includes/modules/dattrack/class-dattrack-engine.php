@@ -108,15 +108,24 @@ final class VGT_Dattrack_Engine {
     }
 
     public static function construct_command_center(): void {
-        add_menu_page(
+        add_submenu_page(
+            'vgt-security-center',
             'VGT Dattrack Vault',
             'Dattrack',
             'manage_options',
             'vgt-dattrack',
-            [\VGT_Dashboard::class, 'render_sovereign_dashboard'],
-            'dashicons-shield',
-            80
+            [\VGT_Dashboard::class, 'render_sovereign_dashboard']
         );
+    }
+
+    public static function generate_site_token(): string {
+        $secret = \VGT_Crypto::get_master_key();
+        if (empty($secret)) {
+            $secret = wp_salt('nonce');
+        }
+        $action = 'vgt_dt_pulse';
+        $tick = ceil(time() / (12 * HOUR_IN_SECONDS));
+        return hash_hmac('sha256', $action . '|' . $tick . '|' . home_url(), $secret);
     }
 
     public static function enqueue_frontend_assets(): void {
@@ -127,12 +136,15 @@ final class VGT_Dattrack_Engine {
         wp_enqueue_script('vgt-dt-consent-js', VGT_WPDESK_URL . 'assets/js/dattrack-consent.js', [], '1.4.0', true);
 
         wp_localize_script('vgt-dt-consent-js', 'vgtConfig', [
-            'endpoint' => admin_url('admin-ajax.php')
+            'endpoint' => admin_url('admin-ajax.php'),
+            'token'    => self::generate_site_token()
         ]);
     }
 
     public static function enqueue_backend_assets(string $hook): void {
-        if ($hook !== 'toplevel_page_vgt-dattrack') return;
+        $is_dt_page = ($hook === 'toplevel_page_vgt-dattrack') || 
+                      ($hook === 'toplevel_page_vgt-security-center' && isset($_GET['view']) && $_GET['view'] === 'dattrack');
+        if (!$is_dt_page) return;
         
         wp_enqueue_style('vgt-dt-dashboard-css', VGT_WPDESK_URL . 'assets/css/dattrack-dashboard.css', [], '1.4.0');
         wp_enqueue_script('vgt-dt-dashboard-js', VGT_WPDESK_URL . 'assets/js/dattrack-dashboard.js', [], '1.4.0', true);

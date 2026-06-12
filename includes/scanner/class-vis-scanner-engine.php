@@ -147,6 +147,13 @@ class VGTS_Scanner_Engine {
                 // MEF: Path-Generierung vorziehen. Trimmen von führenden Slashes für striktes Prefix-Matching.
                 $rel_path = ltrim(str_replace($root, '', $path), '/');
 
+                // Skip scanning itself to avoid flagging the hardcoded signatures
+                $self_rel_path = ltrim(str_replace($root, '', wp_normalize_path(__FILE__)), '/');
+                if ($rel_path === $self_rel_path) {
+                    $count++;
+                    continue;
+                }
+
                 foreach ($this->exclude_dirs as $ex) {
                     // MEF: An den relativen Start des Pfades binden. Verhindert Shadowing in Sub-Ordnern.
                     if (str_starts_with($rel_path, $ex . '/')) {
@@ -414,6 +421,12 @@ class VGTS_Scanner_Engine {
                 $path = wp_normalize_path($file->getPathname());
                 // MEF: Konsistente Path-Generierung auch im Baseline-Regenerator.
                 $rel_path = ltrim(str_replace($root, '', $path), '/');
+
+                // Skip scanning itself to avoid flagging the hardcoded signatures
+                $self_rel_path = ltrim(str_replace($root, '', wp_normalize_path(__FILE__)), '/');
+                if ($rel_path === $self_rel_path) {
+                    continue;
+                }
 
                 foreach ($this->exclude_dirs as $ex) {
                     // MEF: Strict Matching auch hier anwenden.

@@ -22,7 +22,9 @@ final class VGTLoginSettings {
     }
 
     public static function enqueue_assets(string $hook): void {
-        if ($hook !== 'toplevel_page_vgt-login-omega') {
+        $is_login = ($hook === 'toplevel_page_vgt-login-omega') ||
+                    ($hook === 'toplevel_page_vgt-security-center' && isset($_GET['view']) && $_GET['view'] === 'login');
+        if (!$is_login) {
             return;
         }
 
@@ -31,14 +33,13 @@ final class VGTLoginSettings {
     }
 
     public static function register_menu(): void {
-        add_menu_page(
+        add_submenu_page(
+            'vgt-security-center',
             'VGT Login Engine',
-            'VGT Login',
+            'Login-Schutz',
             'manage_options',
             'vgt-login-omega',
-            [self::class, 'render_dashboard'],
-            'dashicons-shield-alt',
-            3
+            [self::class, 'render_dashboard']
         );
     }
 
