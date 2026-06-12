@@ -1,4 +1,9 @@
-# 🖥️ VGT WP-Desk — Premium Slim Desktop Layer
+# 🖥️ VGT WP-Desk — Hardened WordPress Operator Workspace
+
+> *"WordPress stays WordPress. The operator gets a hardened desktop above it."*
+> *AGPLv3 — Local-first, framework-free and built for operators, not SaaS dashboards.*
+
+---
 
 [![License](https://img.shields.io/badge/License-AGPLv3-green?style=for-the-badge)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-1.0.0--Beta__v4-brightgreen?style=for-the-badge)](#)
@@ -9,9 +14,6 @@
 [![Status](https://img.shields.io/badge/Status-BETA__V4-yellow?style=for-the-badge)](#)
 [![Security](https://img.shields.io/badge/Security-Diamant_VGT_Supreme-red?style=for-the-badge)](#)
 [![VGT](https://img.shields.io/badge/VGT-VisionGaia_Technology-red?style=for-the-badge)](https://visiongaiatechnology.de)
-
-> *"No frameworks. No build pipeline. No compromise on UX."*  
-> *AGPLv3 — Open Source Core. Built for operators, not for SaaS dashboards.*
 
 ---
 
@@ -30,47 +32,68 @@ Found a bug or have an improvement? **Open an issue or contact us.**
 
 ---
 
+
+
 ## 🔍 What is VGT WP-Desk?
 
-VGT WP-Desk is a **modular, framework-free WordPress backend enhancement** that transforms the classic WordPress admin interface into a high-performance, OS-style desktop environment — hardened at the kernel level by an integrated security framework.
+VGT WP-Desk is a **modular, zero-dependency WordPress Operator Workspace** that transforms the classic WordPress admin interface into a high-performance, OS-style desktop environment with integrated security, diagnostics and local telemetry controls.
 
-It is engineered under the **Zero-Overheat Doctrine**: maximum performance, absolute compatibility with WordPress Core and third-party hooks, and a strict refusal to rely on heavy frameworks or build pipelines.
+It is not a traditional admin theme and not a standalone security plugin. WP-Desk acts as a **hardened backend operating layer**: WordPress Core and third-party plugin interfaces remain intact, while WP-Desk provides a modern multi-window workspace, persistent per-user desktop state, same-origin iframe isolation and a unified Security Center.
 
-Installed plugins are automatically detected, mapped as standalone desktop apps, and isolated within a **chromeless iframe architecture** — eliminating sidebar fragmentation and replacing it with a consistent, distraction-free multi-window workflow.
+Engineered under the **Zero-Overheat Doctrine**, WP-Desk avoids heavy frameworks, external runtimes and build pipelines. The system is built with vanilla JavaScript, PHP and CSS, served locally from the WordPress installation, and designed to preserve compatibility with native WordPress hooks, admin screens and plugin workflows.
 
-**Beta v4** introduces modular telemetry integrations with smart compatibility rules, UI scaling bounds calculations, right-edge responsive widget locking, and comprehensive AJAX exception jailing.
+Installed plugins are automatically detected, mapped as desktop applications and opened inside a chromeless same-origin iframe workspace. This replaces fragmented sidebar navigation with a consistent operator cockpit while keeping the underlying WordPress admin screens functional and recognizable.
 
-```
+Starting with **Beta v4**, WP-Desk evolves into a full **local-first operations and security environment**. The integrated Security Center combines **Sentinel**, **Throne Guard** and **Dattrack** into a single control layer for request protection, privilege hardening, diagnostics, local telemetry and recovery workflows.
+
+```text
 Classic WordPress Admin:
 → Fragmented sidebar navigation
 → Context-switching overhead
 → No persistent workspace state
-→ Monotone, static interface
-→ No integrated WAF or session hardening
+→ Limited operational visibility
+→ No unified security control layer
 
-VGT WP-Desk OS Layer (Beta v4):
-→ IframeTransformer          — 100% hook-preserving CSS-Grid tile engine
-→ Multi-Window Workspace     — drag, resize, minimize, focus, Aero Snap
-→ App Registry               — auto-maps installed plugins as desktop apps
-→ Submenu Popups             — glassmorphic per-app submenu dropdowns
-→ Folder Mode                — drag-and-drop app grouping on desktop
-→ Multi-Layout Engine        — macOS Cupertino / Windows Redmond / Linux Tux
-→ Command Center             — unified admin panel (diagnostics, security, shortcuts)
-→ RAM Hibernation            — iframe suspend/rehydrate on minimize/restore
-→ Custom DB Layer            — relational settings table with delta-merge
-→ Per-User Opt-in            — desktop mode off by default, per-user activation
-→ AEGIS WAF                  — anomaly-scoring stream WAF (SQLi, XSS, RCE, LFI)
-→ CERBERUS                   — brute-force shield + device fingerprinting
-→ AIRLOCK                    — binary-level upload inspection
-→ HADES                      — WordPress path obfuscation + route masking
-→ CHRONOS                    — async filesystem integrity + malware scanner
-→ GHOST TRAP                 — deception honeypot grid
-→ Throne Guard               — toxic privilege stripping + Superkey vault
-→ Dattrack Telemetry         — sovereign visitor tracking and analytics integration
-→ CSP Nonce Bridge           — automatic nonce propagation to all iframe assets
-→ DOM XSS Engine             — full HTML escaping before DOM injection
-→ Glassmorphic UI            — wallpaper engine, accent colors, blur, custom modals
+VGT WP-Desk Operator Workspace:
+→ OS-style multi-window desktop for WordPress
+→ Per-user opt-in with classic admin fallback
+→ Hook-preserving iframe workspace
+→ Automatic plugin-to-app mapping
+→ Folder Mode, layouts, widgets and persistent state
+→ Command Center for diagnostics and runtime operations
+→ Security Center integrating Sentinel, Throne Guard and Dattrack
+→ Local telemetry without third-party tracking
+→ Same-origin deep-link protection
+→ CSP-aware asset loading and DOM XSS hardening
+→ Zero-CDN, zero-build, zero-framework runtime
 ```
+
+### Security Center
+
+The WP-Desk Security Center brings the core VGT security components into one operator interface:
+
+```text
+VGT WP-Desk Security Center
+├── Sentinel
+│   ├── WAF status
+│   ├── threat logs
+│   ├── ban / unban controls
+│   └── request and payload protection
+│
+├── Throne Guard
+│   ├── privilege hardening
+│   ├── Master role protection
+│   ├── Superkey session gate
+│   └── toxic capability stripping
+│
+└── Dattrack
+    ├── local telemetry
+    ├── privacy-focused analytics
+    ├── visitor event insight
+    └── sovereign data storage
+```
+
+WP-Desk is designed for administrators, publishers, developers and security-conscious operators who want WordPress to remain self-hosted, extensible and familiar — while gaining a faster workspace, stronger operational control and a hardened local security layer.
 
 ---
 
