@@ -1,0 +1,424 @@
+/**
+ * VGT WP-Desk — Modular Style: Core & Canvas
+ */
+
+/* WordPress Admin-Reset */
+html, 
+body, 
+#wpwrap, 
+#wpcontent, 
+#wpbody, 
+#wpbody-content {
+    overflow: hidden !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#wpbody-content { 
+    padding-bottom: 0 !important; 
+}
+
+#wpcontent, 
+#wpbody { 
+    padding: 0 !important; 
+    margin: 0 !important; 
+}
+
+#adminmenumain, 
+#wpadminbar, 
+#wpfooter { 
+    display: none !important; 
+}
+
+html, html.wp-toolbar {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Core Utility Classes */
+.hidden {
+    display: none !important;
+}
+.absolute {
+    position: absolute !important;
+}
+.relative {
+    position: relative !important;
+}
+.flex-1 {
+    flex: 1 1 0% !important;
+}
+
+/* Base Styles (Native WordPress System-Font-Stack for DSGVO / GDPR Compliance) */
+.vgt-desk-shell {
+    height: 100vh !important;
+    width: 100vw !important;
+    background-color: #020617 !important;
+    overflow: hidden !important;
+    position: relative;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    color: #f1f5f9;
+}
+
+/* Wallpaper-Engine */
+.vgt-wallpaper-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.7s ease-in-out;
+    z-index: 0;
+    transform: scale(1.05);
+}
+
+.vgt-wallpaper-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(2, 6, 23, 0.6) 0%, transparent 50%, rgba(2, 6, 23, 0.3) 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Layout Canvas */
+.vgt-interface-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 14px;
+    z-index: 10;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* Premium Glassmorphism & Shadow */
+.glassmorphism {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.45) 0%, rgba(var(--vgt-accent-rgb), 0.04) 100%);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.window-shadow {
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.7);
+}
+
+/* Header Top-Bar */
+.vgt-topbar {
+    width: 100%;
+    height: 44px;
+    border-radius: 12px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 9999 !important;
+    box-sizing: border-box;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    animation: slideDownVGT 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideDownVGT {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.vgt-topbar-left,
+.vgt-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.vgt-logo-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+.vgt-logo-group:hover {
+    opacity: 0.8;
+}
+
+.vgt-topbar-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #6366f1;
+    animation: pulseDot 2s infinite;
+}
+
+@keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.15); }
+}
+
+.vgt-topbar-title {
+    font-weight: 700;
+    color: #6366f1;
+}
+.vgt-topbar-subtitle {
+    color: #cbd5e1;
+}
+.vgt-topbar-separator {
+    color: #475569;
+}
+
+/* BRANDING & VERSION IN TOP-BAR */
+.vgt-topbar-branding {
+    font-size: 11px;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.vgt-topbar-version-badge {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 9px;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+@media (max-width: 900px) {
+    .vgt-topbar-branding {
+        display: none !important;
+    }
+}
+
+.vgt-topbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+@media (max-width: 1024px) {
+    .vgt-topbar-nav {
+        display: none !important;
+    }
+}
+
+.vgt-topbar-btn {
+    background: transparent;
+    border: none;
+    color: #cbd5e1;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    transition: color 0.15s ease;
+}
+.vgt-topbar-btn:hover {
+    color: #ffffff;
+}
+
+.vgt-topbar-logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: rgba(244, 63, 94, 0.08);
+    border: 1px solid rgba(244, 63, 94, 0.15);
+    color: #f43f5e !important;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.vgt-topbar-logout-btn:hover {
+    background: rgba(244, 63, 94, 0.16);
+    color: #ffffff !important;
+    box-shadow: 0 0 10px rgba(244, 63, 94, 0.15);
+}
+
+/* User Profil & Clock in Header */
+.vgt-profile-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: background-color 0.15s ease;
+}
+.vgt-profile-badge:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.vgt-profile-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: rgba(99, 102, 241, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+.vgt-profile-name {
+    font-weight: 600;
+    color: #e2e8f0;
+}
+
+.vgt-clock-badge {
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+/* Workspace Canvas */
+.vgt-workspace {
+    flex: 1 1 0% !important;
+    width: 100%;
+    position: relative;
+    margin: 12px 0;
+    overflow: visible !important; 
+    z-index: 10;
+}
+
+/* ==========================================================================
+   RESTORED MISSING STYLES (AUTOMATIC COMPARISON)
+   ========================================================================== */
+
+:root {
+    --vgt-accent-color: #6366f1;
+    --vgt-accent-rgba15: rgba(99, 102, 241, 0.15);
+    --vgt-accent-rgba8: rgba(99, 102, 241, 0.08);
+    --vgt-accent-rgb: 99, 102, 241;
+    --vgt-window-bg: linear-gradient(135deg, rgba(10, 13, 22, 0.96) 0%, rgba(var(--vgt-accent-rgb), 0.035) 100%);
+    --vgt-dock-bg: linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(var(--vgt-accent-rgb), 0.05) 100%);
+}
+
+.bg-gold:hover {
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.7) !important;
+    transform: scale(1.15) !important;
+}
+
+.desktop-folder {
+    cursor: pointer;
+}
+
+@keyframes vgtFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes vgtScaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.vgt-desk-shell *::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important;
+}
+
+.vgt-desk-shell *::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+.vgt-desk-shell *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 99px !important;
+}
+
+.vgt-desk-shell *::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+.vgt-desk-shell * {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent !important;
+}
+
+.vgt-gold-mode * {
+    transition-property: border-color, box-shadow, background !important;
+    transition-duration: 0.4s !important;
+    transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.vgt-gold-mode .vgt-topbar {
+    background: linear-gradient(90deg,
+        rgba(18, 12, 2, 0.75) 0%,
+        rgba(38, 26, 4, 0.65) 50%,
+        rgba(18, 12, 2, 0.75) 100%) !important;
+    border-color: rgba(218, 165, 32, 0.35) !important;
+    box-shadow:
+        0 10px 30px -5px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(218, 165, 32, 0.08),
+        inset 0 1px 0 rgba(255, 215, 0, 0.1) !important;
+}
+
+.vgt-gold-mode #vgt-topbar-dot {
+    background: linear-gradient(135deg, #b8860b 0%, #ffd700 40%, #daa520 70%, #b8860b 100%) !important;
+    animation: goldPulseDot 2.5s ease-in-out infinite !important;
+}
+
+@keyframes goldPulseDot {
+    0%, 100% { box-shadow: 0 0 6px rgba(255, 215, 0, 0.5); }
+    50%       { box-shadow: 0 0 16px rgba(255, 215, 0, 0.95); }
+}
+
+.vgt-gold-mode .vgt-dock {
+    background: linear-gradient(180deg,
+        rgba(22, 15, 2, 0.7) 0%,
+        rgba(35, 23, 3, 0.62) 100%) !important;
+    border-color: rgba(218, 165, 32, 0.3) !important;
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.8),
+        0 -2px 15px rgba(218, 165, 32, 0.06),
+        inset 0 1px 0 rgba(255, 215, 0, 0.08) !important;
+}
+
+.vgt-gold-mode .glassmorphism {
+    border-color: rgba(218, 165, 32, 0.12) !important;
+}
+
+.vgt-gold-mode .vgt-cc-sidebar {
+    border-right-color: rgba(218, 165, 32, 0.15) !important;
+}
+
+.vgt-gold-mode ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #8b6010 0%, #daa520 50%, #8b6010 100%) !important;
+    border-radius: 99px !important;
+}
+
+.vgt-gold-mode .vgt-context-menu,
+.vgt-gold-mode .vgt-submenu-popup {
+    border-color: rgba(218, 165, 32, 0.25) !important;
+}
+
+@keyframes vgtGoldModeIn {
+    from { filter: brightness(0.85) saturate(0.5); }
+    to   { filter: brightness(1) saturate(1); }
+}
+
+.vgt-gold-mode .vgt-dock,
+.vgt-gold-mode .vgt-topbar {
+    animation: vgtGoldModeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+}

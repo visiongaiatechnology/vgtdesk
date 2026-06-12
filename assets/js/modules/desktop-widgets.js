@@ -6,13 +6,17 @@
 Object.assign(window.VGTDeskEngine, {
     initWidgets() {
         const textarea = document.getElementById('vgt-widget-notes-text');
-        if (!textarea) return;
-        
-        textarea.value = localStorage.getItem('vgt_widget_notes') || '';
-        
-        textarea.addEventListener('input', () => {
-            localStorage.setItem('vgt_widget_notes', textarea.value);
-        });
+        if (textarea) {
+            textarea.value = localStorage.getItem('vgt_widget_notes') || '';
+            textarea.addEventListener('input', () => {
+                localStorage.setItem('vgt_widget_notes', textarea.value);
+            });
+        }
+    },
+
+    isSystemWidgetActive() {
+        const w = document.getElementById('widget-system');
+        return w && this.userSettings.widgets_visible === true && w.style.display !== 'none';
     },
 
     initSentinelWidget() {
@@ -112,8 +116,20 @@ Object.assign(window.VGTDeskEngine, {
             const id = widget.id;
             const saved = positions[id];
             if (saved) {
-                if (saved.left) widget.style.left = saved.left;
-                if (saved.top) widget.style.top = saved.top;
+                if (saved.left) {
+                    widget.style.left = saved.left;
+                    widget.style.right = '';
+                } else if (saved.right) {
+                    widget.style.right = saved.right;
+                    widget.style.left = '';
+                }
+                if (saved.top) {
+                    widget.style.top = saved.top;
+                    widget.style.bottom = '';
+                } else if (saved.bottom) {
+                    widget.style.bottom = saved.bottom;
+                    widget.style.top = '';
+                }
                 if (saved.visible === false) {
                     widget.style.display = 'none';
                 } else if (saved.visible === true) {
@@ -138,26 +154,39 @@ Object.assign(window.VGTDeskEngine, {
                 
                 if (e.button !== 0) return;
                 
+                const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
                 isDragging = true;
                 widget.classList.add('dragging');
                 
                 const rect = widget.getBoundingClientRect();
                 const wsRect = workspace.getBoundingClientRect();
                 
-                offsetX = e.clientX - rect.left;
-                offsetY = e.clientY - rect.top;
+                offsetX = (e.clientX - rect.left) / zoom;
+                offsetY = (e.clientY - rect.top) / zoom;
                 
                 const onMouseMove = (ev) => {
                     if (!isDragging) return;
                     
-                    let left = ev.clientX - wsRect.left - offsetX;
-                    let top = ev.clientY - wsRect.top - offsetY;
+                    const z = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
+                    const wsR = workspace.getBoundingClientRect();
+                    const r = widget.getBoundingClientRect();
+                    
+                    const wsLeft = wsR.left / z;
+                    const wsTop = wsR.top / z;
+                    const wsWidth = wsR.width / z;
+                    const wsHeight = wsR.height / z;
+                    const widgetWidth = r.width / z;
+                    const widgetHeight = r.height / z;
+                    
+                    let left = (ev.clientX / z) - wsLeft - offsetX;
+                    let top = (ev.clientY / z) - wsTop - offsetY;
                     
                     if (left < 10) left = 10;
                     if (top < 10) top = 10;
-                    if (left > wsRect.width - rect.width - 10) left = wsRect.width - rect.width - 10;
-                    if (top > wsRect.height - rect.height - 10) top = wsRect.height - rect.height - 10;
+                    if (left > wsWidth - widgetWidth - 10) left = wsWidth - widgetWidth - 10;
+                    if (top > wsHeight - widgetHeight - 10) top = wsHeight - widgetHeight - 10;
                     
+                    widget.style.right = '';
                     widget.style.left = `${left}px`;
                     widget.style.top = `${top}px`;
                 };
@@ -173,11 +202,28 @@ Object.assign(window.VGTDeskEngine, {
                     if (!this.userSettings.widget_positions || Array.isArray(this.userSettings.widget_positions)) {
                         this.userSettings.widget_positions = {};
                     }
-                    this.userSettings.widget_positions[widget.id] = {
-                        left: widget.style.left,
+                    
+                    const z = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
+                    const wsR = workspace.getBoundingClientRect();
+                    const r = widget.getBoundingClientRect();
+                    const wsWidth = wsR.width / z;
+                    const widgetWidth = r.width / z;
+                    
+                    const leftVal = parseFloat(widget.style.left);
+                    let pos = {
                         top: widget.style.top,
                         visible: widget.style.display !== 'none'
                     };
+                    
+                    if (leftVal > (wsWidth - widgetWidth) / 2) {
+                        // Right-aligned widget saving
+                        const rightVal = wsWidth - leftVal - widgetWidth;
+                        pos.right = `${rightVal}px`;
+                    } else {
+                        pos.left = widget.style.left;
+                    }
+                    
+                    this.userSettings.widget_positions[widget.id] = pos;
                     this.saveUserSetting('widget_positions', this.userSettings.widget_positions);
                 };
                 
@@ -185,6 +231,10 @@ Object.assign(window.VGTDeskEngine, {
                 document.addEventListener('mouseup', onMouseUp);
             });
         });
+
+        if (this.isSystemWidgetActive()) {
+            this.startDiagnosticsPolling();
+        }
     },
 
     /* ==========================================================================
@@ -271,5 +321,174 @@ Object.assign(window.VGTDeskEngine, {
             cancelAnimationFrame(this.ccGraphInterval);
             this.ccGraphInterval = null;
         }
+    },
+
+    updateWidgetData(diag) {
+        // 1. Live Threat-Stream Widget
+        const threatList = document.getElementById('vgt-threat-stream-list');
+        if (threatList && diag.threats) {
+            let html = '';
+            diag.threats.forEach(t => {
+                const ipEscaped = this.escapeHTML(t.ip);
+                const typeEscaped = this.escapeHTML(t.type);
+                const msgEscaped = this.escapeHTML(t.message);
+                const verEscaped = this.escapeHTML(t.version);
+
+                let badgeColor = '#ef4444'; // default red
+                if (t.type === 'SQLi') badgeColor = '#f59e0b'; // amber
+                if (t.type === 'Brute-Force') badgeColor = '#3b82f6'; // blue
+
+                html += `
+                    <div class="vgt-threat-card" style="padding: 8px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; display: flex; flex-direction: column; gap: 4px; font-size: 11px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-weight: 700; color: #ffffff;">
+                            <span style="font-family: monospace;">${ipEscaped}</span>
+                            <span class="vgt-badge-item" style="background: ${badgeColor}15; color: ${badgeColor}; border: 1px solid ${badgeColor}30; font-size: 9px; padding: 2px 4px; border-radius: 4px;">${typeEscaped}</span>
+                        </div>
+                        <div style="color: #94a3b8; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${msgEscaped}">${msgEscaped}</div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+                            <span style="color: #64748b; font-size: 9px;">${verEscaped}</span>
+                            <button onclick="VGTDeskEngine.banIP('${ipEscaped}', this)" class="vgt-btn-danger" style="font-size: 9px; padding: 2px 6px; line-height: 1; border-radius: 4px; border: none; cursor: pointer; font-weight: 700;">Hard Punish</button>
+                        </div>
+                    </div>
+                `;
+            });
+            threatList.innerHTML = html;
+        }
+
+        // 2. Dattrack Telemetry Widget
+        const dtTodayEvents = document.getElementById('vgt-dt-today-events');
+        const dtTodayUsers = document.getElementById('vgt-dt-today-users');
+        const dtChart = document.getElementById('vgt-dattrack-chart');
+
+        if (diag.dattrack && diag.dattrack.length > 0) {
+            const today = diag.dattrack[diag.dattrack.length - 1];
+            if (dtTodayEvents) dtTodayEvents.textContent = today.events;
+            if (dtTodayUsers) dtTodayUsers.textContent = today.users;
+
+            if (dtChart) {
+                const maxEvents = Math.max(...diag.dattrack.map(d => d.events), 1);
+                let chartHtml = '';
+                diag.dattrack.forEach(day => {
+                    const heightPct = Math.max(10, Math.round((day.events / maxEvents) * 100));
+                    chartHtml += `
+                        <div class="vgt-dt-bar-wrapper" style="display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1;">
+                            <div class="vgt-dt-bar" style="width: 12px; height: ${heightPct}%; background: var(--vgt-accent-color); border-radius: 4px 4px 0 0; transition: height 0.3s;" title="${day.events} Hits (${day.users} Uniques)"></div>
+                            <span style="font-size: 8px; color: #64748b;">${day.date}</span>
+                        </div>
+                    `;
+                });
+                dtChart.innerHTML = chartHtml;
+            }
+        }
+
+        // 3. Sovereign Optimizer Widget
+        const optOverhead = document.getElementById('vgt-opt-overhead');
+        const optTransients = document.getElementById('vgt-opt-transients');
+        if (optOverhead && diag.db_overhead !== undefined) {
+            const sizeKB = Math.round(diag.db_overhead / 1024);
+            if (sizeKB > 1024) {
+                optOverhead.textContent = `${(sizeKB / 1024).toFixed(1)} MB`;
+            } else {
+                optOverhead.textContent = `${sizeKB} KB`;
+            }
+        }
+        if (optTransients && diag.transient_count !== undefined) {
+            optTransients.textContent = diag.transient_count;
+        }
+    },
+
+    banIP(ip, btn) {
+        if (typeof vgtConfig === 'undefined' || !vgtConfig.ajaxUrl) return;
+
+        this.playSound('click');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Blocking...';
+            btn.style.opacity = '0.6';
+        }
+
+        const formData = new FormData();
+        formData.append('action', 'vgt_ban_ip');
+        formData.append('nonce', vgtConfig.nonce);
+        formData.append('ip', ip);
+        formData.append('reason', 'Permanente Sperrung über Threat-Stream Widget');
+
+        fetch(vgtConfig.ajaxUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                this.playSound('alert');
+                this.addLog(data.data);
+                this.updateDiagnostics();
+            } else {
+                this.addLog(`Fehler beim Sperren von ${ip}`);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Hard Punish';
+                    btn.style.opacity = '1';
+                }
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Hard Punish';
+                btn.style.opacity = '1';
+            }
+        });
+    },
+
+    optimizeDatabase(btn) {
+        if (typeof vgtConfig === 'undefined' || !vgtConfig.ajaxUrl) return;
+
+        this.playSound('click');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Bereinige...';
+            btn.style.opacity = '0.6';
+        }
+
+        const formData = new FormData();
+        formData.append('action', 'vgt_optimize_database');
+        formData.append('nonce', vgtConfig.nonce);
+
+        fetch(vgtConfig.ajaxUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                this.playSound('alert');
+                this.addLog(data.data);
+                this.updateDiagnostics();
+                setTimeout(() => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = 'Bereinigung starten';
+                        btn.style.opacity = '1';
+                    }
+                }, 1000);
+            } else {
+                this.addLog('Optimierung fehlgeschlagen.');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Bereinigung starten';
+                    btn.style.opacity = '1';
+                }
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Bereinigung starten';
+                btn.style.opacity = '1';
+            }
+        });
     }
 });

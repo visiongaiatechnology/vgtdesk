@@ -157,6 +157,11 @@ Object.assign(window.VGTDeskEngine, {
             this.userSettings.widgets_visible = !this.userSettings.widgets_visible;
             this.saveUserSetting('widgets_visible', this.userSettings.widgets_visible);
             this.applyWidgetsVisibility();
+            if (this.isSystemWidgetActive && this.isSystemWidgetActive()) {
+                this.startDiagnosticsPolling();
+            } else {
+                this.stopDiagnosticsPolling();
+            }
         } else if (key === 'icons') {
             this.userSettings.icons_visible = !this.userSettings.icons_visible;
             this.saveUserSetting('icons_visible', this.userSettings.icons_visible);
@@ -282,7 +287,7 @@ Object.assign(window.VGTDeskEngine, {
     },
 
     updateCCWidgetToggles() {
-        const widgetIds = ['clock', 'system', 'notes', 'sentinel'];
+        const widgetIds = ['clock', 'system', 'notes', 'threat-ticker', 'dattrack', 'optimizer'];
         widgetIds.forEach(id => {
             const toggle = document.getElementById(`cc-widget-toggle-${id}`);
             if (!toggle) return;
@@ -315,6 +320,14 @@ Object.assign(window.VGTDeskEngine, {
         }
         this.userSettings.widget_positions[widget.id].visible = isHidden;
         this.saveUserSetting('widget_positions', this.userSettings.widget_positions);
+
+        if (id === 'system') {
+            if (isHidden) {
+                this.startDiagnosticsPolling();
+            } else {
+                this.stopDiagnosticsPolling();
+            }
+        }
     },
 
     resetAllSettings() {
@@ -581,7 +594,7 @@ Object.assign(window.VGTDeskEngine, {
                 
                 const optSettings = document.createElement('div');
                 optSettings.className = 'vgt-context-menu-item';
-                optSettings.textContent = '⚙️ Einstellungen';
+                optSettings.textContent = '⚙️ Command Center';
                 optSettings.addEventListener('click', (ev) => {
                     ev.stopPropagation();
                     this.openWindow('settings');

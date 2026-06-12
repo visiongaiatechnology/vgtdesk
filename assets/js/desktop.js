@@ -49,10 +49,25 @@ Object.assign(window.VGTDeskEngine, {
         const redirectTo = urlParams.get('vgt_redirect_to');
         if (redirectTo) {
             this.openDeepLink(redirectTo);
+            urlParams.delete('vgt_redirect_to');
+            const cleanSearch = urlParams.toString();
+            const cleanUrl = window.location.pathname + (cleanSearch ? '?' + cleanSearch : '');
+            window.history.replaceState({}, document.title, cleanUrl);
         }
 
+        // Setup-Wizard falls nicht beendet initialisieren
+        this.initFirstRunWizard();
+
         // Icons im Raster neu berechnen, wenn sich die Fenstergröße ändert
-        window.addEventListener('resize', () => this.arrangeDesktopIcons());
+        window.addEventListener('resize', () => {
+            const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
+            const shell = document.getElementById('vgt-shell-root');
+            if (shell) {
+                shell.style.setProperty('width', `${window.innerWidth / zoom}px`, 'important');
+                shell.style.setProperty('height', `${window.innerHeight / zoom}px`, 'important');
+            }
+            this.arrangeDesktopIcons();
+        });
     }
 });
 

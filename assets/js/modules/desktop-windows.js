@@ -171,6 +171,9 @@ Object.assign(window.VGTDeskEngine, {
         if (id === 'settings') {
             this.startDiagnosticsPolling();
         }
+        if (id === 'task-manager') {
+            this.startTaskManagerPolling();
+        }
 
         const iframe = document.getElementById(`iframe-${id}`);
         if (iframe && (iframe.dataset.loaded !== 'true' || iframe.dataset.suspendedUrl)) {
@@ -201,6 +204,9 @@ Object.assign(window.VGTDeskEngine, {
 
         if (id === 'settings') {
             this.stopDiagnosticsPolling();
+        }
+        if (id === 'task-manager') {
+            this.stopTaskManagerPolling();
         }
     },
 
@@ -264,6 +270,9 @@ Object.assign(window.VGTDeskEngine, {
         if (id === 'settings') {
             this.stopDiagnosticsPolling();
         }
+        if (id === 'task-manager') {
+            this.stopTaskManagerPolling();
+        }
     },
 
     restoreWindow(id) {
@@ -283,6 +292,9 @@ Object.assign(window.VGTDeskEngine, {
 
         if (id === 'settings') {
             this.startDiagnosticsPolling();
+        }
+        if (id === 'task-manager') {
+            this.startTaskManagerPolling();
         }
 
         const iframe = document.getElementById(`iframe-${id}`);
@@ -378,14 +390,18 @@ Object.assign(window.VGTDeskEngine, {
             const iframeWindow = iframe.contentWindow;
             const iframeDoc = iframe.contentDocument || iframeWindow.document;
             if (iframeDoc && iframeDoc.documentElement) {
-                const tailwindColors = {
-                    indigo: { main: '#6366f1', hover: '#818cf8', rgba15: 'rgba(99, 102, 241, 0.15)', rgba8: 'rgba(99, 102, 241, 0.08)' },
+                const iframeColors = {
+                    indigo:  { main: '#6366f1', hover: '#818cf8', rgba15: 'rgba(99, 102, 241, 0.15)',  rgba8: 'rgba(99, 102, 241, 0.08)' },
                     emerald: { main: '#10b981', hover: '#34d399', rgba15: 'rgba(16, 185, 129, 0.15)', rgba8: 'rgba(16, 185, 129, 0.08)' },
-                    cyan: { main: '#06b6d4', hover: '#22d3ee', rgba15: 'rgba(6, 182, 212, 0.15)', rgba8: 'rgba(6, 182, 212, 0.08)' },
-                    amber: { main: '#f59e0b', hover: '#fbbf24', rgba15: 'rgba(245, 158, 11, 0.15)', rgba8: 'rgba(245, 158, 11, 0.08)' },
-                    rose: { main: '#f43f5e', hover: '#fb7185', rgba15: 'rgba(244, 63, 94, 0.15)', rgba8: 'rgba(244, 63, 94, 0.08)' }
+                    cyan:    { main: '#06b6d4', hover: '#22d3ee', rgba15: 'rgba(6, 182, 212, 0.15)',   rgba8: 'rgba(6, 182, 212, 0.08)' },
+                    amber:   { main: '#f59e0b', hover: '#fbbf24', rgba15: 'rgba(245, 158, 11, 0.15)', rgba8: 'rgba(245, 158, 11, 0.08)' },
+                    rose:    { main: '#f43f5e', hover: '#fb7185', rgba15: 'rgba(244, 63, 94, 0.15)',   rgba8: 'rgba(244, 63, 94, 0.08)' },
+                    gold:    { main: '#daa520', hover: '#ffd700', rgba15: 'rgba(218, 165, 32, 0.15)',  rgba8: 'rgba(218, 165, 32, 0.08)' },
+                    purple:  { main: '#a855f7', hover: '#c084fc', rgba15: 'rgba(168, 85, 247, 0.15)', rgba8: 'rgba(168, 85, 247, 0.08)' },
+                    violet:  { main: '#8b5cf6', hover: '#a78bfa', rgba15: 'rgba(139, 92, 246, 0.15)', rgba8: 'rgba(139, 92, 246, 0.08)' },
+                    neon:    { main: '#22c55e', hover: '#4ade80', rgba15: 'rgba(34, 197, 94, 0.15)',   rgba8: 'rgba(34, 197, 94, 0.08)' }
                 };
-                const colors = tailwindColors[this.accentColor] || tailwindColors['indigo'];
+                const colors = iframeColors[this.accentColor] || iframeColors['indigo'];
                 iframeDoc.documentElement.style.setProperty('--vgt-accent', colors.main);
                 iframeDoc.documentElement.style.setProperty('--vgt-accent-hover', colors.hover);
                 iframeDoc.documentElement.style.setProperty('--vgt-accent-rgba15', colors.rgba15);
@@ -518,11 +534,16 @@ Object.assign(window.VGTDeskEngine, {
     applyAccentStyles() {
         const color = this.accentColor;
         const tailwindColors = {
-            indigo: { main: '#6366f1', hover: '#818cf8', rgba15: 'rgba(99, 102, 241, 0.15)', rgba8: 'rgba(99, 102, 241, 0.08)' },
-            emerald: { main: '#10b981', hover: '#34d399', rgba15: 'rgba(16, 185, 129, 0.15)', rgba8: 'rgba(16, 185, 129, 0.08)' },
-            cyan: { main: '#06b6d4', hover: '#22d3ee', rgba15: 'rgba(6, 182, 212, 0.15)', rgba8: 'rgba(6, 182, 212, 0.08)' },
-            amber: { main: '#f59e0b', hover: '#fbbf24', rgba15: 'rgba(245, 158, 11, 0.15)', rgba8: 'rgba(245, 158, 11, 0.08)' },
-            rose: { main: '#f43f5e', hover: '#fb7185', rgba15: 'rgba(244, 63, 94, 0.15)', rgba8: 'rgba(244, 63, 94, 0.08)' }
+            indigo:  { main: '#6366f1', hover: '#818cf8',  rgba15: 'rgba(99, 102, 241, 0.15)',   rgba8: 'rgba(99, 102, 241, 0.08)', rgb: '99, 102, 241' },
+            emerald: { main: '#10b981', hover: '#34d399',  rgba15: 'rgba(16, 185, 129, 0.15)',   rgba8: 'rgba(16, 185, 129, 0.08)', rgb: '16, 185, 129' },
+            cyan:    { main: '#06b6d4', hover: '#22d3ee',  rgba15: 'rgba(6, 182, 212, 0.15)',    rgba8: 'rgba(6, 182, 212, 0.08)', rgb: '6, 182, 212' },
+            amber:   { main: '#f59e0b', hover: '#fbbf24',  rgba15: 'rgba(245, 158, 11, 0.15)',   rgba8: 'rgba(245, 158, 11, 0.08)', rgb: '245, 158, 11' },
+            rose:    { main: '#f43f5e', hover: '#fb7185',  rgba15: 'rgba(244, 63, 94, 0.15)',    rgba8: 'rgba(244, 63, 94, 0.08)', rgb: '244, 63, 94' },
+            // New accent colors
+            gold:    { main: '#daa520', hover: '#ffd700',  rgba15: 'rgba(218, 165, 32, 0.15)',   rgba8: 'rgba(218, 165, 32, 0.08)', rgb: '218, 165, 32' },
+            purple:  { main: '#a855f7', hover: '#c084fc',  rgba15: 'rgba(168, 85, 247, 0.15)',   rgba8: 'rgba(168, 85, 247, 0.08)', rgb: '168, 85, 247' },
+            violet:  { main: '#8b5cf6', hover: '#a78bfa',  rgba15: 'rgba(139, 92, 246, 0.15)',   rgba8: 'rgba(139, 92, 246, 0.08)', rgb: '139, 92, 246' },
+            neon:    { main: '#22c55e', hover: '#4ade80',  rgba15: 'rgba(34, 197, 94, 0.15)',    rgba8: 'rgba(34, 197, 94, 0.08)', rgb: '34, 197, 94' }
         };
 
         const colors = tailwindColors[color] || tailwindColors['indigo'];
@@ -533,17 +554,38 @@ Object.assign(window.VGTDeskEngine, {
         root.style.setProperty('--vgt-accent-color', colors.main);
         root.style.setProperty('--vgt-accent-rgba15', colors.rgba15);
         root.style.setProperty('--vgt-accent-rgba8', colors.rgba8);
+        root.style.setProperty('--vgt-accent-rgb', colors.rgb);
 
         const dot = document.getElementById('vgt-topbar-dot');
         const title = document.getElementById('vgt-topbar-title');
         const welcomeTitle = document.getElementById('welcome-title-accent');
         const settingsTitle = document.getElementById('settings-title-accent');
         const badge = document.getElementById('vgt-accent-badge');
-        
-        if (dot) dot.style.backgroundColor = hex;
-        if (title) title.style.color = hex;
-        if (welcomeTitle) welcomeTitle.style.color = hex;
-        if (settingsTitle) settingsTitle.style.color = hex;
+
+        // Special Gold Mode: Use a gradient for the topbar dot & glowing gold text
+        if (color === 'gold') {
+            const goldGrad = 'linear-gradient(135deg, #b8860b 0%, #ffd700 40%, #daa520 70%, #b8860b 100%)';
+            if (dot) {
+                dot.style.background = goldGrad;
+                dot.style.backgroundColor = '';
+                dot.style.boxShadow = '0 0 8px rgba(255, 215, 0, 0.6)';
+            }
+            if (title) { title.style.backgroundImage = goldGrad; title.style.webkitBackgroundClip = 'text'; title.style.webkitTextFillColor = 'transparent'; title.style.backgroundClip = 'text'; }
+            if (welcomeTitle) { welcomeTitle.style.backgroundImage = goldGrad; welcomeTitle.style.webkitBackgroundClip = 'text'; welcomeTitle.style.webkitTextFillColor = 'transparent'; welcomeTitle.style.backgroundClip = 'text'; }
+            if (settingsTitle) { settingsTitle.style.backgroundImage = goldGrad; settingsTitle.style.webkitBackgroundClip = 'text'; settingsTitle.style.webkitTextFillColor = 'transparent'; settingsTitle.style.backgroundClip = 'text'; }
+            // Activate full Gold Mode Easter Egg on shell root
+            const shell = document.getElementById('vgt-shell-root');
+            if (shell) shell.classList.add('vgt-gold-mode');
+        } else {
+            // Reset gold-specific styles for other colors
+            if (dot) { dot.style.background = ''; dot.style.backgroundColor = hex; dot.style.boxShadow = ''; }
+            if (title) { title.style.backgroundImage = ''; title.style.webkitBackgroundClip = ''; title.style.webkitTextFillColor = ''; title.style.backgroundClip = ''; title.style.color = hex; }
+            if (welcomeTitle) { welcomeTitle.style.backgroundImage = ''; welcomeTitle.style.webkitBackgroundClip = ''; welcomeTitle.style.webkitTextFillColor = ''; welcomeTitle.style.backgroundClip = ''; welcomeTitle.style.color = hex; }
+            if (settingsTitle) { settingsTitle.style.backgroundImage = ''; settingsTitle.style.webkitBackgroundClip = ''; settingsTitle.style.webkitTextFillColor = ''; settingsTitle.style.backgroundClip = ''; settingsTitle.style.color = hex; }
+            // Deactivate Gold Mode Easter Egg
+            const shell = document.getElementById('vgt-shell-root');
+            if (shell) shell.classList.remove('vgt-gold-mode');
+        }
         
         if (badge) {
             badge.style.backgroundColor = `${hex}20`;
@@ -568,6 +610,7 @@ Object.assign(window.VGTDeskEngine, {
                     iframeDoc.documentElement.style.setProperty('--vgt-accent-hover', colors.hover);
                     iframeDoc.documentElement.style.setProperty('--vgt-accent-rgba15', colors.rgba15);
                     iframeDoc.documentElement.style.setProperty('--vgt-accent-rgba8', colors.rgba8);
+                    iframeDoc.documentElement.style.setProperty('--vgt-accent-rgb', colors.rgb);
                 }
             } catch (err) {
                 // cross-origin
@@ -590,7 +633,9 @@ Object.assign(window.VGTDeskEngine, {
             audio_enabled: true,
             folders: {},
             auto_redirect: false,
-            layout_style: 'macos'
+            layout_style: 'macos',
+            active_preset: '',
+            first_run_completed: false
         };
 
         // RIGOROSE SCHLÜSSEL-KORREKTUR: Verhindert die zerstörerische Array-Konvertierung von leeren PHP-Objekten
@@ -613,6 +658,7 @@ Object.assign(window.VGTDeskEngine, {
         this.userSettings.icons_visible = this._isTruthy(this.userSettings.icons_visible);
         this.userSettings.audio_enabled = this._isTruthy(this.userSettings.audio_enabled);
         this.userSettings.auto_redirect = this._isTruthy(this.userSettings.auto_redirect);
+        this.userSettings.first_run_completed = this._isTruthy(this.userSettings.first_run_completed);
 
         const savedWall = this.userSettings.wallpaper || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop';
         this.changeWallpaper(savedWall, false);
@@ -627,6 +673,9 @@ Object.assign(window.VGTDeskEngine, {
         const redirectCheckbox = document.getElementById('redirect-toggle');
         if (redirectCheckbox) redirectCheckbox.checked = this.userSettings.auto_redirect;
 
+        const dattrackToggle = document.getElementById('vgt-cc-dattrack-toggle');
+        if (dattrackToggle) dattrackToggle.checked = (typeof vgtConfig !== 'undefined' && vgtConfig.dattrackEnabled);
+
         this.applyWidgetsVisibility();
         this.applyIconsVisibility();
         this.applySavedWindowSettings();
@@ -637,6 +686,11 @@ Object.assign(window.VGTDeskEngine, {
         if (slider) slider.value = savedFontSize;
 
         this.applyShortcuts();
+
+        // Restore active preset UI state
+        if (this.userSettings.active_preset) {
+            this.updatePresetUI(this.userSettings.active_preset);
+        }
     },
 
     toggleBlur() {
@@ -646,6 +700,48 @@ Object.assign(window.VGTDeskEngine, {
         this.saveUserSetting('blur', state);
         this.applyBlur(state);
         this.updateControlCenterToggles();
+    },
+
+    toggleDattrack() {
+        this.playSound('click');
+        const checkbox = document.getElementById('vgt-cc-dattrack-toggle');
+        const state = checkbox ? checkbox.checked : false;
+
+        const formData = new FormData();
+        formData.append('action', 'vgt_toggle_dattrack');
+        formData.append('nonce', vgtConfig.nonce);
+
+        if (checkbox) checkbox.disabled = true;
+
+        fetch(vgtConfig.ajaxUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (checkbox) checkbox.disabled = false;
+            if (data.success) {
+                const isEnabled = data.data.enabled;
+                if (typeof vgtConfig !== 'undefined') {
+                    vgtConfig.dattrackEnabled = isEnabled;
+                }
+                this.addLog(data.data.message || (isEnabled ? "Dattrack erfolgreich aktiviert." : "Dattrack erfolgreich deaktiviert."));
+                
+                setTimeout(() => {
+                    location.reload();
+                }, 400);
+            } else {
+                if (checkbox) checkbox.checked = !state;
+                alert(`Fehler: ${data.data}`);
+            }
+        })
+        .catch(err => {
+            if (checkbox) {
+                checkbox.disabled = false;
+                checkbox.checked = !state;
+            }
+            console.error("Dattrack Sync-Fehler:", err);
+        });
     },
 
     applyBlur(state, sync = true) {
@@ -727,15 +823,18 @@ Object.assign(window.VGTDeskEngine, {
     diagnosticsInterval: null,
 
     startDiagnosticsPolling() {
-        this.stopDiagnosticsPolling();
+        if (this.diagnosticsInterval) return; // Do not start duplicate intervals
         this.updateDiagnostics();
         this.diagnosticsInterval = setInterval(() => {
             this.updateDiagnostics();
-        }, 5000);
+        }, 8000); // Poll at a conservative 8s rate to ensure low footprint
     },
 
     stopDiagnosticsPolling() {
-        if (this.diagnosticsInterval) {
+        const ccVisible = this.activeWindows && this.activeWindows['settings'] && !this.minimizedWindows['settings'];
+        const widgetActive = this.isSystemWidgetActive && this.isSystemWidgetActive();
+        
+        if (!ccVisible && !widgetActive && this.diagnosticsInterval) {
             clearInterval(this.diagnosticsInterval);
             this.diagnosticsInterval = null;
         }
@@ -842,6 +941,59 @@ Object.assign(window.VGTDeskEngine, {
                 if (rowCurrent) {
                     rowCurrent.style.display = diag.throne_guard.active ? '' : 'none';
                 }
+
+                // Update System Widget
+                const wCpuVal = document.getElementById('vgt-widget-cpu-val');
+                const wCpuBar = document.getElementById('vgt-widget-cpu-bar');
+                if (wCpuVal) wCpuVal.textContent = `${diag.cpu}%`;
+                if (wCpuBar) {
+                    wCpuBar.style.width = `${diag.cpu}%`;
+                    if (diag.cpu > 80) {
+                        wCpuBar.style.backgroundColor = '#f43f5e';
+                    } else if (diag.cpu > 50) {
+                        wCpuBar.style.backgroundColor = '#f59e0b';
+                    } else {
+                        wCpuBar.style.backgroundColor = 'var(--vgt-accent-color)';
+                    }
+                }
+
+                const wRamVal = document.getElementById('vgt-widget-ram-val');
+                const wRamBar = document.getElementById('vgt-widget-ram-bar');
+                if (wRamVal) {
+                    const usageMB = Math.round(diag.ram_usage / 1024 / 1024);
+                    const limitMB = diag.ram_limit === -1 ? '∞' : Math.round(diag.ram_limit / 1024 / 1024);
+                    wRamVal.textContent = `${usageMB} MB / ${limitMB} MB`;
+                    if (wRamBar) {
+                        const pct = diag.ram_limit === -1 ? 0 : Math.min(100, Math.round((diag.ram_usage / diag.ram_limit) * 100));
+                        wRamBar.style.width = `${pct}%`;
+                        if (pct > 80) {
+                            wRamBar.style.backgroundColor = '#f43f5e';
+                        } else {
+                            wRamBar.style.backgroundColor = 'var(--vgt-accent-color)';
+                        }
+                    }
+                }
+
+                const wTgStatus = document.getElementById('vgt-widget-tg-status');
+                if (wTgStatus) {
+                    wTgStatus.textContent = diag.throne_guard.active ? 'Aktiv' : 'Inaktiv';
+                    wTgStatus.style.color = diag.throne_guard.active ? '#10b981' : '#f43f5e';
+                }
+
+                const wSentinelStatus = document.getElementById('vgt-widget-sentinel-status');
+                if (wSentinelStatus) {
+                    wSentinelStatus.textContent = diag.sentinel.active ? 'Aktiv' : 'Inaktiv';
+                    wSentinelStatus.style.color = diag.sentinel.active ? '#10b981' : '#f43f5e';
+                }
+
+                const wBansStatus = document.getElementById('vgt-widget-bans-status');
+                if (wBansStatus) {
+                    wBansStatus.textContent = `${diag.total_bans} IPs`;
+                }
+
+                if (this.updateWidgetData) {
+                    this.updateWidgetData(diag);
+                }
             }
         })
         .catch(err => console.error("Diagnose Sync-Fehler:", err));
@@ -914,13 +1066,27 @@ Object.assign(window.VGTDeskEngine, {
     },
 
     applyFontSize(size, sync = true) {
-        document.documentElement.style.setProperty('--vgt-font-size', `${size}px`);
+        const sizeNum = parseFloat(size);
+        // Set the font-size CSS variable (for elements that use it without !important)
+        document.documentElement.style.setProperty('--vgt-font-size', `${sizeNum}px`);
+        // Set zoom ratio relative to the base size (14px = 1.0x).
+        // The zoom property on #vgt-shell-root scales ALL children proportionally,
+        // including those with hardcoded !important px font-sizes.
+        const zoomRatio = parseFloat((sizeNum / 14).toFixed(4));
+        document.documentElement.style.setProperty('--vgt-font-zoom', zoomRatio.toString());
+        
+        const shell = document.getElementById('vgt-shell-root');
+        if (shell) {
+            shell.style.setProperty('width', `${window.innerWidth / zoomRatio}px`, 'important');
+            shell.style.setProperty('height', `${window.innerHeight / zoomRatio}px`, 'important');
+        }
+
         const label = document.getElementById('vgt-font-size-label');
-        if (label) label.textContent = `${size}px`;
+        if (label) label.textContent = `${sizeNum}px`;
         if (sync) {
-            this.userSettings.font_size = size;
-            this.saveUserSetting('font_size', size);
-            this.addLog(`Schriftgröße auf ${size}px gesetzt.`);
+            this.userSettings.font_size = sizeNum;
+            this.saveUserSetting('font_size', sizeNum);
+            this.addLog(`Bildschirmauflösung auf ${sizeNum}px gesetzt.`);
         }
     },
 
@@ -958,5 +1124,140 @@ Object.assign(window.VGTDeskEngine, {
     formatShortcutString(code) {
         if (!code) return '';
         return code.replace('Key', '').replace('Digit', '').replace(/\+/g, ' + ');
+    },
+
+    /**
+     * Workspace Presets (Phase 4)
+     * One-click profiles that reconfigure the entire desktop environment.
+     * @param {string} presetName - 'publisher' | 'security' | 'developer' | 'minimal'
+     */
+    applyWorkspacePreset(presetName) {
+        const PRESETS = {
+            publisher: {
+                label:          'Publisher Mode',
+                accent_color:   'emerald',
+                layout_style:   'macos',
+                widgets_visible: true,
+                icons_visible:   true,
+                log_msg:        'Publisher Mode aktiviert — Content-Erstellung bereit.'
+            },
+            security: {
+                label:          'Security Mode',
+                accent_color:   'rose',
+                layout_style:   'macos',
+                widgets_visible: true,
+                icons_visible:   true,
+                log_msg:        'Security Mode aktiviert — Sentinel & Throne Guard priorisiert.'
+            },
+            developer: {
+                label:          'Developer Mode',
+                accent_color:   'violet',
+                layout_style:   'linux',
+                widgets_visible: true,
+                icons_visible:   true,
+                log_msg:        'Developer Mode aktiviert — Code & Debug Umgebung bereit.'
+            },
+            minimal: {
+                label:          'Minimal Mode',
+                accent_color:   'indigo',
+                layout_style:   'macos',
+                widgets_visible: false,
+                icons_visible:   false,
+                log_msg:        'Minimal Mode aktiviert — Maximale Arbeitsfläche.'
+            }
+        };
+
+        const preset = PRESETS[presetName];
+        if (!preset) {
+            console.warn(`VGT Presets: Unbekanntes Preset "${presetName}"`);
+            return;
+        }
+
+        this.playSound('click');
+
+        // 1. Apply accent color
+        this.changeAccentColor(preset.accent_color, true);
+
+        // 2. Apply layout
+        if (typeof this.changeLayoutStyle === 'function') {
+            this.changeLayoutStyle(preset.layout_style);
+        }
+
+        // 3. Apply widget visibility
+        this.userSettings.widgets_visible = preset.widgets_visible;
+        this.saveUserSetting('widgets_visible', preset.widgets_visible);
+        if (typeof this.applyWidgetsVisibility === 'function') {
+            this.applyWidgetsVisibility();
+        }
+
+        // 4. Apply icon visibility
+        this.userSettings.icons_visible = preset.icons_visible;
+        this.saveUserSetting('icons_visible', preset.icons_visible);
+        if (typeof this.applyIconsVisibility === 'function') {
+            this.applyIconsVisibility();
+        }
+
+        // 5. Save the active preset key for UI persistence
+        this.userSettings.active_preset = presetName;
+        this.saveUserSetting('active_preset', presetName);
+
+        // 6. Update preset card UI
+        this.updatePresetUI(presetName);
+
+        // 7. Log
+        this.addLog(`🎭 ${preset.log_msg}`);
+
+        // 8. Show brief toast notification
+        this.showPresetToast(preset.label);
+    },
+
+    /**
+     * Update preset card UI to highlight the active preset.
+     */
+    updatePresetUI(activePreset) {
+        document.querySelectorAll('.vgt-preset-card').forEach(card => {
+            const isActive = card.dataset.preset === activePreset;
+            card.classList.toggle('is-active', isActive);
+        });
+    },
+
+    /**
+     * Show a brief, dismissing toast notification for preset activation.
+     */
+    showPresetToast(label) {
+        let toast = document.getElementById('vgt-preset-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'vgt-preset-toast';
+            toast.style.cssText = [
+                'position:fixed', 'bottom:100px', 'left:50%',
+                'transform:translateX(-50%) translateY(0)',
+                'background:rgba(15,23,42,0.92)',
+                'border:1px solid var(--vgt-accent-color)',
+                'color:#ffffff',
+                'font-size:12px',
+                'font-weight:700',
+                'padding:10px 22px',
+                'border-radius:50px',
+                'z-index:999999',
+                'box-shadow:0 8px 30px rgba(0,0,0,0.5),0 0 15px var(--vgt-accent-rgba15)',
+                'backdrop-filter:blur(20px)',
+                'transition:opacity 0.4s ease,transform 0.4s ease',
+                'pointer-events:none',
+                'white-space:nowrap'
+            ].join(';');
+            const shell = document.getElementById('vgt-shell-root') || document.body;
+            shell.appendChild(toast);
+        }
+        // Sanitize label text
+        toast.textContent = `🎭 ${label.substring(0, 50)} aktiviert`;
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(-50%) translateY(0)';
+
+        clearTimeout(toast._hideTimer);
+        toast._hideTimer = setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) translateY(10px)';
+        }, 2200);
     }
 });

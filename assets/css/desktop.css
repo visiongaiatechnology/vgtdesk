@@ -721,6 +721,23 @@ html, html.wp-toolbar {
 .bg-amber { background-color: #f59e0b !important; }
 .bg-rose { background-color: #f43f5e !important; }
 
+/* === NEW ACCENT COLORS === */
+/* Gold — Elegantes, glänzendes Echtes-Gold Design */
+.bg-gold {
+    background: linear-gradient(135deg, #b8860b 0%, #ffd700 35%, #daa520 60%, #b8860b 100%) !important;
+    box-shadow: 0 2px 8px rgba(218, 165, 32, 0.5) !important;
+}
+.bg-gold:hover {
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.7) !important;
+    transform: scale(1.15) !important;
+}
+/* Purple — Royal Deep Purple */
+.bg-purple { background-color: #a855f7 !important; }
+/* Violet — Electric Neon Violet */
+.bg-violet { background-color: #8b5cf6 !important; }
+/* Neon — Electric Green Matrix */
+.bg-neon { background-color: #22c55e !important; }
+
 /* System Bypass Box */
 .vgt-bypass-card {
     background: rgba(255, 255, 255, 0.03);
@@ -938,12 +955,17 @@ html, html.wp-toolbar {
     opacity: 0;
 }
 
-.vgt-bg-slate-500 { background-color: #64748b !important; }
+.vgt-bg-slate-500  { background-color: #64748b !important; }
 .vgt-bg-indigo-400 { background-color: #818cf8 !important; }
 .vgt-bg-emerald-400 { background-color: #34d399 !important; }
-.vgt-bg-cyan-400 { background-color: #22d3ee !important; }
-.vgt-bg-amber-400 { background-color: #fbbf24 !important; }
-.vgt-bg-rose-400 { background-color: #fb7185 !important; }
+.vgt-bg-cyan-400   { background-color: #22d3ee !important; }
+.vgt-bg-amber-400  { background-color: #fbbf24 !important; }
+.vgt-bg-rose-400   { background-color: #fb7185 !important; }
+/* New accent color indicators */
+.vgt-bg-gold-400   { background: linear-gradient(135deg, #b8860b, #ffd700) !important; box-shadow: 0 0 5px rgba(255, 215, 0, 0.8) !important; }
+.vgt-bg-purple-400 { background-color: #c084fc !important; }
+.vgt-bg-violet-400 { background-color: #a78bfa !important; }
+.vgt-bg-neon-400   { background-color: #4ade80 !important; }
 
 .vgt-dock-divider {
     width: 1px;
@@ -1233,6 +1255,11 @@ body.vgt-dragging, body.vgt-dragging * {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
     box-sizing: border-box;
     pointer-events: auto;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+.vgt-widget:hover {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 15px var(--vgt-accent-rgba8) !important;
 }
 
 #widget-clock {
@@ -2650,6 +2677,12 @@ body.vgt-dragging *,
 
 #vgt-shell-root {
     font-size: var(--vgt-font-size, 14px);
+    /* Font Zoom Scale: proportional scaling of ALL children including !important px sizes */
+    zoom: var(--vgt-font-zoom, 1);
+    -moz-transform: scale(var(--vgt-font-zoom, 1));
+    -moz-transform-origin: 0 0;
+    width: calc(100vw / var(--vgt-font-zoom, 1)) !important;
+    height: calc(100vh / var(--vgt-font-zoom, 1)) !important;
 }
 
 .vgt-cc-container {
@@ -3172,4 +3205,773 @@ body.vgt-dragging *,
     padding: 2px 6px !important;
     border-radius: 4px !important;
 }
+
+/* ==========================================================================
+   ✨ GOLD MODE EASTER EGG — Full Desktop Gold Theme
+   Aktiviert durch class="vgt-gold-mode" auf #vgt-shell-root
+   ========================================================================== */
+
+/* Smooth entry animation for Gold Mode activation */
+.vgt-gold-mode * {
+    transition-property: border-color, box-shadow, background !important;
+    transition-duration: 0.4s !important;
+    transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+/* Gold Topbar — Dark metallic bar with gold accent rim */
+.vgt-gold-mode .vgt-topbar {
+    background: linear-gradient(90deg,
+        rgba(18, 12, 2, 0.75) 0%,
+        rgba(38, 26, 4, 0.65) 50%,
+        rgba(18, 12, 2, 0.75) 100%) !important;
+    border-color: rgba(218, 165, 32, 0.35) !important;
+    box-shadow:
+        0 10px 30px -5px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(218, 165, 32, 0.08),
+        inset 0 1px 0 rgba(255, 215, 0, 0.1) !important;
+}
+
+/* Gold topbar glowing dot */
+.vgt-gold-mode #vgt-topbar-dot {
+    background: linear-gradient(135deg, #b8860b 0%, #ffd700 40%, #daa520 70%, #b8860b 100%) !important;
+    animation: goldPulseDot 2.5s ease-in-out infinite !important;
+}
+@keyframes goldPulseDot {
+    0%, 100% { box-shadow: 0 0 6px rgba(255, 215, 0, 0.5); }
+    50%       { box-shadow: 0 0 16px rgba(255, 215, 0, 0.95); }
+}
+
+/* Gold Dock — Metallic dark gold floating bar */
+.vgt-gold-mode .vgt-dock {
+    background: linear-gradient(180deg,
+        rgba(22, 15, 2, 0.7) 0%,
+        rgba(35, 23, 3, 0.62) 100%) !important;
+    border-color: rgba(218, 165, 32, 0.3) !important;
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.8),
+        0 -2px 15px rgba(218, 165, 32, 0.06),
+        inset 0 1px 0 rgba(255, 215, 0, 0.08) !important;
+}
+
+/* Dock icon hover — golden glow */
+.vgt-gold-mode .vgt-dock-item:hover .vgt-dock-icon {
+    box-shadow:
+        0 10px 15px -3px rgba(0, 0, 0, 0.4),
+        0 0 16px rgba(255, 215, 0, 0.35) !important;
+}
+
+/* Windows — Gold bordered panels with subtle warm tint */
+.vgt-gold-mode .vgt-window {
+    border-color: rgba(218, 165, 32, 0.4) !important;
+    box-shadow:
+        0 30px 60px -15px rgba(0, 0, 0, 0.85),
+        0 0 25px rgba(218, 165, 32, 0.08) !important;
+}
+
+/* Active window — Rich glowing gold halo */
+.vgt-gold-mode .vgt-window.vgt-window-active {
+    border-color: rgba(255, 215, 0, 0.65) !important;
+    box-shadow:
+        0 30px 60px -15px rgba(0, 0, 0, 0.9),
+        0 0 45px rgba(255, 215, 0, 0.3),
+        inset 0 0 0 1px rgba(255, 215, 0, 0.05) !important;
+}
+
+/* Window on hover */
+.vgt-gold-mode .window:hover {
+    border-color: rgba(255, 215, 0, 0.45) !important;
+}
+
+/* Window Header — Dark premium gold strip */
+.vgt-gold-mode .vgt-window-header {
+    background: linear-gradient(90deg,
+        rgba(20, 13, 2, 0.7) 0%,
+        rgba(35, 23, 3, 0.6) 50%,
+        rgba(20, 13, 2, 0.7) 100%) !important;
+    border-bottom-color: rgba(218, 165, 32, 0.2) !important;
+}
+
+/* Window Dots — Gold-infused minimize dot */
+.vgt-gold-mode .vgt-window-dot.dot-amber {
+    background: linear-gradient(135deg, #b8860b 0%, #ffd700 100%) !important;
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.6) !important;
+}
+
+/* Glassmorphism panels — Gold-tinted borders */
+.vgt-gold-mode .glassmorphism {
+    border-color: rgba(218, 165, 32, 0.12) !important;
+}
+
+/* Start Menu — Gold-framed launcher */
+.vgt-gold-mode #vgt-start-menu {
+    border-color: rgba(218, 165, 32, 0.35) !important;
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.75),
+        0 0 25px rgba(218, 165, 32, 0.1) !important;
+}
+
+/* Start Menu header border */
+.vgt-gold-mode .vgt-start-menu-header {
+    border-bottom-color: rgba(218, 165, 32, 0.12) !important;
+}
+
+/* Spotlight Search — Gold-rimmed */
+.vgt-gold-mode .vgt-spotlight {
+    border-color: rgba(218, 165, 32, 0.4) !important;
+    box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.6),
+        0 0 25px rgba(218, 165, 32, 0.12) !important;
+}
+
+/* Control Center — Gold sidebar rim */
+.vgt-gold-mode .vgt-cc-sidebar {
+    border-right-color: rgba(218, 165, 32, 0.15) !important;
+}
+
+/* Scrollbar thumb — Gold gradient */
+.vgt-gold-mode ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #8b6010 0%, #daa520 50%, #8b6010 100%) !important;
+    border-radius: 99px !important;
+}
+
+/* Widget panels — Gold-tinted border */
+.vgt-gold-mode .vgt-widget {
+    border-color: rgba(218, 165, 32, 0.2) !important;
+    box-shadow:
+        0 10px 20px rgba(0, 0, 0, 0.4),
+        0 0 10px rgba(218, 165, 32, 0.06) !important;
+}
+
+/* Context menu — Gold border */
+.vgt-gold-mode .vgt-context-menu,
+.vgt-gold-mode .vgt-submenu-popup {
+    border-color: rgba(218, 165, 32, 0.25) !important;
+}
+
+/* Subtle animated gold shimmer on dock on entry */
+@keyframes vgtGoldModeIn {
+    from { filter: brightness(0.85) saturate(0.5); }
+    to   { filter: brightness(1) saturate(1); }
+}
+.vgt-gold-mode .vgt-dock,
+.vgt-gold-mode .vgt-topbar {
+    animation: vgtGoldModeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+}
+
+
+/* ==========================================================================
+   🎭 WORKSPACE PRESETS (PHASE 4)
+   Premium preset selection cards for the Command Center
+   ========================================================================== */
+
+.vgt-preset-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    margin-bottom: 24px !important;
+}
+
+.vgt-preset-card {
+    position: relative !important;
+    background: rgba(15, 23, 42, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 14px !important;
+    padding: 18px 16px !important;
+    cursor: pointer !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+}
+
+/* Animated shimmer on hover */
+.vgt-preset-card::before {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.03) 60%, transparent 70%) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+}
+
+.vgt-preset-card:hover {
+    transform: translateY(-3px) !important;
+    border-color: var(--vgt-accent-color) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 15px var(--vgt-accent-rgba15) !important;
+}
+.vgt-preset-card:hover::before {
+    opacity: 1 !important;
+}
+
+.vgt-preset-card:active {
+    transform: translateY(-1px) scale(0.99) !important;
+}
+
+/* Preset icon badge */
+.vgt-preset-icon {
+    font-size: 28px !important;
+    line-height: 1 !important;
+    display: block !important;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)) !important;
+}
+
+/* Preset label */
+.vgt-preset-name {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    margin: 0 !important;
+    letter-spacing: -0.01em !important;
+}
+
+.vgt-preset-desc {
+    font-size: 11px !important;
+    color: #64748b !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    flex: 1 !important;
+}
+
+/* Activate button */
+.vgt-preset-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    padding: 6px 12px !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #94a3b8 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin-top: auto !important;
+}
+.vgt-preset-btn:hover {
+    background: var(--vgt-accent-rgba15) !important;
+    border-color: var(--vgt-accent-color) !important;
+    color: var(--vgt-accent-color) !important;
+    box-shadow: 0 0 10px var(--vgt-accent-rgba8) !important;
+}
+
+/* Individual preset color accents on card top rim */
+.vgt-preset-card.preset-publisher  { border-top: 2px solid #10b981 !important; }
+.vgt-preset-card.preset-security   { border-top: 2px solid #f43f5e !important; }
+.vgt-preset-card.preset-developer  { border-top: 2px solid #8b5cf6 !important; }
+.vgt-preset-card.preset-minimal    { border-top: 2px solid #64748b !important; }
+
+/* Active preset badge */
+.vgt-preset-active-badge {
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    padding: 2px 7px !important;
+    border-radius: 4px !important;
+    background: rgba(16, 185, 129, 0.12) !important;
+    color: #10b981 !important;
+    border: 1px solid rgba(16, 185, 129, 0.25) !important;
+    display: none !important;
+}
+
+.vgt-preset-card.is-active .vgt-preset-active-badge {
+    display: block !important;
+}
+
+.vgt-preset-card.is-active {
+    border-color: var(--vgt-accent-color) !important;
+    background: var(--vgt-accent-rgba8) !important;
+}
+
+
+/* ==========================================================================
+   🧙‍♂️ FIRST RUN WIZARD
+   High-fidelity glassmorphic overlay for onboarding new administrators.
+   ========================================================================== */
+
+.vgt-wizard-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(3, 5, 12, 0.82) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    z-index: 9999999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    animation: vgtWizardFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.vgt-wizard-overlay.hidden {
+    display: none !important;
+}
+
+@keyframes vgtWizardFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.vgt-wizard-card {
+    width: 680px !important;
+    height: 520px !important;
+    background: rgba(10, 15, 26, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 20px !important;
+    box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.8),
+        0 0 40px var(--vgt-accent-rgba15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    padding: 30px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    color: #cbd5e1 !important;
+    animation: vgtWizardPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+@keyframes vgtWizardPopIn {
+    from { transform: scale(0.9) translateY(20px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.vgt-wizard-title-group {
+    margin-bottom: 15px !important;
+}
+
+.vgt-wizard-main-title {
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    margin: 0 0 4px 0 !important;
+    letter-spacing: -0.02em !important;
+}
+
+.vgt-wizard-subtitle {
+    font-size: 11px !important;
+    color: #64748b !important;
+    margin: 0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-weight: 700 !important;
+}
+
+/* Stepper Indicator Navigation */
+.vgt-wizard-steps {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    margin-bottom: 25px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding-bottom: 12px !important;
+    user-select: none !important;
+}
+
+.vgt-wizard-step-indicator {
+    font-size: 10px !important;
+    color: #475569 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.025em !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: color 0.3s ease !important;
+}
+
+.vgt-wizard-step-indicator-number {
+    display: inline-flex !important;
+    width: 16px !important;
+    height: 16px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 9px !important;
+    transition: all 0.3s ease !important;
+}
+
+.vgt-wizard-step-indicator.active {
+    color: var(--vgt-accent-color) !important;
+}
+
+.vgt-wizard-step-indicator.active .vgt-wizard-step-indicator-number {
+    background: var(--vgt-accent-color) !important;
+    border-color: var(--vgt-accent-color) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 10px var(--vgt-accent-rgba15) !important;
+}
+
+.vgt-wizard-step-indicator.completed {
+    color: #10b981 !important;
+}
+
+.vgt-wizard-step-indicator.completed .vgt-wizard-step-indicator-number {
+    background: rgba(16, 185, 129, 0.1) !important;
+    border-color: #10b981 !important;
+    color: #10b981 !important;
+}
+
+/* Wizard Content Panels */
+.vgt-wizard-body {
+    flex: 1 !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    margin-bottom: 25px !important;
+}
+
+.vgt-wizard-step-content {
+    display: none !important;
+}
+
+.vgt-wizard-step-content.active {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 15px !important;
+    animation: vgtWizardSlideIn 0.3s ease-out forwards !important;
+}
+
+@keyframes vgtWizardSlideIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.vgt-wizard-step-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    margin: 0 0 4px 0 !important;
+}
+
+.vgt-wizard-step-desc {
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+    margin: 0 !important;
+    line-height: 1.5 !important;
+}
+
+/* Step 1: Layout grid custom styles */
+.vgt-wizard-layout-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    margin-top: 10px !important;
+}
+
+.vgt-wizard-layout-card {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+    transition: all 0.25s ease !important;
+    box-sizing: border-box !important;
+}
+
+.vgt-wizard-layout-card:hover {
+    border-color: var(--vgt-accent-color) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    transform: translateY(-2px) !important;
+}
+
+.vgt-wizard-layout-card.active {
+    border-color: var(--vgt-accent-color) !important;
+    background: var(--vgt-accent-rgba8) !important;
+    box-shadow: 0 0 15px var(--vgt-accent-rgba15) !important;
+}
+
+.vgt-wizard-layout-preview {
+    width: 100% !important;
+    height: 70px !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-radius: 6px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.vgt-wizard-layout-label {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+}
+
+/* Step 2: Accent color selections */
+.vgt-wizard-color-palette {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    margin-top: 10px !important;
+}
+
+.vgt-wizard-color-item {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 10px !important;
+    padding: 12px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    transition: all 0.2s ease !important;
+}
+
+.vgt-wizard-color-item:hover {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.vgt-wizard-color-item.active {
+    border-color: var(--vgt-accent-color) !important;
+    background: var(--vgt-accent-rgba8) !important;
+    box-shadow: 0 0 10px var(--vgt-accent-rgba15) !important;
+}
+
+.vgt-wizard-color-dot {
+    width: 14px !important;
+    height: 14px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+}
+
+.vgt-wizard-color-label {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #cbd5e1 !important;
+}
+
+/* Step 3: Superkey Form */
+.vgt-wizard-superkey-container {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    box-sizing: border-box !important;
+}
+
+.vgt-wizard-input-wrapper {
+    position: relative !important;
+    display: flex !important;
+}
+
+.vgt-wizard-input-wrapper input {
+    width: 100% !important;
+    padding-right: 40px !important;
+}
+
+.vgt-wizard-eye-toggle {
+    position: absolute !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    user-select: none !important;
+    opacity: 0.6 !important;
+    transition: opacity 0.2s !important;
+}
+
+.vgt-wizard-eye-toggle:hover {
+    opacity: 1 !important;
+}
+
+.vgt-wizard-strength-meter {
+    height: 4px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 99px !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    display: flex !important;
+    margin-top: -6px !important;
+}
+
+.vgt-wizard-strength-bar {
+    height: 100% !important;
+    width: 0% !important;
+    background: #ef4444 !important;
+    transition: width 0.3s ease, background-color 0.3s ease !important;
+}
+
+.vgt-wizard-strength-label {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+    text-align: right !important;
+    margin-top: -4px !important;
+}
+
+/* Step 4 & 5: Security / Redirect Toggle Cards */
+.vgt-wizard-toggle-card {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border-radius: 12px !important;
+    padding: 16px 20px !important;
+    box-sizing: border-box !important;
+}
+
+.vgt-wizard-toggle-info {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    max-width: 80% !important;
+}
+
+.vgt-wizard-toggle-title {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+}
+
+.vgt-wizard-toggle-desc {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+    line-height: 1.4 !important;
+}
+
+.vgt-wizard-benefits-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin-top: 5px !important;
+    padding-left: 5px !important;
+}
+
+.vgt-wizard-benefit-item {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.vgt-wizard-benefit-bullet {
+    color: #10b981 !important;
+    font-weight: bold !important;
+}
+
+/* Step 6: Success Layout */
+.vgt-wizard-success-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 15px !important;
+    text-align: center !important;
+    padding: 20px 0 !important;
+}
+
+.vgt-wizard-success-shield {
+    font-size: 56px !important;
+    filter: drop-shadow(0 0 20px var(--vgt-accent-color)) !important;
+    animation: vgtWizardShieldPulse 2s infinite ease-in-out !important;
+}
+
+@keyframes vgtWizardShieldPulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px var(--vgt-accent-color)); }
+    50%       { transform: scale(1.08); filter: drop-shadow(0 0 30px var(--vgt-accent-color)); }
+}
+
+.vgt-wizard-summary-box {
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.01) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border-radius: 12px !important;
+    padding: 14px 20px !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    box-sizing: border-box !important;
+}
+
+.vgt-wizard-summary-item {
+    display: flex !important;
+    justify-content: space-between !important;
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+    padding-bottom: 6px !important;
+}
+
+.vgt-wizard-summary-item span:last-child {
+    font-weight: 700 !important;
+    color: #ffffff !important;
+}
+
+/* Wizard Footer Navigation Controls */
+.vgt-wizard-footer {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding-top: 16px !important;
+}
+
+.vgt-wizard-skip-link {
+    font-size: 11px !important;
+    color: #64748b !important;
+    cursor: pointer !important;
+    text-decoration: underline !important;
+    font-weight: 700 !important;
+    transition: color 0.2s ease !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.vgt-wizard-skip-link:hover {
+    color: #94a3b8 !important;
+}
+
+/* System Widget Styling */
+.vgt-widget-row-col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    width: 100% !important;
+}
+.vgt-widget-row-label {
+    display: flex !important;
+    justify-content: space-between !important;
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+}
+.vgt-widget-meter-track {
+    width: 100% !important;
+    height: 4px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-radius: 99px !important;
+    overflow: hidden !important;
+}
+.vgt-widget-meter-bar {
+    height: 100% !important;
+    background: var(--vgt-accent-color) !important;
+    border-radius: 99px !important;
+    width: 0%;
+    transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    box-shadow: 0 0 8px var(--vgt-accent-color);
+}
+
 

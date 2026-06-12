@@ -115,9 +115,10 @@ Object.assign(window.VGTDeskEngine, {
             this.preventClick = false;
             let hasMoved = false;
             
+            const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
             const rect = icon.getBoundingClientRect();
-            offsetX = e.clientX - rect.left;
-            offsetY = e.clientY - rect.top;
+            offsetX = (e.clientX - rect.left) / zoom;
+            offsetY = (e.clientY - rect.top) / zoom;
             
             let startX = e.clientX;
             let startY = e.clientY;
@@ -142,14 +143,24 @@ Object.assign(window.VGTDeskEngine, {
                     }
                 }
                 
-                const wsRect = workspace.getBoundingClientRect();
-                let left = ev.clientX - wsRect.left - offsetX;
-                let top = ev.clientY - wsRect.top - offsetY;
+                const z = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
+                const wsR = workspace.getBoundingClientRect();
+                const r = icon.getBoundingClientRect();
+                
+                const wsLeft = wsR.left / z;
+                const wsTop = wsR.top / z;
+                const wsWidth = wsR.width / z;
+                const wsHeight = wsR.height / z;
+                const iconWidth = r.width / z;
+                const iconHeight = r.height / z;
+                
+                let left = (ev.clientX / z) - wsLeft - offsetX;
+                let top = (ev.clientY / z) - wsTop - offsetY;
                 
                 if (left < 10) left = 10;
                 if (top < 10) top = 10;
-                if (left > wsRect.width - rect.width - 10) left = wsRect.width - rect.width - 10;
-                if (top > wsRect.height - rect.height - 10) top = wsRect.height - rect.height - 10;
+                if (left > wsWidth - iconWidth - 10) left = wsWidth - iconWidth - 10;
+                if (top > wsHeight - iconHeight - 10) top = wsHeight - iconHeight - 10;
                 
                 icon.style.left = `${left}px`;
                 icon.style.top = `${top}px`;
@@ -255,9 +266,11 @@ Object.assign(window.VGTDeskEngine, {
             this.preventClick = false;
             let hasMoved = false;
             const touch = e.touches[0];
+            
+            const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
             const rect = icon.getBoundingClientRect();
-            offsetX = touch.clientX - rect.left;
-            offsetY = touch.clientY - rect.top;
+            offsetX = (touch.clientX - rect.left) / zoom;
+            offsetY = (touch.clientY - rect.top) / zoom;
             
             let startX = touch.clientX;
             let startY = touch.clientY;
@@ -283,14 +296,24 @@ Object.assign(window.VGTDeskEngine, {
                     }
                 }
                 
-                const wsRect = workspace.getBoundingClientRect();
-                let left = t.clientX - wsRect.left - offsetX;
-                let top = t.clientY - wsRect.top - offsetY;
+                const z = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
+                const wsR = workspace.getBoundingClientRect();
+                const r = icon.getBoundingClientRect();
+                
+                const wsLeft = wsR.left / z;
+                const wsTop = wsR.top / z;
+                const wsWidth = wsR.width / z;
+                const wsHeight = wsR.height / z;
+                const iconWidth = r.width / z;
+                const iconHeight = r.height / z;
+                
+                let left = (t.clientX / z) - wsLeft - offsetX;
+                let top = (t.clientY / z) - wsTop - offsetY;
 
                 if (left < 10) left = 10;
                 if (top < 10) top = 10;
-                if (left > wsRect.width - rect.width - 10) left = wsRect.width - rect.width - 10;
-                if (top > wsRect.height - rect.height - 10) top = wsRect.height - rect.height - 10;
+                if (left > wsWidth - iconWidth - 10) left = wsWidth - iconWidth - 10;
+                if (top > wsHeight - iconHeight - 10) top = wsHeight - iconHeight - 10;
 
                 icon.style.left = `${left}px`;
                 icon.style.top = `${top}px`;

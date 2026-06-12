@@ -51,8 +51,9 @@ Object.assign(window.VGTDeskEngine, {
                 }
             }
 
-            let top = e.clientY - offsetY;
-            let left = e.clientX - offsetX;
+            const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
+            let top = (e.clientY / zoom) - offsetY;
+            let left = (e.clientX / zoom) - offsetX;
             
             if (top < 0) top = 0; 
             
@@ -84,14 +85,18 @@ Object.assign(window.VGTDeskEngine, {
                 baseWidth = "calc(100% - 80px)";
             }
 
-            if (e.clientY < 60) {
+            const clientX_css = e.clientX / zoom;
+            const clientY_css = e.clientY / zoom;
+            const winWidth_css = window.innerWidth / zoom;
+
+            if (clientY_css < 60) {
                 currentSnapZone = 'top';
                 preview.style.left = baseLeft;
                 preview.style.top = baseTop;
                 preview.style.width = baseWidth;
                 preview.style.height = baseHeight;
                 preview.classList.add('visible');
-            } else if (e.clientX < 40) {
+            } else if (clientX_css < 40) {
                 currentSnapZone = 'left';
                 preview.style.left = baseLeft;
                 preview.style.top = baseTop;
@@ -104,7 +109,7 @@ Object.assign(window.VGTDeskEngine, {
                 }
                 preview.style.height = baseHeight;
                 preview.classList.add('visible');
-            } else if (e.clientX > window.innerWidth - 40) {
+            } else if (clientX_css > winWidth_css - 40) {
                 currentSnapZone = 'right';
                 if (isWin) {
                     preview.style.left = "50%";
@@ -171,11 +176,12 @@ Object.assign(window.VGTDeskEngine, {
                 return;
             }
             
+            const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
             isDragging = true;
             startX = e.clientX;
             startY = e.clientY;
-            offsetX = e.clientX - win.offsetLeft;
-            offsetY = e.clientY - win.offsetTop;
+            offsetX = (e.clientX / zoom) - win.offsetLeft;
+            offsetY = (e.clientY / zoom) - win.offsetTop;
             this.focusWindow(winId);
             
             document.addEventListener('mousemove', onMouseMove);
@@ -202,13 +208,14 @@ Object.assign(window.VGTDeskEngine, {
         const snapClasses = ['vgt-window-snap-left', 'vgt-window-snap-right', 'vgt-window-snap-topleft', 'vgt-window-snap-bottomleft', 'vgt-window-maximized'];
         this.currentResizeWin.classList.remove(...snapClasses);
         
+        const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
         const rect = this.currentResizeWin.getBoundingClientRect();
-        this.startWidth = rect.width;
-        this.startHeight = rect.height;
+        this.startWidth = rect.width / zoom;
+        this.startHeight = rect.height / zoom;
         this.startLeft = this.currentResizeWin.offsetLeft;
         this.startTop = this.currentResizeWin.offsetTop;
-        this.startX = e.clientX;
-        this.startY = e.clientY;
+        this.startX = e.clientX / zoom;
+        this.startY = e.clientY / zoom;
 
         const overlay = this.currentResizeWin.querySelector('.drag-overlay');
         if (overlay) overlay.classList.remove('hidden');
@@ -240,8 +247,9 @@ Object.assign(window.VGTDeskEngine, {
     doResize(e) {
         if (!this.currentResizeWin) return;
         
-        const dx = e.clientX - this.startX;
-        const dy = e.clientY - this.startY;
+        const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
+        const dx = (e.clientX / zoom) - this.startX;
+        const dy = (e.clientY / zoom) - this.startY;
         
         let newWidth = this.startWidth;
         let newHeight = this.startHeight;

@@ -136,7 +136,7 @@ Object.assign(window.VGTDeskEngine, {
     
     getSearchableItems() {
         const items = [];
-        items.push({ id: 'settings', title: 'Systemeinstellungen', type: 'app', desc: 'System-Konfiguration, Farben und Hintergründe' });
+        items.push({ id: 'settings', title: 'Command Center', type: 'app', desc: 'System-Konfiguration, Farben und Hintergründe' });
         items.push({ id: 'welcome', title: 'Willkommen', type: 'app', desc: 'Willkommensbildschirm und Spenden-Infos' });
         
         document.querySelectorAll('.desktop-icon').forEach(icon => {

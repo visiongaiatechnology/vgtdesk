@@ -1,0 +1,656 @@
+/**
+ * VGT WP-Desk — Modular Style: Widgets & Multi-Layouts
+ */
+
+.vgt-widgets-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 12;
+}
+
+.vgt-widget {
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
+    pointer-events: auto;
+    cursor: grab !important;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+.vgt-widget:hover {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 15px var(--vgt-accent-rgba8) !important;
+}
+.vgt-widget:active {
+    cursor: grabbing !important;
+}
+.vgt-widget.dragging {
+    opacity: 0.8;
+    transform: scale(1.02);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+    z-index: 99 !important;
+}
+
+#widget-clock {
+    top: 16px;
+    left: calc(100% - 276px);
+}
+#widget-system {
+    top: 120px;
+    left: calc(100% - 276px);
+}
+#widget-notes {
+    top: 350px;
+    left: calc(100% - 276px);
+}
+#widget-optimizer {
+    top: 530px;
+    left: calc(100% - 276px);
+}
+#widget-threat-ticker {
+    top: 16px;
+    left: 16px;
+}
+#widget-dattrack {
+    top: 290px;
+    left: 16px;
+}
+
+.vgt-widget-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--vgt-accent-color);
+    margin: 0 0 10px 0;
+}
+
+/* Clock Widget Details */
+.widget-clock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+#vgt-widget-clock-time {
+    font-size: 32px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.025em;
+}
+#vgt-widget-clock-date {
+    font-size: 11px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-top: 2px;
+}
+
+/* System Widget Details */
+.widget-system {
+    display: flex;
+    flex-direction: column;
+}
+.vgt-widget-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    padding-bottom: 4px;
+    align-items: center;
+}
+.vgt-widget-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+.vgt-widget-row span {
+    color: #ffffff;
+}
+.vgt-widget-row strong {
+    color: #ffffff;
+}
+
+.vgt-widget-row-col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    width: 100% !important;
+}
+.vgt-widget-row-label {
+    display: flex !important;
+    justify-content: space-between !important;
+    font-size: 11px !important;
+    color: #ffffff !important;
+}
+.vgt-widget-meter-track {
+    width: 100% !important;
+    height: 4px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-radius: 99px !important;
+    overflow: hidden !important;
+}
+.vgt-widget-meter-bar {
+    height: 100% !important;
+    background: var(--vgt-accent-color) !important;
+    border-radius: 99px !important;
+    width: 0%;
+    transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    box-shadow: 0 0 8px var(--vgt-accent-color);
+}
+
+/* Notes Widget Details */
+.widget-notes {
+    display: flex;
+    flex-direction: column;
+    height: 160px;
+}
+.vgt-widget-textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    resize: none;
+    color: #ffffff;
+    font-size: 11px;
+    line-height: 1.5;
+    outline: none;
+    padding: 0;
+    width: 100%;
+}
+.vgt-widget-textarea::placeholder {
+    color: #475569;
+}
+
+/* 1. VGT Transient Optimizer Widget */
+.widget-optimizer {
+    width: 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.vgt-opt-btn {
+    width: 100%;
+    padding: 6px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--vgt-accent-color), #4338ca);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.vgt-opt-btn:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 0 10px var(--vgt-accent-rgba15);
+}
+
+/* 2. Live Threat Stream Widget */
+.widget-threat-ticker {
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: rgba(15, 23, 42, 0.55);
+}
+.vgt-threat-stream {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.vgt-threat-item {
+    background: rgba(244, 63, 94, 0.05);
+    border: 1px solid rgba(244, 63, 94, 0.15);
+    border-radius: 10px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+}
+.vgt-threat-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+}
+.vgt-threat-ip {
+    font-weight: 700;
+    color: #ffffff;
+    font-family: monospace;
+}
+.vgt-threat-type {
+    background: rgba(244, 63, 94, 0.2);
+    color: #fb7185;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 8px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.vgt-threat-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.vgt-threat-time {
+    font-size: 9px;
+    color: #ffffff;
+}
+.vgt-punish-btn {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 8px;
+    font-weight: 800;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+.vgt-punish-btn:hover {
+    background: linear-gradient(135deg, #ff0000, #ef4444);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+    transform: scale(1.05);
+}
+
+/* 3. Dattrack Telemetry Widget */
+.widget-dattrack {
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.55);
+}
+.vgt-dt-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.vgt-dt-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+}
+.vgt-dt-label {
+    font-size: 8px;
+    text-transform: uppercase;
+    color: #ffffff;
+    font-weight: bold;
+}
+.vgt-dt-value {
+    font-size: 16px;
+    font-weight: 800;
+    color: #00f0ff;
+    font-family: monospace;
+}
+/* Visual Sparkline Chart */
+.vgt-dt-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 40px;
+    padding: 4px 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+}
+.vgt-dt-bar {
+    width: 20px;
+    background: linear-gradient(to top, #008b96, #00f0ff);
+    border-radius: 2px 2px 0 0;
+    transition: height 0.3s ease;
+    min-height: 2px;
+}
+
+/* Mobile Hiding */
+@media (max-width: 1024px) {
+    .vgt-widgets-container {
+        display: none !important;
+    }
+}
+
+/* Context Menu, Folder Window & Snap Helper */
+.vgt-context-menu {
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 6px;
+    min-width: 160px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: none;
+    position: absolute !important;
+    z-index: 999999 !important;
+    pointer-events: auto !important;
+}
+.vgt-context-menu-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #cbd5e1;
+    border-radius: 8px;
+    transition: background-color 0.15s, color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.vgt-context-menu-item:hover {
+    background-color: var(--vgt-accent-rgba15);
+    color: #ffffff;
+}
+
+.vgt-submenu-popup {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    min-width: 180px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    animation: vgtPopupIn 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    position: absolute !important;
+    z-index: 999999 !important;
+    pointer-events: auto !important;
+}
+@keyframes vgtPopupIn {
+    0% { transform: scale(0.95); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.folder-window-body {
+    background: rgba(10, 13, 22, 0.5);
+    border-radius: 12px;
+    height: calc(100% - 56px);
+    box-sizing: border-box;
+}
+
+.remove-from-folder-btn:hover {
+    transform: scale(1.1);
+}
+
+.vgt-snap-preview-indicator {
+    position: absolute;
+    background: var(--vgt-accent-rgba15);
+    border: 2px dashed var(--vgt-accent-color);
+    border-radius: 12px;
+    z-index: 99999 !important;
+    pointer-events: none;
+    opacity: 0;
+    box-sizing: border-box;
+    transition: opacity 0.15s ease, left 0.15s ease, top 0.15s ease, width 0.15s ease, height 0.15s ease;
+}
+.vgt-snap-preview-indicator.visible {
+    opacity: 1;
+}
+
+/* 🪟 WINDOWS REDMOND LAYOUT STYLE CUSTOMIZATIONS */
+.vgt-layout-windows .vgt-window-title,
+.vgt-layout-linux .vgt-window-title {
+    order: 1 !important;
+    margin-right: auto;
+}
+.vgt-layout-windows .vgt-window-badge-wrap,
+.vgt-layout-linux .vgt-window-badge-wrap {
+    order: 2 !important;
+    margin-right: auto;
+}
+.vgt-layout-windows .vgt-window-spacer,
+.vgt-layout-linux .vgt-window-spacer {
+    display: none !important;
+}
+.vgt-layout-windows .vgt-window-dots,
+.vgt-layout-linux .vgt-window-dots {
+    order: 3 !important;
+}
+.vgt-layout-windows .vgt-window-dot.dot-rose,
+.vgt-layout-linux .vgt-window-dot.dot-rose {
+    order: 3 !important;
+}
+.vgt-layout-windows .vgt-window-dot.dot-emerald,
+.vgt-layout-linux .vgt-window-dot.dot-emerald {
+    order: 2 !important;
+}
+.vgt-layout-windows .vgt-window-dot.dot-amber,
+.vgt-layout-linux .vgt-window-dot.dot-amber {
+    order: 1 !important;
+}
+
+.vgt-layout-windows .vgt-interface-overlay {
+    flex-direction: column !important;
+}
+.vgt-layout-windows .vgt-topbar {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    height: 48px !important;
+    border-radius: 0 !important;
+    border: none !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    margin: 0 !important;
+    z-index: 99999 !important;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.4) !important;
+    background: rgba(15, 23, 42, 0.8) !important;
+    padding: 0 14px !important;
+}
+.vgt-layout-windows .vgt-footer {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: auto !important;
+    height: 48px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    z-index: 100000 !important;
+    pointer-events: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.vgt-layout-windows .vgt-dock {
+    height: 40px !important;
+    padding: 0 10px !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    pointer-events: auto !important;
+    gap: 8px !important;
+}
+.vgt-layout-windows .vgt-dock-divider {
+    display: none !important;
+}
+.vgt-layout-windows .vgt-dock-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 6px !important;
+}
+.vgt-layout-windows .vgt-dock-emoji {
+    font-size: 16px !important;
+}
+.vgt-layout-windows .vgt-dock-dashicon {
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+}
+.vgt-layout-windows .vgt-dock-img {
+    width: 18px !important;
+    height: 18px !important;
+}
+.vgt-layout-windows .vgt-dock-item:hover .vgt-dock-icon {
+    transform: scale(1.1) !important;
+}
+.vgt-layout-windows .vgt-dock-indicator {
+    width: 4px !important;
+    height: 4px !important;
+    margin-top: 2px !important;
+}
+
+.vgt-layout-windows .vgt-workspace {
+    margin-top: 0 !important;
+    margin-bottom: 48px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+.vgt-layout-windows .vgt-start-menu {
+    top: auto !important;
+    bottom: 54px !important;
+    left: 10px !important;
+    width: 560px !important;
+    height: 640px !important;
+}
+.vgt-layout-windows .vgt-start-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+}
+.vgt-layout-windows .vgt-control-center {
+    top: auto !important;
+    bottom: 54px !important;
+    right: 10px !important;
+}
+
+.vgt-layout-windows .vgt-window-snap-left {
+    width: 50% !important;
+    height: calc(100% + 4px) !important;
+    top: 0px !important;
+    left: 0px !important;
+}
+.vgt-layout-windows .vgt-window-snap-right {
+    width: 50% !important;
+    height: calc(100% + 4px) !important;
+    top: 0px !important;
+    left: 50% !important;
+}
+.vgt-layout-windows .vgt-window-snap-topleft {
+    width: 50% !important;
+    height: calc(50% - 8px) !important;
+    top: 0px !important;
+    left: 0px !important;
+}
+.vgt-layout-windows .vgt-window-snap-bottomleft {
+    width: 50% !important;
+    height: calc(50% - 8px) !important;
+    top: calc(50% + 2px) !important;
+    left: 0px !important;
+}
+
+/* 🐧 LINUX TUX SIDEBAR */
+.vgt-layout-linux .vgt-interface-overlay {
+    flex-direction: column !important;
+}
+.vgt-layout-linux .vgt-footer {
+    position: absolute !important;
+    top: 70px !important;
+    bottom: 14px !important;
+    left: 14px !important;
+    width: 64px !important;
+    height: calc(100% - 84px) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    z-index: 10000 !important;
+    pointer-events: none !important;
+    display: flex !important;
+    align-items: center !important;
+}
+.vgt-layout-linux .vgt-dock {
+    flex-direction: column !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 12px 0 !important;
+    border-radius: 12px !important;
+    gap: 12px !important;
+    pointer-events: auto !important;
+    overflow: visible !important;
+}
+.vgt-layout-linux .vgt-dock-divider {
+    width: 24px !important;
+    height: 1px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    margin: 4px auto !important;
+}
+.vgt-layout-linux .vgt-dynamic-taskbar-flex {
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+}
+.vgt-layout-linux .vgt-workspace {
+    margin-left: 80px !important;
+}
+.vgt-layout-linux .vgt-start-menu {
+    top: 70px !important;
+    left: 80px !important;
+    bottom: auto !important;
+}
+.vgt-layout-linux .vgt-control-center {
+    top: 70px !important;
+    right: 14px !important;
+    bottom: auto !important;
+}
+
+.vgt-layout-linux .vgt-dock-tooltip {
+    display: none !important;
+}
+.vgt-layout-linux .vgt-dock-indicator {
+    width: 3px !important;
+    height: 12px !important;
+    left: 3px !important;
+    bottom: 50% !important;
+    transform: translateY(50%) !important;
+}
+
+.vgt-layout-linux .vgt-window-snap-left {
+    width: calc(50% - 40px) !important;
+    height: calc(100% - 20px) !important;
+    top: 4px !important;
+    left: 80px !important;
+}
+.vgt-layout-linux .vgt-window-snap-right {
+    width: calc(50% - 40px) !important;
+    height: calc(100% - 20px) !important;
+    top: 4px !important;
+    left: calc(80px + (100% - 80px) / 2) !important;
+}
+.vgt-layout-linux .vgt-window-snap-topleft {
+    width: calc(50% - 40px) !important;
+    height: calc(50% - 14px) !important;
+    top: 4px !important;
+    left: 80px !important;
+}
+.vgt-layout-linux .vgt-window-snap-bottomleft {
+    width: calc(50% - 40px) !important;
+    height: calc(50% - 14px) !important;
+    top: calc(50% + 10px) !important;
+    left: 80px !important;
+}
+
+
+/* ==========================================================================
+   RESTORED MISSING STYLES (AUTOMATIC COMPARISON)
+   ========================================================================== */
+
+#widget-sentinel {
+    top: 430px;
+    left: calc(100% - 276px);
+}
+
+.vgt-gold-mode .vgt-widget {
+    border-color: rgba(218, 165, 32, 0.2) !important;
+    box-shadow:
+        0 10px 20px rgba(0, 0, 0, 0.4),
+        0 0 10px rgba(218, 165, 32, 0.06) !important;
+}
