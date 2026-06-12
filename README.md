@@ -1,12 +1,12 @@
 # 🖥️ VGT WP-Desk — Premium Slim Desktop Layer
 
 [![License](https://img.shields.io/badge/License-AGPLv3-green?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.0.0--Beta__v3__Hardened-brightgreen?style=for-the-badge)](#)
+[![Version](https://img.shields.io/badge/Version-1.0.0--Beta__v4__Hardened-brightgreen?style=for-the-badge)](#)
 [![Platform](https://img.shields.io/badge/Platform-WordPress-21759B?style=for-the-badge&logo=wordpress)](#)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php)](#)
 [![Architecture](https://img.shields.io/badge/Architecture-Zero--Overheat_OS--Layer-blue?style=for-the-badge)](#)
 [![Engine](https://img.shields.io/badge/Engine-Vanilla_JS_%2F_CSS3-orange?style=for-the-badge)](#)
-[![Status](https://img.shields.io/badge/Status-BETA__V3__HARDENED-yellow?style=for-the-badge)](#)
+[![Status](https://img.shields.io/badge/Status-BETA__V4__HARDENED-yellow?style=for-the-badge)](#)
 [![Security](https://img.shields.io/badge/Security-Diamant_VGT_Supreme-red?style=for-the-badge)](#)
 [![VGT](https://img.shields.io/badge/VGT-VisionGaia_Technology-red?style=for-the-badge)](https://visiongaiatechnology.de)
 
@@ -17,7 +17,7 @@
 
 ## ⚠️ DISCLAIMER: BETA SOFTWARE
 
-This project is currently in **Beta v3 (Hardened Edition)** and part of ongoing development at VisionGaia Technology. It is **not** yet a finalized production release.
+This project is currently in **Beta v4 (Hardened Edition)** and part of ongoing development at VisionGaia Technology. It is **not** yet a finalized production release.
 
 **Use at your own risk.** Test thoroughly in a staging environment before deploying to live sites.
 
@@ -411,6 +411,38 @@ git clone https://github.com/visiongaiatechnology/vgtdesk
 ```
 
 ---
+
+# Changelog: VGT WP-Desk — Version 1.0.0-Beta v4
+
+This document outlines the detailed list of improvements, security updates, and bug fixes introduced in **1.0.0-Beta v4**, bridging the gap from the previous **Beta v3** release.
+
+---
+
+## 📊 1. Dattrack Telemetry Integration & Premium Safeguards
+- **Sovereign Telemetry Integration**: Safely integrated Dattrack as an opt-in telemetry module inside the WP-Desk setting environment.
+- **Sentinel V7 Class Collision Shield**: Implemented defensive check shields (`class_exists('VGT_Crypto')`, `class_exists('VGT_Collector')`, etc.) inside [class-dattrack-engine.php](file:///c:/Users/Masterboard/Downloads/vgtdesk-main/vgtdesk-main/includes/modules/dattrack/class-dattrack-engine.php) to prevent class redeclaration fatal errors when premium security suites are active.
+- **Dynamic Module Activation**: Wrapped database metrics retrieval loops inside strict `class_exists` and `method_exists` validations for `VGT_Dashboard::get_vault_metrics()`, neutralizing blank dashboards and rendering errors.
+- **Isolation on Premium Activation**: Deferred booting of the Dattrack analytics engine to the `plugins_loaded` hook. If Sentinel V7 is active (`defined('VIS_VERSION')`), Dattrack is completely hidden from the desktop environment (app shortcut icons, widgets, and Command Center panels), and the setup onboarding wizard is dynamically reduced from 7 steps to 6.
+
+## 🖥️ 2. UI Resolution Scaling & Drag-and-Drop Alignments
+- **JS Compilation Blocker Fix**: Resolved a critical syntax error (`SyntaxError: Identifier 'zoom' has already been declared`) in [desktop-draggable.js](file:///c:/Users/Masterboard/Downloads/vgtdesk-main/vgtdesk-main/assets/js/modules/desktop-draggable.js) caused by a duplicate `const zoom` declaration, restoring the desktop wallpaper, taskbar, dock, and widgets render routines.
+- **Viewport Auto-Sizing**: Renamed setting "Schriftgrösse (Skalierung)" to "Bildschirmauflösung (Skalierung)". Dynamically calculate `#vgt-shell-root` boundaries using `window.innerWidth / zoom` and `window.innerHeight / zoom` during page scaling and viewport resize triggers to prevent white borders and background gaps.
+- **Overflow & Scrollbars Override**: Injected global overrides (`overflow: hidden !important`, `width/height: 100% !important`) on outer admin wrapper containers (`html`, `body`, `#wpwrap`, `#wpcontent`) inside [desktop-core.css](file:///c:/Users/Masterboard/Downloads/vgtdesk-main/vgtdesk-main/assets/css/desktop-core.css) to permanently eliminate browser window scrollbars at all zoom levels.
+- **Widget Drifting Protection**: Rewrote widget position persistence in [desktop-widgets.js](file:///c:/Users/Masterboard/Downloads/vgtdesk-main/vgtdesk-main/assets/js/modules/desktop-widgets.js). Right-aligned widgets are saved using a relative `right` offset rather than pixel `left` coordinates, anchoring them to the right edge and maintaining perfect screen-edge placement when zoom levels shift.
+- **Snapping & Boundaries Alignment**: Corrected boundaries inside scaled layouts to clear "invisible walls" and allow dragging widgets and windows freely up to the absolute margins of the screen.
+
+## 🔒 3. AJAX Exception Hardening (DIAMANT VGT SUPREME)
+- **Information Leakage Shield**: Refactored the catch blocks for five administrative AJAX endpoints in [desktop.php](file:///c:/Users/Masterboard/Downloads/vgtdesk-main/vgtdesk-main/desktop.php) to catch specific exception hierarchies (`SecurityException`, `ValidationException`, `StorageException`, and a final fallback `\Throwable $e`) to comply with Pattern 1.5.A:
+  - `ajax_ban_ip`
+  - `ajax_get_task_manager_stats`
+  - `ajax_unschedule_cron`
+  - `ajax_kill_transient`
+  - `ajax_optimize_database`
+- **Sanitized JSON Feedback**: Replaced raw exception string leakages with clean, generic JSON error alerts for the client while writing full traceback logs to the server's PHP `error_log` (prefixed with `[SEC]` or `[FATAL]`).
+
+## 💠 4. Codebase Audits & Status Headers
+- Standardized file headers, certifying audited modules under `// STATUS: 💠 DIAMANT VGT SUPREME` verification.
+
 
 ## 📜 Changelog
 
