@@ -17,7 +17,7 @@ if (!current_user_can('manage_options')) {
 
 // Fetch states
 $user_id = get_current_user_id();
-$user_settings = $this->get_user_settings($user_id);
+$user_settings = \VisionGaia\WPDesk\WPDeskSettings::get_user_settings($user_id);
 $auto_redirect_active = $user_settings['auto_redirect'] ?? false;
 $bypass_active = isset($_COOKIE['vgt_desk_bypass']) && $_COOKIE['vgt_desk_bypass'] === '1';
 
