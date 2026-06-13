@@ -63,11 +63,11 @@ Object.assign(window.VGTDeskEngine, {
                 <div class="flex-1 iframe-container relative">
                     <div class="drag-overlay absolute inset-0 hidden z-50 bg-transparent"></div>
                     <iframe 
-                        id="iframe-${escapedId}" 
-                        src="${escapedUrl}" 
-                        data-src="${escapedUrl}"
-                        data-loaded="true"
-                        onload="window.VGTDeskEngine && VGTDeskEngine.handleIframeLoaded('${escapedId}')">
+                         id="iframe-${escapedId}" 
+                         src="${escapedUrl}" 
+                         data-src="${escapedUrl}"
+                         data-loaded="true"
+                         onload="window.VGTDeskEngine && VGTDeskEngine.handleIframeLoaded('${escapedId}')">
                     </iframe>
                 </div>
             </div>
@@ -580,7 +580,7 @@ Object.assign(window.VGTDeskEngine, {
             // Reset gold-specific styles for other colors
             if (dot) { dot.style.background = ''; dot.style.backgroundColor = hex; dot.style.boxShadow = ''; }
             if (title) { title.style.backgroundImage = ''; title.style.webkitBackgroundClip = ''; title.style.webkitTextFillColor = ''; title.style.backgroundClip = ''; title.style.color = hex; }
-            if (welcomeTitle) { welcomeTitle.style.backgroundImage = ''; welcomeTitle.style.webkitBackgroundClip = ''; welcomeTitle.style.webkitTextFillColor = ''; welcomeTitle.style.backgroundClip = ''; welcomeTitle.style.color = hex; }
+            if (welcomeTitle) { welcomeTitle.style.backgroundImage = ''; welcomeTitle.style.webkitBackgroundClip = ''; welcomeTitle.style.webkitTextFillColor = ''; welcomeTitle.style.backgroundClip = ''; title.style.color = hex; }
             if (settingsTitle) { settingsTitle.style.backgroundImage = ''; settingsTitle.style.webkitBackgroundClip = ''; settingsTitle.style.webkitTextFillColor = ''; settingsTitle.style.backgroundClip = ''; settingsTitle.style.color = hex; }
             // Deactivate Gold Mode Easter Egg
             const shell = document.getElementById('vgt-shell-root');

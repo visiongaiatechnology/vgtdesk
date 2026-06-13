@@ -174,22 +174,35 @@ if (!defined('ABSPATH')) {
                                 </div>
                                 
                                 <div class="vgt-cc-form-group">
-                                    <label class="vgt-cc-label">Desktop-Optionen</label>
-                                    <div class="vgt-cc-toggle-card">
-                                        <div class="vgt-cc-toggle-info">
-                                            <span class="vgt-cc-toggle-title">Weichzeichner (Glassmorphismus)</span>
-                                            <span class="vgt-cc-toggle-desc">Blur-Effekt auf allen Panels anwenden.</span>
-                                        </div>
-                                        <input type="checkbox" checked class="vgt-toggle-switch" id="blur-toggle" onchange="VGTDeskEngine.toggleBlur()">
-                                    </div>
-                                    <div class="vgt-cc-toggle-card" style="margin-top: 8px;">
-                                        <div class="vgt-cc-toggle-info">
-                                            <span class="vgt-cc-toggle-title">Desktop Standard-Ansicht</span>
-                                            <span class="vgt-cc-toggle-desc">Umleitung in den VGT-Desk bei Backend-Aufrufen.</span>
-                                        </div>
-                                        <input type="checkbox" class="vgt-toggle-switch" id="redirect-toggle" onchange="VGTDeskEngine.toggleAutoRedirect()">
-                                    </div>
-                                </div>
+                                     <label class="vgt-cc-label">Desktop-Optionen</label>
+                                     <div class="vgt-cc-toggle-card">
+                                         <div class="vgt-cc-toggle-info">
+                                             <span class="vgt-cc-toggle-title">Weichzeichner (Glassmorphismus)</span>
+                                             <span class="vgt-cc-toggle-desc">Blur-Effekt auf allen Panels anwenden.</span>
+                                         </div>
+                                         <input type="checkbox" checked class="vgt-toggle-switch" id="blur-toggle" onchange="VGTDeskEngine.toggleBlur()">
+                                     </div>
+                                     <div class="vgt-cc-toggle-card" style="margin-top: 8px;">
+                                         <div class="vgt-cc-toggle-info">
+                                             <span class="vgt-cc-toggle-title">Desktop Standard-Ansicht</span>
+                                             <span class="vgt-cc-toggle-desc">Umleitung in den VGT-Desk bei Backend-Aufrufen.</span>
+                                         </div>
+                                         <input type="checkbox" class="vgt-toggle-switch" id="redirect-toggle" onchange="VGTDeskEngine.toggleAutoRedirect()">
+                                     </div>
+                                 </div>
+
+                                 <div class="vgt-cc-form-group">
+                                     <label class="vgt-cc-label">Sound-Design (Audio Pack)</label>
+                                     <div class="vgt-cc-select-wrapper" style="position: relative; width: 100%;">
+                                         <select id="vgt-sound-pack-select" class="vgt-input-text" onchange="VGTDeskEngine.changeSoundPack(this.value)" style="width: 100%; appearance: none; padding-right: 30px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; color: #fff; height: 38px; box-sizing: border-box; padding-left: 12px; outline: none; transition: border-color 0.2s;">
+                                             <option value="synth_default" <?php selected($user_settings['sound_pack'] ?? 'synth_default', 'synth_default'); ?>>🎹 Synth Retro (Standard)</option>
+                                             <option value="cyber_neon" <?php selected($user_settings['sound_pack'] ?? 'synth_default', 'cyber_neon'); ?>>⚡ Cyber Neon (Sci-Fi)</option>
+                                             <option value="classic_bell" <?php selected($user_settings['sound_pack'] ?? 'synth_default', 'classic_bell'); ?>>🔔 Classic Bell (Klassisch)</option>
+                                             <option value="digital_minimal" <?php selected($user_settings['sound_pack'] ?? 'synth_default', 'digital_minimal'); ?>>🖱️ Digital Minimal (Modern)</option>
+                                         </select>
+                                         <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #6b7280; font-size: 10px;">▼</span>
+                                     </div>
+                                 </div>
                                 
                                 <div class="vgt-cc-action-bar" style="display: flex; gap: 10px;">
                                     <button onclick="VGTDeskEngine.resetIconGrid()" class="vgt-btn-secondary">Symbole zurücksetzen</button>
