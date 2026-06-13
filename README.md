@@ -39,10 +39,7 @@ See: [SECURITY_POSTURE.md](SECURITY_POSTURE.md)
 
 <img width="2560" height="1232" alt="image" src="https://github.com/user-attachments/assets/336383e1-653c-4353-aaea-7414d909b3bf" />
 
-
 ---
-
-
 
 ## 🔍 What is VGT WP-Desk?
 
@@ -72,6 +69,8 @@ VGT WP-Desk Operator Workspace:
 → Folder Mode, layouts, widgets and persistent state
 → Command Center for diagnostics and runtime operations
 → Security Center integrating Sentinel, Throne Guard and Dattrack
+→ VGT Build Center unifying Form Builder, Chronos and Book Reader
+→ Sentinel Hardening Auditor with Cyberpunk scoring UI
 → Local telemetry without third-party tracking
 → Same-origin deep-link protection
 → CSP-aware asset loading and DOM XSS hardening
@@ -102,6 +101,19 @@ VGT WP-Desk Security Center
     ├── visitor event insight
     └── sovereign data storage
 ```
+
+### VGT Build Center
+
+Beta v4 consolidates the builder toolchain under a single unified app icon (`dashicons-hammer`), replacing three separate menu entries:
+
+```text
+VGT Build Center
+├── Form Builder (Omega Vault)   ← AES-256-GCM encrypted form submissions
+├── Chronos Builder              ← WYSIWYG countdown and automation timer editor
+└── VGT Book Reader              ← Interactive PDF and media presentation system
+```
+
+Submenus and AJAX routing load each builder interface directly into the iframe workspace — no context switching required.
 
 WP-Desk is designed for administrators, publishers, developers and security-conscious operators who want WordPress to remain self-hosted, extensible and familiar — while gaining a faster workspace, stronger operational control and a hardened local security layer.
 
@@ -135,6 +147,12 @@ Throne Guard Capability Hardening & Session Gate
 → Hardware Deactivation Lock
 → CSP Admin Exception: nonce removed from admin CSP — preserves WP Core inline scripts
 ↓
+Modular PHP Kernel (Beta v4)
+→ desktop.php             ← lightweight bootstrapper / loader only
+→ WPDeskSettings          ← DB schema, settings tables, defaults
+→ WPDeskAppBuilder        ← dynamic WordPress menu parser → app matrix
+→ WPDeskPlugin            ← central controller: hooks, assets, AJAX dispatch, iframe rules
+↓
 Per-User Opt-in Check
 → Desktop mode off by default
 → Admin notice in classic backend → explicit per-user activation
@@ -160,7 +178,6 @@ Persistent Settings (Relational DB)
 ```
 
 <img width="1870" height="1142" alt="image" src="https://github.com/user-attachments/assets/fbbb1b7f-cfce-45b7-86f3-28878a32cc09" />
-
 
 ---
 
@@ -205,7 +222,7 @@ Persistent Settings (Relational DB)
 App grouping directly on the desktop workspace — no page reload required.
 
 **Creating & Managing Folders:**
-- Right-click empty desktop area → context menu → **📁 Neuer Ordner** → glassmorphic name prompt
+- Right-click empty desktop area → context menu → **📁 New Folder** → glassmorphic name prompt
 - Folders snap to the desktop icon grid with collision-avoidance
 - Right-click a folder icon → rename ✏️ or delete 🗑️ directly
 
@@ -281,19 +298,39 @@ Unified administration panel replacing the previous settings window — split gl
 - Superkey update: `ajax_update_superkey()` — verifies current key via `password_verify`, enforces 12-character minimum
 
 **Display & Personalization:**
-- Bildschirmauflösung (Skalierung) slider (10px–24px) — updates `--vgt-font-size` on `:root` + DB sync
+- Resolution scaling slider (10px–24px) — updates `--vgt-font-size` on `:root` + DB sync
 - Layout switcher (macOS / Windows / Linux)
-- Wallpaper selector + custom URL input
+- Wallpaper selector + custom URL input (same-origin enforced — Beta v4)
 - HSL accent color theme matrix
 
 **Keyboard Shortcuts Mapper:**
-- Click "Aufzeichnen" → captures modifier key (Ctrl/Alt/Shift/Meta) + `e.code`
+- Click "Record" → captures modifier key (Ctrl/Alt/Shift/Meta) + `e.code`
 - Saved to user settings — persisted in `vgt_desk_settings`
 - Global `initShortcuts()` listener matches recorded keys to desktop window actions
 
 ---
 
-### 🔒 2.7 Security Architecture — Defense in Depth
+### 🛡️ 2.7 Sentinel Hardening Auditor *(New in Beta v4)*
+
+The WordPress security audit system is now deeply integrated into the VGT Security Center, replacing the previous standalone view.
+
+**Sentinel Auto-Awareness:**
+Automatically detects whether Sentinel CE or Enterprise V7 is active, checks which defense modules are running (Airlock, Cerberus, Titan) and reflects their state positively in the security index — no manual configuration.
+
+**Cyberpunk Scoring UI:**
+- **Cyber-corner brackets** — cards render with glowing cyan corner markers
+- **Animated scan line** — neon-blue vertical scanner animates during audit execution
+- **Angled cyber button** — start button rendered with futuristic `clip-path` bevel
+- **Cockpit-style score display** — large luminous digital index readout
+- **Interactive tier grid** — four tier boxes (DIAMANT / PLATIN GOLD / VGT SECURED / CRITICAL RISK) remain greyed out at idle; illuminate in their respective neon color on scan completion based on achieved score
+- **Red warning row highlighting** — all unresolved audit items receive a left-edge red indicator bar, a red-tinted row background and bright red status text — directing the administrator immediately to open vulnerabilities
+
+**Score Index Fix:**
+`ScoreMax` is no longer hardcoded to 33 but dynamically counts the actual number of test vectors executed (29). 27 passed tests now correctly report 93% instead of the previously distorted 82%.
+
+---
+
+### 🔒 2.8 Security Architecture — Defense in Depth
 
 **Integrated Sentinel CE (v1.7.0):**
 
@@ -319,8 +356,27 @@ AEGIS, CERBERUS, AIRLOCK, HADES, CHRONOS, and GHOST TRAP integrated into boot se
 - `preg_replace('/[()\'\"\\\\]/', '', ...)` applied to background image and logo URL values at save and render time
 - Prevents quote/parenthesis characters from breaking `url('...')` CSS context
 
+**Wallpaper Same-Origin Enforcement (Beta v4):**
+- On save, wallpaper URLs are restricted to same-origin connections, the WordPress media library (including CDNs) or local base64 presets
+- Eliminates cross-site image tracking vectors via external wallpaper servers
+
 **CSP Admin Fix:**
 - Nonce removed from `Content-Security-Policy` header during `is_admin()` — WordPress Core inline scripts (Heartbeat, inline-edit) no longer blocked by overly strict CSP
+
+**SAMEORIGIN Iframe Fix (Beta v4):**
+- `vault.php` previously sent `X-Frame-Options: DENY` — this blocked the Form Builder from loading inside the desktop workspace
+- Replaced with `SAMEORIGIN` combined with CSP `frame-ancestors 'self'`
+
+**Scope-Limited Error Handlers (Beta v4):**
+- Globally registered error handlers in the Security Center are now strictly scoped to `VGT_WPDESK_PATH`
+- Warnings from WordPress Core or third-party plugins can no longer trigger a "Critical Kernel Failure" in the audit system
+
+**SQL Identifier Hardening (Beta v4):**
+- SQL identifiers in the database optimization routine are backtick-escaped via `str_replace('`','``',$table)` — injection pattern closed
+
+**AJAX Exception Hardening (Beta v4 — DIAMANT VGT SUPREME):**
+- Five major AJAX actions (`ajax_ban_ip`, `ajax_get_task_manager_stats`, `ajax_unschedule_cron`, `ajax_kill_transient`, `ajax_optimize_database`) now catch typed exception hierarchies: `SecurityException`, `ValidationException`, `StorageException`, and a final `\Throwable` fallback
+- Opaque generic responses returned to client on failure — full tracebacks written to server `error_log` only
 
 **Throne Guard Integration (v2.6.0):**
 - 14 toxic capabilities stripped from `administrator` → `master` role exclusive
@@ -337,7 +393,7 @@ AEGIS, CERBERUS, AIRLOCK, HADES, CHRONOS, and GHOST TRAP integrated into boot se
 
 ---
 
-### 💡 2.8 Desktop Engine Modularization
+### 💡 2.9 Desktop Engine Modularization
 
 `desktop.js` (3,250+ lines) decomposed into 9 isolated modules under `assets/js/modules/`. Each module extends the global `window.VGTDeskEngine` singleton via `Object.assign` — no build pipeline, no transpiler.
 
@@ -359,7 +415,7 @@ AEGIS, CERBERUS, AIRLOCK, HADES, CHRONOS, and GHOST TRAP integrated into boot se
 
 ---
 
-### 💾 2.9 Performance & Persistence
+### 💾 2.10 Performance & Persistence
 
 **RAM Hibernation (Iframe Suspend):**
 - Minimizing a window: after CSS animation completes, `suspendIframe(id)` saves current `location.href` to `data-suspendedUrl` → iframe replaced with `about:blank` → client RAM freed
@@ -375,17 +431,22 @@ AEGIS, CERBERUS, AIRLOCK, HADES, CHRONOS, and GHOST TRAP integrated into boot se
 **Per-User Opt-in:**
 - Desktop mode **off by default** for all users
 - Admin notice in classic backend → explicit per-user activation button
-- `Settings → Desktop als Standard-Ansicht` toggle for persistent preference
+- `Settings → Desktop as Default View` toggle for persistent preference
 - `?vgt_bypass=1` → classic view for session; `auto_redirect` set to `false` in DB — redirect loops permanently prevented
 
+**Viewport Dimension Auto-Fit (Beta v4):**
+- `#vgt-shell-root` width/height boundaries dynamically recalculated on resize (`innerWidth / zoom`, `innerHeight / zoom`) — eliminates blank borders and scrollbars under any zoom factor
+- Parent WordPress layout containers (`html`, `body`, `#wpwrap`, `#wpcontent`) forced to strictly clipped boundaries (`overflow: hidden !important`)
+- Widgets positioned on the right half of the workspace are saved as relative `right` properties — correct edge-relative spacing maintained across zoom changes
+
 **Cookie Hardening:**
-- `setcookie()` corrected to PHP 7.3+ `$cookie_options` array signature — fatal error on "Zur klassischen Ansicht" button eliminated
+- `setcookie()` corrected to PHP 7.3+ `$cookie_options` array signature — fatal error on classic view toggle eliminated
 
 ---
 
-### 🎨 2.10 Glassmorphic UI & Custom Modals
+### 🎨 2.11 Glassmorphic UI & Custom Modals
 
-**Wallpaper Engine:** Local WebP assets, preset collection + custom URL, zero third-party CDN requests.
+**Wallpaper Engine:** Local WebP assets, preset collection + custom URL (same-origin enforced), zero third-party CDN requests.
 
 **Accent Colors:** Indigo / Emerald / Cyan / Amber / Rose — dynamically applied to badges, buttons, dock LEDs, Sentinel widget, snap preview borders.
 
@@ -398,6 +459,62 @@ AEGIS, CERBERUS, AIRLOCK, HADES, CHRONOS, and GHOST TRAP integrated into boot se
 
 ---
 
+## 📜 Changelog
+
+### v1.0.0-Beta v4 — Stability, Scaling & Security Update *(Current)*
+
+#### Modular PHP Kernel Architecture
+
+The monolithic `desktop.php` has been fully decoupled into a clean object-oriented service structure:
+
+- `desktop.php` — reduced to a lightweight bootstrapper that declares the license and delegates startup
+- `class-vgt-wpdesk-settings.php` — encapsulates all DB schema creation, settings tables and defaults
+- `class-vgt-wpdesk-app-builder.php` — dynamically parses the WordPress menu and builds the app matrix for the desktop dock
+- `class-vgt-wpdesk-plugin.php` — central controller for hooks, assets, AJAX dispatching and iframe rules
+
+#### VGT Build Center Consolidation
+
+Form Builder, Chronos Builder and Book Reader consolidated under a single **VGT Build Center** app icon (`dashicons-hammer`). The main menu is decluttered; submenus and AJAX routing navigate each builder interface inside the iframe workspace seamlessly.
+
+#### Sentinel Hardening Auditor Integration
+
+- **Sentinel Auto-Awareness:** Detects active Sentinel CE or V7, checks running defense modules (Airlock, Cerberus, Titan) and reflects their status in the security index automatically
+- Raw JSON export boxes and export buttons removed — interface integrated cleanly into the admin view
+- **Cyberpunk UI:** Cyan corner brackets, animated neon scan line, angled clip-path start button, cockpit-style score display, interactive tier grid (DIAMANT / PLATIN GOLD / VGT SECURED / CRITICAL RISK) illuminating on scan completion
+- **Red warning row highlighting** on all unresolved audit items
+- **Score index fix:** `ScoreMax` now dynamically counts actual test vectors (29) — 27 passed tests correctly report 93% instead of 82%
+
+#### Dattrack Telemetry Integration & V7 Conflict Resolution
+
+- Dattrack integrated as an opt-in telemetry module within the desktop settings ecosystem
+- **Sentinel V7 class collision fix:** `class_exists('VGT_Crypto')` guards prevent PHP fatal `Cannot declare class` errors when premium suites are present
+- **Dynamic module activation:** `class_exists` + `method_exists` defensive wrappers on `VGT_Dashboard::get_vault_metrics()` — no critical failure on telemetry view navigation
+- **Premium isolation guard:** Engine boot deferred to `plugins_loaded` — if Sentinel V7 is active, Dattrack dashboard, app icons, widgets and wizard steps are hidden automatically (wizard shortens from 7 to 6 steps)
+
+#### UI Resolution Scaling & Window Snapping Fixes
+
+- **JS compiler restoration:** Fixed `SyntaxError: Identifier 'zoom' has already been declared` in `desktop-draggable.js` — this blocked all desktop JS module execution when scaling was adjusted
+- **Viewport auto-fit:** Dynamic `#vgt-shell-root` boundary recalculation on resize prevents blank borders and scrollbars at any zoom level
+- **Canvas overflow overrides:** Parent WordPress layout containers forced to `overflow: hidden !important`
+- **Drift-free widget docking:** Right-half widgets saved as relative `right` coordinates — correct spacing maintained across zoom changes
+- **Invisible wall fix:** Drag-and-drop boundaries recalculated relative to scaled zoom grids — free movement across all screen edges restored
+
+#### Security Hardening (DIAMANT VGT SUPREME)
+
+- **AJAX exception hardening:** Five major admin AJAX actions now catch typed exception hierarchies (`SecurityException`, `ValidationException`, `StorageException`, `\Throwable`) — opaque generic responses to client, full tracebacks to `error_log` only
+- **Wallpaper same-origin enforcement:** External wallpaper URLs blocked — same-origin, WordPress media library or local base64 presets only
+- **SAMEORIGIN iframe fix:** `vault.php` `X-Frame-Options: DENY` replaced with `SAMEORIGIN` + CSP `frame-ancestors 'self'` — Form Builder loads correctly inside the workspace
+- **Scope-limited error handlers:** Security Center error handlers scoped to `VGT_WPDESK_PATH` — third-party plugin warnings can no longer trigger audit system failures
+- **SQL identifier hardening:** Backtick-escaping applied to table names in the DB optimization routine
+- **Recovery Center bugfix:** PHP fatal error resolved — deprecated `$this->get_user_settings()` replaced with static `WPDeskSettings` service call
+- **Sandbox test transparency:** Auditor now displays a clear notice that a temporary isolated test file is created in the uploads directory during scan and deleted immediately after
+
+#### File Headers
+
+All files standardized with `// STATUS: 💠 DIAMANT VGT SUPREME` verification headers.
+
+---
+
 ## ⚙️ Technical Specifications
 
 | Metric | Specification |
@@ -407,6 +524,7 @@ AEGIS, CERBERUS, AIRLOCK, HADES, CHRONOS, and GHOST TRAP integrated into boot se
 | **Frontend Frameworks** | None — 100% Vanilla JS (ES6+) / CSS Custom Variables |
 | **Compilation Overhead** | Zero — no Node.js, no Vite, no TypeScript at runtime |
 | **JS Architecture** | 9 isolated modules + 61-line orchestrator |
+| **PHP Architecture** | Modular service classes (Settings / AppBuilder / Plugin) + lightweight bootstrapper |
 | **Database Footprint** | `{prefix}vgt_desk_settings` (relational, delta-merge) + `{prefix}mcp_user_roles` |
 | **Runtime External Calls** | Zero |
 | **WAF Engine** | AEGIS Anomaly Scoring — Sentinel CE v1.7.0 / Sentinel V7 |
@@ -428,7 +546,7 @@ git clone https://github.com/visiongaiatechnology/vgtdesk
 
 # 3. Opt-in to Desktop Mode
 # Admin notice appears in classic backend → click to activate for your user
-# Or: WP-Desk menu → Settings → Desktop als Standard-Ansicht
+# Or: WP-Desk menu → Settings → Desktop as Default View
 
 # 4. Initialize Throne Guard (Critical — do this first)
 # Desktop → Master User Control app → set Superkey (12+ chars) + configure role hardening
@@ -446,136 +564,6 @@ git clone https://github.com/visiongaiatechnology/vgtdesk
 
 ---
 
-## 📜 Changelog
-
-### v1.0.0-Beta v4 — Stability & Scaling Update *(Current)*
-
-**Dattrack Telemetry Integration & V7 Conflict Resolution**
-- **Sovereign Telemetry Integration**: Integrated Dattrack securely into the desktop settings ecosystem as an Opt-In telemetry module.
-- **Sentinel V7 Class Collision Fix**: Resolved PHP fatal error `Cannot declare class VGT_Crypto` by checking `class_exists('VGT_Crypto')`, etc. to prevent duplicate declarations when premium security suites are present.
-- **Dynamic Module Activation**: Guarded dashboard metrics calls via defensive check wrappers (`class_exists` and `method_exists` checks for `VGT_Dashboard::get_vault_metrics()`) to avoid critical failures when navigating telemetry views.
-- **Premium Isolation Guard**: Deferred modular engine booting to the `plugins_loaded` hook to ensure Sentinel V7 sets `VIS_VERSION` first. If Sentinel V7 is active, the Dattrack dashboard, app shortcut icons, widgets, and setup steps are hidden automatically (Wizard dynamically shortens from 7 steps to 6 steps).
-
-**UI Resolution Scaling & Window Snapping Fixes**
-- **JS Compiler Restoration**: Fixed syntax parse error (`SyntaxError: Identifier 'zoom' has already been declared`) in `desktop-draggable.js` which completely blocked desktop JS modules execution when scaling properties were adjusted.
-- **Viewport Dimension Auto-Fit**: Replaced typography scale setting "Schriftgrösse (Skalierung)" with "Bildschirmauflösung (Skalierung)" and implemented dynamic coordinate and bounds checks. Re-calculated `#vgt-shell-root` width/height boundaries dynamically (`innerWidth / zoom` and `innerHeight / zoom`) on window resizing to prevent blank borders and scrollbars.
-- **Canvas Overflow Overrides**: Forced parent WordPress layouts (`html`, `body`, `#wpwrap`, `#wpcontent`) to maintain strictly clipped boundaries (`overflow: hidden !important`, `width/height: 100% !important`), preventing scrollbar leakage under any zoom factors.
-- **Drift-Free Widget Docking**: Rewrote desktop widget positioning persistence. Widgets positioned on the right half of the workspace are saved as relative `right` properties rather than pixel `left` coordinates, ensuring they maintain correct spacing relative to the right edge during zoom modifications.
-- **Invisible Wall Boundary Fix**: Re-calculated drag-and-drop boundary coordinates relative to scaled zoom grids, allowing widgets to be dragged freely across all screen edges.
-
-**AJAX Exception Hardening (DIAMANT VGT SUPREME)**
-- **Information Leakage Shield**: Refactored try-catch handlers on five major administrative AJAX actions in `desktop.php` (`ajax_ban_ip`, `ajax_get_task_manager_stats`, `ajax_unschedule_cron`, `ajax_kill_transient`, and `ajax_optimize_database`) to catch custom exception hierarchies (`SecurityException`, `ValidationException`, `StorageException`, and a final fallback `\Throwable`).
-- **Sanitized Client Feedback**: Opaque, generic responses are returned to the client on database/file failures while full trackbacks and logs are saved to the server's `error_log` for security purposes.
-
-**Audit Verification & Status Headers**
-- Standardized file headers, certifying files under `// STATUS: 💠 DIAMANT VGT SUPREME` verification.
-
-### v1.0.0-Beta v3 — Hardened Edition
-
-**Security Audit & Hardening**
-- Eliminated potential RCE in scanner engine: `integrity_matrix.php` migrated from PHP `include` to `file_get_contents` + `json_decode` with PHP exit guard header
-- Path jail boundary hardened with trailing slash enforcement in `ajax_scan_plugin` — directory shadowing attack closed
-- DOM XSS in mock developer console fixed: regex HTML entity escaping applied to all terminal input before render
-- Login settings CSS variable injection fixed: `preg_replace` sanitization on background image + logo URL at save and render
-- AEGIS WAF Quick Edit exception: `edit_posts` / `manage_options` users — all pattern weights zeroed on post-save endpoints; RCE/LFI remain active
-- CSP Admin fix: nonce removed from `is_admin()` CSP header — WordPress Core inline scripts no longer blocked
-- Antibot module: typed exception hierarchy (AppException, ValidationException, SecurityException, StorageException) — PATTERN 1.5.A
-- Full DIAMANT VGT SUPREME audit: Aegis, Airlock, Cerberus, Hades, Chronos, Ghost Trap, Throne Guard — all modules verified
-- Stray `</form>` tag removed from `class-vis-dashboard-view.php` — DOM structure stabilized
-
-**Desktop Engine Modularization (Phase 0)**
-- `desktop.js` (3,250+ lines) decomposed into 9 isolated modules under `assets/js/modules/`
-- Main orchestrator reduced to 61 lines
-- WordPress dependency chain guarantees load order — no race conditions
-- `window.VGTDeskEngine` singleton pattern via `Object.assign` — zero build pipeline overhead
-
-**New Features: Folder Mode**
-- Drag-and-drop app grouping on desktop workspace
-- Bounding box overlap detection triggers grouping
-- Folder windows with launch, remove, rename, delete
-- Right-click desktop icon context menu: position reset, rename (folders), delete (folders)
-- Full persistence in `vgt_desk_settings` via delta-merge AJAX
-
-**New Features: WordPress Submenus**
-- Glassmorphic dropdown popup on app icon click for apps with WordPress submenus
-- Capability-checked via `current_user_can` — users see only accessible submenus
-- XSS-safe DOM construction: `document.createElement` + `textContent` — zero innerHTML injection
-- Window title updates: `Parent Title › Submenu Title`
-
-**New Features: Multi-Layout Workspace (Phase 2)**
-- Three complete OS styles: macOS Cupertino, Windows Redmond, Linux Tux
-- Windows 10-style Start Menu: left sidebar strip, center A–Z app list, right 3-column pinned tiles
-- Spotlight CLI: `/layout [macos|windows|linux]`
-- Layout-aware Aero Snap preview zones and maximize bounds
-- Reactive icon recalculation on layout change (immediate + post-CSS-transition)
-- SVG protocol fix: `esc_attr` for `data:` URIs — WordPress no longer strips SVG base64 protocols
-- Start Menu: pinned vs. all-apps sections with search-driven section auto-hide
-
-**New Features: Command Center (Phase 3)**
-- Split glassmorphic admin panel: left nav tabs + scrollable right content
-- Real-Time Diagnostics: CPU, RAM, Sentinel/Throne Guard state, DB footprint, terminal event log
-- Enclave Security Center: IP Ban Manager, Superkey update, active threat overview
-- Display controls: font size slider, layout switcher, wallpaper, accent colors
-- Keyboard Shortcuts Mapper: click-to-capture recording, global key event monitor
-
-**Performance: Phase 1 Optimizations**
-- RAM Hibernation: minimized/closed windows suspend iframe to `about:blank` — memory freed; rehydration on restore
-- Custom relational DB: `{prefix}vgt_desk_settings` with `UNIQUE(user_id, setting_key)` and delta-merge AJAX
-- wp_usermeta auto-migration on first load
-- Per-User Opt-in: desktop mode off by default; admin notice for activation; `?vgt_bypass=1` redirect loop fix
-- `setcookie()` PHP 7.3+ signature fix — fatal error on classic view toggle eliminated
-
-**UX & Window Management**
-- Aero Snap: drag-to-top maximize, drag-to-edge half-screen snap with live preview outlines
-- Double-click header: toggle maximize; drag-to-restore on maximized windows
-- Window drag capped at `top: 0`; resize capped at top boundary
-- Custom glassmorphic `showModal` replaces all native `prompt()` / `confirm()` dialogs
-- Welcome window automatic popup removed — clean workspace start
-- Login-Design button in top bar: opens VGT Omega Login Engine in dedicated portal window
-- Dark mode injected into Media, Themes, Menus pages inside iframes — consistent contrast throughout
-
-**Bug Fixes**
-- Clickability fix: `.vgt-context-menu` and `.vgt-submenu-popup` given `z-index: 999999 !important` + appended to `#vgt-shell-root` + `stopPropagation()` — menus no longer intercepted by workspace layer
-- Windows Redmond grid: `repeat(3, minmax(0, 1fr))` — long tile labels no longer overflow Start Menu
-- Theme grid overlap fix: Flexbox on `.theme-browser .themes` — "Add New Theme" no longer renders on top of active theme
-- Control Center toggles: state normalized to JavaScript booleans — string/boolean coercion desync eliminated
-
----
-
-### v1.0.0-Beta v3
-
-- Sentinel CE v1.7.0 + Throne Guard v2.6.0 integrated into boot sequence
-- AEGIS Anomaly Scoring WAF (replaces binary block decisions)
-- AEGIS contextual WooCommerce + Gutenberg exceptions
-- CSP Nonce Bridge: Throne Guard nonce propagated to IframeTransformer
-- Sentinel Live Desktop Widget with AJAX WAF toggle
-- Top-bar quick access: Login-Design + Throne Guard/Sentinel dashboards
-- Hades Iframe Continuity: plugin breakouts from workspace prevented
-- Widget Visibility Manager in Control Center
-- VGT Omega Login Engine Module integrated
-- Plugin page dark-mode overrides (rgb(9 13 22) + white text)
-- Control Center toggle desync fixed (string/boolean normalization)
-
----
-
-### v1.0.0-Beta v2
-
-- Security Hotfix (Hades Module): `current_user_can('manage_options')` added — unauthenticated `.htaccess` rewrite DoS closed
-- Throne Guard partial integration: capability manager, Superkey session vault gate, and Jailed upload vault
-- Premium Lock Screen: glassmorphic Superkey entry UI
-- WAF false positive fix: AEGIS no longer blocks admin AJAX and `admin-post.php` forms
-- Sentinel V7 compatibility: combined ban statistics, locked widget toggles
-- Desktop Layout: widget overlay container re-layered — drag tracking and overlap bugs fixed
-
----
-
-### v1.0.0-Beta v1
-
-- Initial release: IframeTransformer, Wallpaper Engine, Start Menu, Dock
-- Basic Multi-Window Workspace (drag + resize)
-
----
-
 ## 🔗 VGT Ecosystem
 
 | Tool | Type | Purpose |
@@ -586,6 +574,7 @@ git clone https://github.com/visiongaiatechnology/vgtdesk
 | 🛡️ **[VGT Myrmidon](https://github.com/visiongaiatechnology/vgtmyrmidon)** | **ZTNA** | Zero Trust device registry and cryptographic integrity verification |
 | ⚡ **[VGT Auto-Punisher](https://github.com/visiongaiatechnology/vgt-auto-punisher)** | **IDS** | L4+L7 Hybrid IDS — attackers terminated before they even knock |
 | 📊 **[VGT Dattrack](https://github.com/visiongaiatechnology/dattrack)** | **Analytics** | Sovereign analytics engine — your data, your server, no third parties |
+| 🔐 **[VGT Omega Vault](https://github.com/visiongaiatechnology/vgt-omega-vault)** | **Encrypted Forms** | AES-256-GCM form vault with drag-and-drop builder — integrated via Build Center |
 | 🌐 **[VGT Global Threat Sync](https://github.com/visiongaiatechnology/vgt-global-threat-sync)** | **Preventive** | Daily threat feed — block known attackers before arrival |
 
 ---
@@ -617,8 +606,8 @@ Licensed under **AGPLv3** — *"For Humans, not for SaaS Corporations."*
 
 VisionGaia Technology builds enterprise-grade infrastructure — engineered to the DIAMANT VGT SUPREME standard.
 
-> *"WP-Desk was built because WordPress administrators deserved a workspace that doesn't fragment their attention, doesn't phone home, and doesn't ask them to accept a degraded UX as the price of using the world's most popular CMS. Beta v3 Hardened adds what every professional workspace also needs: a security layer that activates before the attacker reaches the door, and a desktop engine that doesn't fall apart when you actually use it at scale."*
+> *"WP-Desk was built because WordPress administrators deserved a workspace that doesn't fragment their attention, doesn't phone home, and doesn't ask them to accept a degraded UX as the price of using the world's most popular CMS. Beta v4 raises the bar further: a modular PHP kernel, a consolidated Build Center, a Cyberpunk-grade security auditor and a full scaling overhaul — all still running on zero dependencies, zero build pipeline and zero external calls."*
 
 ---
 
-*Version 1.0.0-Beta v4 — VGT WP-Desk // Modular 9-Engine Desktop // Multi-Layout (macOS/Windows/Linux) // Command Center // Folder Mode // Submenus // Aero Snap // RAM Hibernation // Relational DB // Sentinel CE v1.7.0 // Throne Guard v2.6.0 // Dattrack Telemetry // Zero-Overheat Architecture // AGPLv3*
+*Version 1.0.0-Beta v4 — VGT WP-Desk // Modular PHP Kernel // 9-Engine Desktop // Multi-Layout (macOS/Windows/Linux) // Command Center // VGT Build Center // Sentinel Hardening Auditor // Folder Mode // Submenus // Aero Snap // RAM Hibernation // Dattrack Telemetry // Relational DB // Sentinel CE v1.7.0 // Throne Guard v2.6.0 // Zero-Overheat Architecture // AGPLv3*
