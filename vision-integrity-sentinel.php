@@ -15,6 +15,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Wenn Sentinel V7 (Proprietary / MU) aktiv ist, Sentinel CE nicht laden, um Konflikte zu vermeiden.
+if (defined('VIS_VERSION')) {
+    return;
+}
+
 // --- SYSTEM KONSTANTEN ---
 define('VGTS_VERSION', '1.7.0');
 define('VGTS_PATH', plugin_dir_path(__FILE__));
@@ -250,6 +255,10 @@ add_filter('pre_update_option_vgts_config', function($new_value, $old_value, $op
 
 // --- BOOTSTRAP (VGT KERNEL PRIORITY QUEUE) ---
 add_action('plugins_loaded', function() {
+    // Wenn Sentinel V7 (Proprietary / MU) aktiv ist, Sentinel CE komplett deaktivieren
+    if (defined('VIS_VERSION')) {
+        return;
+    }
     vgts_init_constants();
     $enabled = get_option('vgt_sentinel_enabled') === 'true';
 

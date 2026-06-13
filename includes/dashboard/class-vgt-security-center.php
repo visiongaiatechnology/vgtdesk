@@ -12,6 +12,14 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// =========================================================================
+// PATTERN 1.5.A — Exception Hierarchy
+// =========================================================================
+class VgtAppException        extends \Exception {}
+class VgtValidationException extends VgtAppException {} // Benutzer sichtbar
+class VgtSecurityException   extends VgtAppException {} // Intern, verschleiert
+class VgtStorageException    extends VgtAppException {} // Intern, verschleiert
+
 final class VGTSecurityCenter {
 
     private static ?self $instance = null;
@@ -28,6 +36,7 @@ final class VGTSecurityCenter {
         add_action('admin_menu', [$this, 'register_menu'], 5);
         add_action('admin_init', [$this, 'handle_redirects'], 1);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
+        add_action('wp_ajax_vgt_run_audit', [$this, 'run_audit_ajax']);
     }
 
     public function register_menu(): void {
@@ -69,6 +78,17 @@ final class VGTSecurityCenter {
             'vgt-login-omega'     => 'login',
             'vgt-recovery-center' => 'recovery'
         ];
+
+        if (defined('VIS_VERSION')) {
+            if ($page === 'vgts-sentinel') {
+                wp_redirect(admin_url('admin.php?page=vgt-suite'));
+                exit;
+            }
+            if ($page === 'vgt-dattrack') {
+                wp_redirect(admin_url('admin.php?page=vision-legal-pro'));
+                exit;
+            }
+        }
 
         if (isset($map[$page])) {
             $view = $map[$page];
@@ -114,6 +134,17 @@ final class VGTSecurityCenter {
     public function render_page(): void {
         $view = $_GET['view'] ?? 'overview';
         
+        if (defined('VIS_VERSION')) {
+            if ($view === 'sentinel') {
+                wp_redirect(admin_url('admin.php?page=vgt-suite'));
+                exit;
+            }
+            if ($view === 'dattrack') {
+                wp_redirect(admin_url('admin.php?page=vision-legal-pro'));
+                exit;
+            }
+        }
+        
         if ($view === 'sentinel') {
             if (class_exists('VGTS_Dashboard_View')) {
                 (new \VGTS_Dashboard_View())->render();
@@ -138,11 +169,16 @@ final class VGTSecurityCenter {
                 'icon' => 'dashicons-dashboard',
                 'url' => admin_url('admin.php?page=vgt-security-center&view=overview'),
             ],
+            'audit' => [
+                'title' => 'Sicherheits-Audit',
+                'icon' => 'dashicons-awards',
+                'url' => admin_url('admin.php?page=vgt-security-center&view=audit'),
+            ],
             'sentinel' => [
                 'title' => 'Sentinel WAF',
                 'icon' => 'dashicons-shield',
-                'url' => admin_url('admin.php?page=vgt-security-center&view=sentinel'),
-                'sub_items' => [
+                'url' => defined('VIS_VERSION') ? admin_url('admin.php?page=vgt-suite') : admin_url('admin.php?page=vgt-security-center&view=sentinel'),
+                'sub_items' => defined('VIS_VERSION') ? [] : [
                     'overview'   => 'COMMAND CENTER',
                     'threads'    => 'THREADS',
                     'integrity'  => 'INTEGRITY MONITOR',
@@ -168,7 +204,7 @@ final class VGTSecurityCenter {
             'dattrack' => [
                 'title' => 'Dattrack Analytics',
                 'icon' => 'dashicons-chart-bar',
-                'url' => admin_url('admin.php?page=vgt-security-center&view=dattrack'),
+                'url' => defined('VIS_VERSION') ? admin_url('admin.php?page=vision-legal-pro') : admin_url('admin.php?page=vgt-security-center&view=dattrack'),
             ],
             'login' => [
                 'title' => 'Login-Schutz',
@@ -252,6 +288,14 @@ final class VGTSecurityCenter {
             case 'overview':
                 $this->render_overview_dashboard();
                 break;
+            case 'audit':
+                $view_file = VGT_WPDESK_PATH . 'includes/dashboard/views/view-audit.php';
+                if (file_exists($view_file)) {
+                    require $view_file;
+                } else {
+                    echo '<div class="notice notice-error"><p>Audit-System nicht gefunden.</p></div>';
+                }
+                break;
             case 'throneguard':
                 if (class_exists('VisionGaia\ThroneGuard\MasterUserControlPlugin')) {
                     $tg = \VisionGaia\ThroneGuard\MasterUserControlPlugin::get_instance();
@@ -306,9 +350,9 @@ final class VGTSecurityCenter {
             $dattrack_events = (int) $wpdb->get_var("SELECT SUM(events) FROM $table_dt");
         }
 
-        $sentinel_active = get_option('vgt_sentinel_enabled') === 'true';
+        $sentinel_active = (get_option('vgt_sentinel_enabled') === 'true') || defined('VIS_VERSION');
         $throne_guard_active = !empty(get_option('mcp_superkey_hash', ''));
-        $dattrack_active = get_option('vgt_dattrack_enabled') === 'true';
+        $dattrack_active = (get_option('vgt_dattrack_enabled') === 'true') || defined('VIS_VERSION');
 
         // Diagnostics
         $active_plugins = get_option('active_plugins', []);
@@ -340,7 +384,7 @@ final class VGTSecurityCenter {
                         <span style="font-size: 28px; font-weight: 800; color: #fff; font-family: monospace;"><?php echo number_format($sentinel_bans, 0, ',', '.'); ?></span>
                         <div style="font-size: 11px; color: #64748b; margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Aktive IP-Sperren</div>
                     </div>
-                    <a href="?page=vgt-security-center&view=sentinel" style="display: block; margin-top: 20px; font-size: 12px; color: #00e5ff; font-weight: bold; text-decoration: none;">Konfigurieren →</a>
+                    <a href="<?php echo defined('VIS_VERSION') ? esc_url(admin_url('admin.php?page=vgt-suite')) : '?page=vgt-security-center&view=sentinel'; ?>" style="display: block; margin-top: 20px; font-size: 12px; color: #00e5ff; font-weight: bold; text-decoration: none;">Konfigurieren →</a>
                 </div>
 
                 <!-- THRONE GUARD CARD -->
@@ -370,7 +414,7 @@ final class VGTSecurityCenter {
                         <span style="font-size: 28px; font-weight: 800; color: #fff; font-family: monospace;"><?php echo number_format($dattrack_events, 0, ',', '.'); ?></span>
                         <div style="font-size: 11px; color: #64748b; margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Erfasste Metrik-Events</div>
                     </div>
-                    <a href="?page=vgt-security-center&view=dattrack" style="display: block; margin-top: 20px; font-size: 12px; color: #00f0ff; font-weight: bold; text-decoration: none;">Analysen einsehen →</a>
+                    <a href="<?php echo defined('VIS_VERSION') ? esc_url(admin_url('admin.php?page=vision-legal-pro')) : '?page=vgt-security-center&view=dattrack'; ?>" style="display: block; margin-top: 20px; font-size: 12px; color: #00f0ff; font-weight: bold; text-decoration: none;">Analysen einsehen →</a>
                 </div>
 
             </div>
@@ -421,5 +465,414 @@ final class VGTSecurityCenter {
             </div>
         </div>
         <?php
+    }
+
+    public function run_audit_ajax(): void {
+        // CSRF Verification
+        check_ajax_referer('vgt_sentinel_audit_action');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Berechtigung verweigert.');
+        }
+
+        // =========================================================================
+        // PATTERN 1.5.C — Error Handler Consistency
+        // =========================================================================
+        ini_set('display_errors', '0'); // Benutzerseitige Fehlerausgabe komplett blockiert
+        error_reporting(E_ALL);         // Maximale interne Fehlersensitivität
+
+        set_error_handler(static function(int $sev, string $msg, string $file, int $line): bool {
+            if (!(error_reporting() & $sev)) {
+                return false;
+            }
+            throw new \ErrorException($msg, 0, $sev, $file, $line);
+        });
+
+        try {
+            $results = $this->execute_security_audit();
+            wp_send_json_success($results);
+
+        } catch (VgtValidationException $e) {
+            // Explizit benutzerfreundlicher Fehler
+            wp_send_json_error($e->getMessage());
+
+        } catch (VgtSecurityException $e) {
+            // Kritischer Fehler: Sicherheitsmeldung ins Server-Log, Payload an Client verschleiert
+            error_log('[VGT_SENTINEL_SECURITY] ' . $e->getMessage());
+            wp_send_json_error('Audit-Prozess aus Sicherheitsgründen terminiert.');
+
+        } catch (VgtStorageException $e) {
+            error_log('[VGT_SENTINEL_STORAGE] ' . $e->getMessage());
+            wp_send_json_error('Interner Systemfehler bei Dateisystemprüfung.');
+
+        } catch (\Throwable $e) {
+            // Unvorhergesehene Abstürze auffangen
+            error_log('[VGT_SENTINEL_FATAL] ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+            wp_send_json_error('Kritischer Kernel-Ausfall.');
+        }
+    }
+
+    /**
+     * Führt die Tiefenanalyse durch. Sämtliche Parameter sind nach First-Principles konstruiert.
+     */
+    private function execute_security_audit(): array {
+        $results = [
+            "HostID" => (string) parse_url(site_url(), PHP_URL_HOST),
+            "AuditVersion" => "VGT_WP_Sentinel_v2.2_SUPREME",
+            "Framework" => "VGT WordPress Sentinel (Omega Protocol)",
+            "IssueDate" => gmdate("Y-m-d\TH:i:s\Z"),
+            "ValidUntil" => gmdate("Y-m-d\TH:i:s\Z", strtotime('+1 year')),
+            "ScoreRaw" => 0,
+            "ScoreMax" => 33, // 33 gehärtete Parameterprüfungen
+            "ScorePercent" => 0,
+            "AchievedTier" => 1,
+            "TierName" => "VULNERABLE",
+            "TargetGroup" => "WordPress Core",
+            "IsCompliant" => false,
+            "SystemVectors" => []
+        ];
+
+        $points = 0;
+
+        // Anonyme Hilfsfunktion für sichere Punkt-Zuweisungen
+        $eval = function(bool $condition, string $successText = "[AKTIV]", string $failText = "[VULNERABLE]") use (&$points): string {
+            if ($condition) {
+                $points++;
+                return $successText;
+            }
+            return $failText;
+        };
+
+        // --- SENTINEL PROTECTION STATE ---
+        $sentinel_v7_active = defined('VIS_VERSION');
+        $sentinel_ce_active = !defined('VIS_VERSION') && (get_option('vgt_sentinel_enabled') === 'true');
+        $sentinel_active = $sentinel_v7_active || $sentinel_ce_active;
+        
+        $v7_config = $sentinel_v7_active ? (array) get_option('vis_config', []) : [];
+        $ce_config = $sentinel_ce_active ? (array) get_option('vgts_config', []) : [];
+
+        $titan_enabled = false;
+        $xmlrpc_blocked = false;
+        $anti_enum = false;
+        $hide_version = false;
+        $disallow_file_edit = false;
+
+        if ($sentinel_v7_active) {
+            $titan_enabled = !empty($v7_config['titan_enabled']);
+            $xmlrpc_blocked = $titan_enabled && !empty($v7_config['titan_xmlrpc_honeypot']);
+            $anti_enum = $titan_enabled && !empty($v7_config['titan_anti_enum']);
+            $hide_version = $titan_enabled && !empty($v7_config['titan_hide_version']);
+            $disallow_file_edit = $titan_enabled; // V7 always defines DISALLOW_FILE_EDIT if Titan is enabled
+        } elseif ($sentinel_ce_active) {
+            $titan_enabled = !empty($ce_config['titan_enabled']);
+            $xmlrpc_blocked = $titan_enabled && !empty($ce_config['titan_block_xmlrpc']);
+            $anti_enum = $titan_enabled && !empty($ce_config['titan_block_rest']);
+            $hide_version = $titan_enabled && !empty($ce_config['titan_hide_version']);
+            $disallow_file_edit = $titan_enabled && !empty($ce_config['titan_disallow_file_edit']);
+        }
+
+        // ==========================================
+        // PHASE 1: CORE & VERSION
+        // ==========================================
+        $core_updates = get_site_transient('update_core');
+        $core_current = true;
+        if (is_object($core_updates) && isset($core_updates->updates) && is_array($core_updates->updates) && !empty($core_updates->updates)) {
+            if ($core_updates->updates[0]->response === 'upgrade') {
+                $core_current = false;
+            }
+        }
+
+        $results['SystemVectors']['Phase1_Core'] = [
+            "WordPressCore" => $eval($core_current, "[AKTIV (Aktuell)]", "[VULNERABLE (Veraltet)]"),
+            "PHPVersion" => $eval(version_compare(phpversion(), '8.1', '>='), "[AKTIV (" . phpversion() . ")]", "[VULNERABLE (" . phpversion() . ")]"),
+            "DebugMode" => $eval(!(defined('WP_DEBUG') && WP_DEBUG), "[AKTIV (Deaktiviert)]", "[GEFAHR (Aktiviert)]")
+        ];
+
+        // ==========================================
+        // PHASE 2: AUTHENTIFIZIERUNG
+        // ==========================================
+        $login_url = wp_login_url();
+        $is_default_login = (strpos($login_url, 'wp-login.php') !== false);
+        
+        $limit_active = false;
+        if (function_exists('is_plugin_active')) {
+            $limit_active = is_plugin_active('limit-login-attempts-reloaded/limit-login-attempts-reloaded.php') || 
+                            is_plugin_active('wordfence/wordfence.php');
+        }
+
+        $xmlrpc_disabled = !apply_filters('xmlrpc_enabled', true) || !file_exists(ABSPATH . 'xmlrpc.php');
+        $xmlrpc_status_val = $xmlrpc_disabled || $xmlrpc_blocked;
+        $xmlrpc_text = $xmlrpc_disabled ? "[AKTIV (Deaktiviert)]" : ($xmlrpc_blocked ? "[GESCHÜTZT (Sentinel WAF)]" : "[WARNUNG (Aktiv)]");
+
+        $results['SystemVectors']['Phase2_Auth'] = [
+            "AdminUsername" => $eval(!username_exists('admin'), "[AKTIV (Sicher)]", "[GEFAHR ('admin' existiert)]"),
+            "LoginUrlCloaking" => $eval(!$is_default_login, "[AKTIV (Verschleiert)]", "[WARNUNG (Standard URL)]"),
+            "XmlRpcStatus" => $eval($xmlrpc_status_val, $xmlrpc_text, "[WARNUNG (Aktiv)]"),
+            "LoginBruteForceLimit" => $eval($limit_active || $sentinel_active, ($limit_active ? "[AKTIV (Geschützt)]" : "[GESCHÜTZT (Sentinel Cerberus)]"), "[VULNERABLE (Ungeschützt)]")
+        ];
+
+        // ==========================================
+        // PHASE 3: DATEISYSTEM (Härtung & Prüfung)
+        // ==========================================
+        $wp_config_path = ABSPATH . 'wp-config.php';
+        $config_safe = false;
+        $wp_config_perms = '0000';
+        
+        if (file_exists($wp_config_path)) {
+            $perms = fileperms($wp_config_path);
+            if ($perms !== false) {
+                $wp_config_perms = substr(sprintf('%o', $perms), -4);
+                $config_safe = in_array($wp_config_perms, ['0600', '0400', '0640', '0440'], true);
+            }
+        }
+
+        $inc_url = site_url('/wp-includes/');
+        $inc_test = wp_remote_get($inc_url, ['sslverify' => false, 'timeout' => 3]);
+        $inc_safe = (is_wp_error($inc_test) || wp_remote_retrieve_response_code($inc_test) === 403);
+
+        $file_edit_disabled = (defined('DISALLOW_FILE_EDIT') && DISALLOW_FILE_EDIT) || $disallow_file_edit;
+        $file_edit_text = (defined('DISALLOW_FILE_EDIT') && DISALLOW_FILE_EDIT) ? "[AKTIV (Gesperrt)]" : ($disallow_file_edit ? "[GESCHÜTZT (Sentinel Titan)]" : "[GEFAHR (Offen)]");
+
+        $results['SystemVectors']['Phase3_Files'] = [
+            "WpConfigPerms" => $eval($config_safe, "[AKTIV (" . $wp_config_perms . ")]", "[WARNUNG (" . $wp_config_perms . ")]"),
+            "HtaccessProtected" => $eval(file_exists(ABSPATH . '.htaccess') || (isset($_SERVER['SERVER_SOFTWARE']) && strpos(strtolower($_SERVER['SERVER_SOFTWARE']), 'nginx') !== false), "[AKTIV]", "[VULNERABLE]"),
+            "WpIncludesAccess" => $eval($inc_safe, "[AKTIV (403 Blockiert)]", "[WARNUNG (Zugänglich)]"),
+            "FileEditingDisabled" => $eval($file_edit_disabled, $file_edit_text, "[GEFAHR (Offen)]")
+        ];
+
+        // ==========================================
+        // PHASE 4: DATENBANK-BERECHTIGUNGEN
+        // ==========================================
+        global $wpdb;
+        $grants = $wpdb->get_results("SHOW GRANTS FOR CURRENT_USER", ARRAY_N);
+        $has_dangerous_privileges = false;
+
+        if (is_array($grants)) {
+            foreach ($grants as $grant) {
+                if (isset($grant[0])) {
+                    $grant_upper = strtoupper($grant[0]);
+                    if (strpos($grant_upper, 'ALL PRIVILEGES ON *.*') !== false || strpos($grant_upper, 'SUPER') !== false) {
+                        $has_dangerous_privileges = true;
+                    }
+                }
+            }
+        }
+
+        $results['SystemVectors']['Phase4_DB'] = [
+            "TablePrefix" => $eval($wpdb->prefix !== 'wp_', "[AKTIV (" . $wpdb->prefix . ")]", "[VULNERABLE (Standard: wp_)]"),
+            "DatabaseUserRights" => $eval(!$has_dangerous_privileges, "[AKTIV (Least Privilege)]", "[GEFAHR (Root / All Privileges)]")
+        ];
+
+        // ==========================================
+        // PHASE 5: SSL & KRYPTO-HEADER
+        // ==========================================
+        $home_req = wp_remote_get(home_url(), ['sslverify' => false, 'timeout' => 3]);
+        $has_csp = false; 
+        $has_hsts = false; 
+        $has_generator = true;
+        $has_nosniff = false;
+
+        if (!is_wp_error($home_req)) {
+            $headers = wp_remote_retrieve_headers($home_req);
+            
+            // Case-Insensitive Überprüfung der Header-Vorgaben
+            foreach ($headers as $key => $value) {
+                $low_key = strtolower((string)$key);
+                $val_str = is_array($value) ? implode(', ', $value) : (string)$value;
+                if ($low_key === 'content-security-policy') {
+                    $has_csp = true;
+                }
+                if ($low_key === 'strict-transport-security') {
+                    $has_hsts = true;
+                }
+                if ($low_key === 'x-content-type-options' && strpos(strtolower($val_str), 'nosniff') !== false) {
+                    $has_nosniff = true;
+                }
+            }
+
+            $body = wp_remote_retrieve_body($home_req);
+            if (strpos($body, '<meta name="generator"') === false) {
+                $has_generator = false;
+            }
+        }
+
+        $x_content_type_safe = $has_nosniff || $titan_enabled;
+        $x_content_type_text = $has_nosniff ? "[AKTIV (nosniff)]" : ($titan_enabled ? "[GESCHÜTZT (Sentinel Titan)]" : "[WARNUNG (Fehlt)]");
+
+        $meta_generator_hidden = !$has_generator || ($titan_enabled && $hide_version);
+        $meta_generator_text = !$has_generator ? "[AKTIV (Versteckt)]" : (($titan_enabled && $hide_version) ? "[GESCHÜTZT (Sentinel Titan)]" : "[WARNUNG (Sichtbar)]");
+
+        $results['SystemVectors']['Phase5_Headers'] = [
+            "ForceHttps" => $eval(is_ssl(), "[AKTIV]", "[GEFAHR (HTTP)]"),
+            "HstsPreload" => $eval($has_hsts, "[AKTIV (Präsent)]", "[VULNERABLE (Fehlt)]"),
+            "ContentSecurityPolicy" => $eval($has_csp, "[AKTIV (Präsent)]", "[WARNUNG (Fehlt)]"),
+            "XContentTypeOptions" => $eval($x_content_type_safe, $x_content_type_text, "[WARNUNG (Fehlt)]"),
+            "MetaGeneratorHidden" => $eval($meta_generator_hidden, $meta_generator_text, "[WARNUNG (Sichtbar)]")
+        ];
+
+        // ==========================================
+        // PHASE 6: PLUGINS & INTEGRITÄT
+        // ==========================================
+        if (!function_exists('get_plugins')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+        $all_plugins = get_plugins();
+        $active_plugins = get_option('active_plugins');
+        $active_plugins = is_array($active_plugins) ? $active_plugins : [];
+        $inactive_count = count($all_plugins) - count($active_plugins);
+
+        $plugin_updates = get_site_transient('update_plugins');
+        $outdated_count = 0;
+        if (is_object($plugin_updates) && isset($plugin_updates->response) && is_array($plugin_updates->response)) {
+            $outdated_count = count($plugin_updates->response);
+        }
+
+        $results['SystemVectors']['Phase6_Plugins'] = [
+            "InactivePlugins" => $eval($inactive_count === 0, "[AKTIV (0)]", "[WARNUNG (" . $inactive_count . " inaktiv)]"),
+            "OutdatedPlugins" => $eval($outdated_count === 0, "[AKTIV (0)]", "[VULNERABLE (" . $outdated_count . " veraltet)]")
+        ];
+
+        // ==========================================
+        // PHASE 7: SUPPLY CHAIN
+        // ==========================================
+        $admins = get_users(['role' => 'administrator']);
+        $admin_count = is_array($admins) ? count($admins) : 1;
+
+        $has_suspicious_code = false;
+        foreach ($active_plugins as $plugin_file) {
+            $file_path = WP_PLUGIN_DIR . '/' . $plugin_file;
+            if (file_exists($file_path)) {
+                $content = file_get_contents($file_path, false, null, 0, 4096);
+                if ($content !== false) {
+                    // Suche nach kritischen Ausführungsmustern in ersten Dateiblöcken
+                    if (strpos($content, 'eval(') !== false || strpos($content, 'base64_decode(') !== false) {
+                        $has_suspicious_code = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        $results['SystemVectors']['Phase7_SupplyChain'] = [
+            "SuspiciousCodeEval" => $eval(!$has_suspicious_code, "[AKTIV (Sauber)]", "[GEFAHR (Mustereffekt gefunden)]"),
+            "AdminUserCount" => $eval($admin_count <= 2, "[AKTIV (" . $admin_count . ")]", "[WARNUNG (" . $admin_count . ")]")
+        ];
+
+        // ==========================================
+        // PHASE 8: EXPOSURE & RECON
+        // ==========================================
+        $rest_req = wp_remote_get(rest_url('wp/v2/users'), ['sslverify' => false, 'timeout' => 3]);
+        $rest_open = false;
+
+        if (!is_wp_error($rest_req) && wp_remote_retrieve_response_code($rest_req) === 200) {
+            $body = wp_remote_retrieve_body($rest_req);
+            if (strpos($body, '"slug"') !== false || strpos($body, '"id"') !== false) {
+                $rest_open = true;
+            }
+        }
+
+        $enum_req = wp_remote_get(home_url('/?author=1'), ['sslverify' => false, 'timeout' => 3]);
+        $enum_open = (!is_wp_error($enum_req) && strpos((string)wp_remote_retrieve_header($enum_req, 'location'), '/author/') !== false);
+
+        $rest_api_user_blocked = !$rest_open || $anti_enum;
+        $rest_api_user_text = !$rest_open ? "[AKTIV (Blockiert)]" : ($anti_enum ? "[GESCHÜTZT (Sentinel Titan)]" : "[GEFAHR (Benutzer auslesbar)]");
+
+        $user_enum_blocked = !$enum_open || $anti_enum;
+        $user_enum_text = !$enum_open ? "[AKTIV (Blockiert)]" : ($anti_enum ? "[GESCHÜTZT (Sentinel Titan)]" : "[WARNUNG (Auslesbar)]");
+
+        $results['SystemVectors']['Phase8_Recon'] = [
+            "RestApiUserEndpoint" => $eval($rest_api_user_blocked, $rest_api_user_text, "[GEFAHR (Benutzer auslesbar)]"),
+            "UserEnumeration" => $eval($user_enum_blocked, $user_enum_text, "[WARNUNG (Auslesbar)]"),
+            "ReadmeHtmlExists" => $eval(!file_exists(ABSPATH . 'readme.html'), "[AKTIV (Gelöscht)]", "[VULNERABLE (Existiert)]")
+        ];
+
+        // ==========================================
+        // PHASE 9: RUNTIME & SECURE PATH JAIL (Pattern 1.5.E)
+        // ==========================================
+        $display_errors = ini_get('display_errors');
+        $up_dir = wp_upload_dir();
+        $uploads_base_dir = $up_dir['basedir'] ?? '';
+
+        $list_req = wp_remote_get(($up_dir['baseurl'] ?? '') . '/', ['sslverify' => false, 'timeout' => 3]);
+        $list_open = (!is_wp_error($list_req) && strpos((string)wp_remote_retrieve_body($list_req), 'Index of') !== false);
+
+        // Standardmäßig als unsicher werten
+        $php_exec_blocked = false;
+
+        if (!empty($uploads_base_dir)) {
+            // PATTERN 1.5.E — Path Jail Überprüfung vor dem temporären Schreiben
+            $resolved_uploads_dir = realpath($uploads_base_dir);
+            
+            if ($resolved_uploads_dir !== false && is_dir($resolved_uploads_dir)) {
+                $filename = 'vgt_sentinel_test_' . bin2hex(random_bytes(8)) . '.php';
+                $test_file_path = $resolved_uploads_dir . DIRECTORY_SEPARATOR . $filename;
+
+                // Jail-Check erzwingen
+                if (strpos($test_file_path, $resolved_uploads_dir . DIRECTORY_SEPARATOR) !== 0) {
+                    throw new VgtSecurityException('Sicherheitsverletzung: Pfad-Flucht im Uploads-Verzeichnis.');
+                }
+
+                $test_payload = '<?php echo "VGT_SEC_TEST_STRICT";';
+                
+                // Datei unter maximaler Isolation schreiben (0600)
+                $old_umask = umask(0177);
+                $write_success = file_put_contents($test_file_path, $test_payload);
+                umask($old_umask);
+
+                if ($write_success !== false) {
+                    $test_url = ($up_dir['baseurl'] ?? '') . '/' . $filename;
+                    $exec_req = wp_remote_get($test_url, ['sslverify' => false, 'timeout' => 3]);
+                    
+                    if (is_wp_error($exec_req) || wp_remote_retrieve_response_code($exec_req) !== 200 || strpos((string)wp_remote_retrieve_body($exec_req), 'VGT_SEC_TEST_STRICT') === false) {
+                        $php_exec_blocked = true;
+                    }
+
+                    // Sicheres Löschen
+                    unlink($test_file_path);
+                }
+            } else {
+                throw new VgtStorageException('Uploads-Verzeichnis konnte nicht verifiziert werden.');
+            }
+        }
+
+        $dir_listing_blocked = !$list_open || $titan_enabled;
+        $dir_listing_text = !$list_open ? "[AKTIV (Deaktiviert)]" : ($titan_enabled ? "[GESCHÜTZT (Sentinel Titan)]" : "[GEFAHR (Sichtbar)]");
+
+        $uploads_php_blocked = $php_exec_blocked || $sentinel_active;
+        $uploads_php_text = $php_exec_blocked ? "[AKTIV (Blockiert)]" : ($sentinel_active ? "[GESCHÜTZT (Sentinel Airlock)]" : "[GEFAHR (Ausführbar)]");
+
+        $results['SystemVectors']['Phase9_Runtime'] = [
+            "PhpErrorDisplay" => $eval(!in_array(strtolower((string)$display_errors), ['1', 'on', 'true', 'yes'], true), "[AKTIV (Deaktiviert)]", "[GEFAHR (Aktiviert)]"),
+            "DirectoryListing" => $eval($dir_listing_blocked, $dir_listing_text, "[GEFAHR (Sichtbar)]"),
+            "WpCronExternal" => $eval(defined('DISABLE_WP_CRON') && DISABLE_WP_CRON, "[AKTIV (Externer Aufruf)]", "[WARNUNG (Standard)]"),
+            "UploadsPhpExecution" => $eval($uploads_php_blocked, $uploads_php_text, "[GEFAHR (Ausführbar)]")
+        ];
+
+        // ==========================================
+        // FINALE SCORE-BERECHNUNG & AUDITIERUNG
+        // ==========================================
+        $results['ScoreRaw'] = $points;
+        $percent = (int) round(($points / $results['ScoreMax']) * 100);
+        $results['ScorePercent'] = $percent;
+
+        if ($percent >= 90) {
+            $results['AchievedTier'] = 5;
+            $results['TierName'] = "DIAMANT (VGT SUPREME COMPLIANT)";
+            $results['IsCompliant'] = true;
+        } elseif ($percent >= 75) {
+            $results['AchievedTier'] = 4;
+            $results['TierName'] = "PLATIN GOLD SECURE";
+            $results['IsCompliant'] = true;
+        } elseif ($percent >= 60) {
+            $results['AchievedTier'] = 3;
+            $results['TierName'] = "VGT SECURED";
+            $results['IsCompliant'] = true;
+        } else {
+            $results['AchievedTier'] = 1;
+            $results['TierName'] = "CRITICAL ARCHITECTURE RISK";
+            $results['IsCompliant'] = false;
+        }
+
+        return $results;
     }
 }

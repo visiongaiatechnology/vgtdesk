@@ -1,0 +1,138 @@
+/* STATUS: DIAMANT VGT SUPREME
+ ARCHITEKTUR: Total Genesis. Deep Space Corporate Aesthetic.
+*/
+
+:root {
+    --vgt-bg-base: #030305;
+    --vgt-bg-gradient: radial-gradient(circle at top right, #0a0a12, #030305);
+    --vgt-panel-bg: rgba(15, 15, 20, 0.6);
+    --vgt-border: rgba(255, 255, 255, 0.06);
+    --vgt-border-hover: rgba(255, 255, 255, 0.15);
+    --vgt-text: #e0e0e0;
+    --vgt-text-muted: #78788a;
+    --vgt-primary: #00ffcc;
+    --vgt-primary-glow: rgba(0, 255, 204, 0.25);
+    --vgt-surface: #0a0a0e;
+}
+
+#wpcontent { padding-left: 0; background: var(--vgt-bg-base); }
+.vgt-admin-wrapper {
+    margin: -10px 0 0 -20px;
+    padding: 2.5rem;
+    background: var(--vgt-bg-gradient);
+    color: var(--vgt-text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+.vgt-admin-wrapper * { box-sizing: border-box; }
+
+/* Header */
+.vgt-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 2rem; border-bottom: 1px solid var(--vgt-border); margin-bottom: 2.5rem;
+}
+.vgt-logo-area { display: flex; align-items: center; gap: 1rem; }
+.vgt-logo-area h1 { margin: 0; color: #fff; font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; }
+.vgt-logo-area span { color: var(--vgt-primary); font-weight: 400; }
+.vgt-pulse {
+    width: 8px; height: 8px; background: var(--vgt-primary); border-radius: 50%;
+    box-shadow: 0 0 12px var(--vgt-primary); animation: vgtPulse 2s infinite;
+}
+@keyframes vgtPulse { 0% { box-shadow: 0 0 0 0 var(--vgt-primary-glow); } 70% { box-shadow: 0 0 0 10px rgba(0,255,204, 0); } 100% { box-shadow: 0 0 0 0 rgba(0,255,204, 0); } }
+.vgt-glow-text { color: var(--vgt-primary); text-shadow: 0 0 10px var(--vgt-primary-glow); font-weight: 600; letter-spacing: 1px;}
+
+/* Layout Grid */
+.vgt-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 2.5rem; align-items: start; }
+.mt-4 { margin-top: 2.5rem; }
+
+/* Panels & Glassmorphism */
+.vgt-glass {
+    background: var(--vgt-panel-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--vgt-border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.vgt-panel h2 {
+    margin-top: 0; color: #fff; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px;
+    border-bottom: 1px solid var(--vgt-border); padding-bottom: 1rem; margin-bottom: 2rem;
+}
+.vgt-form-section { margin-bottom: 2.5rem; }
+.vgt-form-section h3 { color: var(--vgt-primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
+
+/* Form Controls */
+.vgt-form-group { margin-bottom: 1.5rem; }
+.vgt-form-row { display: flex; gap: 1.5rem; }
+.vgt-form-row > div { flex: 1; }
+.vgt-form label { display: block; margin-bottom: 0.6rem; color: var(--vgt-text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+
+.vgt-form input[type="text"], .vgt-form input[type="url"], .vgt-form input[type="number"], .vgt-form input[type="datetime-local"], .vgt-form select {
+    width: 100%; background: var(--vgt-surface); border: 1px solid var(--vgt-border); color: #fff;
+    padding: 0.85rem 1.2rem; border-radius: 8px; font-family: inherit; font-size: 0.95rem; transition: all 0.3s ease;
+}
+.vgt-form input:focus, .vgt-form select:focus {
+    outline: none; border-color: var(--vgt-primary); box-shadow: 0 0 0 3px var(--vgt-primary-glow); background: #000;
+}
+
+/* Custom Color Picker */
+.vgt-color-picker-wrapper { display: flex; align-items: center; gap: 1rem; background: var(--vgt-surface); padding: 0.5rem; border-radius: 8px; border: 1px solid var(--vgt-border); }
+input[type="color"] { -webkit-appearance: none; border: none; width: 36px; height: 36px; border-radius: 6px; cursor: pointer; padding: 0; background: transparent; }
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: none; border-radius: 6px; }
+.vgt-color-val { font-family: monospace; font-size: 0.9rem; color: var(--vgt-text-muted); }
+
+/* Live Preview Canvas */
+.sticky-panel { position: sticky; top: 40px; }
+.vgt-canvas-area {
+    background: #000;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+    border: 1px solid var(--vgt-border);
+    border-radius: 12px;
+    padding: 3rem 1rem;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 200px; margin-bottom: 1rem;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+}
+.vgt-hint { font-size: 0.75rem; color: var(--vgt-text-muted); text-align: center; margin: 0; font-style: italic; }
+
+/* Matrix Cards */
+.vgt-card-grid { display: grid; gap: 1rem; }
+.vgt-matrix-card {
+    background: var(--vgt-surface); border: 1px solid var(--vgt-border); border-radius: 8px;
+    padding: 1.5rem; transition: all 0.3s;
+}
+.vgt-matrix-card:hover { border-color: var(--vgt-border-hover); transform: translateY(-2px); }
+.vgt-card-active { border-color: var(--vgt-primary); box-shadow: 0 0 20px var(--vgt-primary-glow); }
+.vgt-mc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.vgt-mc-actions { display: flex; align-items: center; gap: 0.75rem; }
+.vgt-mc-header h4 { margin: 0; font-size: 1rem; color: #fff; }
+.vgt-badge { background: rgba(0, 255, 204, 0.1); color: var(--vgt-primary); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; }
+
+/* Action Buttons */
+.vgt-btn-edit, .vgt-btn-delete {
+    width: 28px; height: 28px; display: inline-flex; justify-content: center; align-items: center; 
+    border-radius: 4px; text-decoration: none; font-size: 0.8rem; transition: all 0.3s; border: 1px solid transparent;
+}
+.vgt-btn-edit { color: var(--vgt-primary); background: rgba(0, 255, 204, 0.1); }
+.vgt-btn-edit:hover { background: var(--vgt-primary); color: #000; box-shadow: 0 0 12px var(--vgt-primary-glow); transform: scale(1.1); }
+
+.vgt-btn-delete { color: #ff0044; background: rgba(255, 0, 68, 0.1); }
+.vgt-btn-delete:hover { background: #ff0044; color: #fff; border-color: #ff0044; box-shadow: 0 0 12px rgba(255, 0, 68, 0.5); transform: scale(1.1); }
+
+.vgt-btn-cancel { display: inline-block; margin-bottom: 1rem; color: #ff0044; text-decoration: none; font-size: 0.8rem; font-weight: bold; border: 1px solid #ff0044; padding: 0.5rem 1rem; border-radius: 4px; transition: 0.3s; }
+.vgt-btn-cancel:hover { background: #ff0044; color: #fff; }
+
+.vgt-mc-body code { display: block; background: #000; color: #fff; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--vgt-border); font-family: monospace; cursor: copy; }
+.vgt-mc-body code:hover { border-color: var(--vgt-primary); color: var(--vgt-primary); }
+
+/* Buttons */
+.vgt-btn-primary {
+    background: var(--vgt-primary); color: #000; border: none; padding: 1.2rem; border-radius: 8px;
+    font-weight: 800; font-size: 1rem; letter-spacing: 1px; cursor: pointer; width: 100%;
+    text-transform: uppercase; transition: all 0.3s; box-shadow: 0 4px 15px var(--vgt-primary-glow);
+}
+.vgt-btn-primary:hover { background: #fff; box-shadow: 0 4px 25px rgba(255,255,255,0.4); transform: translateY(-2px); }

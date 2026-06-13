@@ -91,6 +91,18 @@ final class WPDeskPlugin
             require_once VGT_WPDESK_PATH . 'includes/modules/loginpager/login-engine.php';
         }
 
+        if (file_exists(VGT_WPDESK_PATH . 'includes/build-center/vault.php')) {
+            require_once VGT_WPDESK_PATH . 'includes/build-center/vault.php';
+        }
+
+        if (file_exists(VGT_WPDESK_PATH . 'includes/book-reader/bookreader.php')) {
+            require_once VGT_WPDESK_PATH . 'includes/book-reader/bookreader.php';
+        }
+
+        if (file_exists(VGT_WPDESK_PATH . 'includes/chronos/Chronosloader.php')) {
+            require_once VGT_WPDESK_PATH . 'includes/chronos/Chronosloader.php';
+        }
+
         add_action('plugins_loaded', function() {
             if (!defined('VIS_VERSION') && !class_exists('VisionGaia\\WPDesk\\VGT_Dattrack_Engine')) {
                 if (file_exists(VGT_WPDESK_PATH . 'includes/modules/dattrack/class-dattrack-engine.php')) {

@@ -1,0 +1,188 @@
+/* * VGT OMEGA PROTOCOL: FRONTEND STYLES
+ * Status: Diamant Supreme
+ * Scope: Isoliert auf VGT Klassen, stört keine Themes.
+ */
+
+/* ==========================================================================
+   THE TRIGGER BUTTONS
+   ========================================================================== */
+.vgt-trigger-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+    line-height: 1;
+}
+
+.vgt-btn-icon { width: 18px; height: 18px; transition: transform 0.3s ease; }
+.vgt-trigger-btn:hover .vgt-btn-icon { transform: scale(1.1); }
+.vgt-btn-label { position: relative; z-index: 2; }
+
+/* Styles */
+.vgt-style-solid {
+    background-color: var(--vgt-accent);
+    color: #050505;
+    border: 1px solid var(--vgt-accent);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2), 0 0 20px calc(var(--vgt-accent) + 40); /* Fallback glow */
+}
+.vgt-style-solid:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+.vgt-style-outline {
+    background-color: transparent;
+    color: var(--vgt-accent);
+    border: 2px solid var(--vgt-accent);
+}
+.vgt-style-outline:hover { background-color: var(--vgt-accent); color: #050505; }
+
+.vgt-style-glass {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--vgt-accent);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+.vgt-style-glass:hover { background-color: rgba(255, 255, 255, 0.15); border-color: var(--vgt-accent); box-shadow: 0 0 20px calc(var(--vgt-accent) + 30); }
+
+/* ==========================================================================
+   THE OVERLAY (Z-INDEX 999999 DOMINANCE)
+   ========================================================================== */
+#vgt-reader-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background: rgba(5, 5, 5, 0.85);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+#vgt-reader-overlay.vgt-reader-active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Ambient Orb */
+.vgt-ambient-orb {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70vw;
+    height: 70vh;
+    background: radial-gradient(circle, rgba(0,240,255,0.08) 0%, rgba(0,0,0,0) 60%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Topbar */
+.vgt-reader-topbar {
+    position: relative;
+    z-index: 10;
+    height: 70px;
+    padding: 0 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(10,10,12,0.9), rgba(10,10,12,0));
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.vgt-reader-title-group { display: flex; align-items: center; gap: 15px; }
+.vgt-icon-book { width: 36px; height: 36px; background: rgba(255,255,255,0.05); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; border: 1px solid rgba(255,255,255,0.1); }
+#vgt-reader-title { margin: 0; color: #fff; font-size: 16px; font-weight: 600; letter-spacing: 0.5px; }
+
+/* Actions */
+.vgt-reader-actions { display: flex; align-items: center; gap: 12px; }
+.vgt-action-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s; border: 1px solid transparent; }
+.vgt-action-btn.store { background: rgba(0, 240, 255, 0.1); color: #00f0ff; border-color: rgba(0, 240, 255, 0.2); }
+.vgt-action-btn.store:hover { background: rgba(0, 240, 255, 0.2); box-shadow: 0 0 15px rgba(0,240,255,0.3); }
+.vgt-action-btn.default { background: rgba(255,255,255,0.05); color: #a1a1aa; padding: 8px; border-color: rgba(255,255,255,0.1); }
+.vgt-action-btn.default:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.vgt-action-btn.danger { background: transparent; color: #ef4444; padding: 8px; }
+.vgt-action-btn.danger:hover { background: rgba(239, 68, 68, 0.1); color: #f87171; }
+.vgt-action-divider { width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 4px; }
+
+/* Viewport & Iframe Container */
+.vgt-reader-viewport {
+    position: relative;
+    z-index: 5;
+    flex: 1;
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.vgt-iframe-container {
+    width: 100%;
+    max-width: 1200px;
+    height: 100%;
+    background: #fff; /* White background for PDFs */
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1);
+    transform: translateY(40px) scale(0.98);
+    opacity: 0;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+}
+
+#vgt-reader-overlay.vgt-reader-active .vgt-iframe-container {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+#vgt-reader-iframe { width: 100%; height: 100%; border: none; background: #fff; }
+
+/* Loader State */
+.vgt-loader-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    color: #00f0ff;
+    font-size: 13px;
+    font-family: monospace;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    z-index: 2;
+    transition: opacity 0.4s ease;
+}
+
+.vgt-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0, 240, 255, 0.1);
+    border-top-color: #00f0ff;
+    border-radius: 50%;
+    animation: vgtSpin 1s linear infinite;
+    box-shadow: 0 0 20px rgba(0,240,255,0.2);
+}
+
+@keyframes vgtSpin { to { transform: rotate(360deg); } }
+
+/* Mobile Optimization */
+@media (max-width: 768px) {
+    .vgt-reader-viewport { padding: 0; }
+    .vgt-iframe-container { border-radius: 0; border: none; }
+    .vgt-reader-topbar { padding: 0 15px; }
+    #vgt-reader-buy-text { display: none; } /* Hide text, keep icon */
+}

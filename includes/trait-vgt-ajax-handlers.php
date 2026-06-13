@@ -25,7 +25,7 @@ trait WPDeskAJAXTrait
             $type  = isset($_POST['setting_type']) ? sanitize_key($_POST['setting_type']) : '';
             $value = isset($_POST['value']) ? wp_unslash($_POST['value']) : '';
 
-            if (!in_array($type, ['wallpaper', 'accent_color', 'blur', 'icon_positions', 'window_settings', 'widgets_visible', 'icons_visible', 'audio_enabled', 'widget_positions', 'folders', 'auto_redirect', 'layout_style', 'pinned_apps', 'font_size', 'shortcuts', 'active_preset', 'first_run_completed'], true)) {
+            if (!in_array($type, ['wallpaper', 'accent_color', 'blur', 'icon_positions', 'window_settings', 'widgets_visible', 'icons_visible', 'audio_enabled', 'widget_positions', 'folders', 'auto_redirect', 'layout_style', 'pinned_apps', 'font_size', 'shortcuts', 'active_preset', 'first_run_completed', 'show_welcome_on_startup'], true)) {
                 throw new ValidationException('Invalid configuration parameters submitted.');
             }
 
@@ -42,7 +42,7 @@ trait WPDeskAJAXTrait
                 throw new ValidationException('Illegal active preset value.');
             }
 
-            if (in_array($type, ['blur', 'widgets_visible', 'icons_visible', 'audio_enabled', 'auto_redirect', 'first_run_completed'], true)) {
+            if (in_array($type, ['blur', 'widgets_visible', 'icons_visible', 'audio_enabled', 'auto_redirect', 'first_run_completed', 'show_welcome_on_startup'], true)) {
                 $value = ($value === 'true' || $value === '1') ? 'true' : 'false';
             }
 
