@@ -183,8 +183,6 @@ Persistent Settings (Relational DB)
 → Migration: wp_usermeta data imported on first load
 ```
 
-<img width="1870" height="1142" alt="image" src="https://github.com/user-attachments/assets/fbbb1b7f-cfce-45b7-86f3-28878a32cc09" />
-
 ---
 
 ## 🧩 Feature Matrix
@@ -201,7 +199,8 @@ Persistent Settings (Relational DB)
 | **Dark Theme Injection** | Media, Themes, Menus pages receive consistent dark-mode overrides |
 | **SVG Branding** | Native SVG colors preserved — `filter: invert()` removed |
 
-<img width="1914" height="914" alt="Tile Engine Layout" src="https://github.com/user-attachments/assets/3f3df87a-45ef-4666-a879-8831f791a0e2" />
+<img width="2560" height="1234" alt="image" src="https://github.com/user-attachments/assets/f59207e3-9276-415f-8868-db81439cb602" />
+
 
 ---
 
