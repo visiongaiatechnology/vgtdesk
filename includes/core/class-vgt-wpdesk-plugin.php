@@ -258,24 +258,24 @@ final class WPDeskPlugin
 
         remove_action('wp_head', '_admin_bar_bump_cb');
         wp_enqueue_style('dashicons');
-        wp_enqueue_style('vgt-desktop-core-css', VGT_WPDESK_URL . 'assets/css/desktop-core.css', [], '1.0.0-Beta');
-        wp_enqueue_style('vgt-desktop-windows-css', VGT_WPDESK_URL . 'assets/css/desktop-windows.css', ['vgt-desktop-core-css'], '1.0.0-Beta');
-        wp_enqueue_style('vgt-desktop-icons-css', VGT_WPDESK_URL . 'assets/css/desktop-icons.css', ['vgt-desktop-core-css'], '1.0.0-Beta');
-        wp_enqueue_style('vgt-desktop-widgets-css', VGT_WPDESK_URL . 'assets/css/desktop-widgets.css', ['vgt-desktop-core-css'], '1.0.0-Beta');
-        wp_enqueue_style('vgt-desktop-apps-css', VGT_WPDESK_URL . 'assets/css/desktop-apps.css', ['vgt-desktop-core-css'], '1.0.0-Beta');
+        wp_enqueue_style('vgt-desktop-core-css', VGT_WPDESK_URL . 'assets/css/desktop-core.css', [], '1.0.0-Beta-5');
+        wp_enqueue_style('vgt-desktop-windows-css', VGT_WPDESK_URL . 'assets/css/desktop-windows.css', ['vgt-desktop-core-css'], '1.0.0-Beta-5');
+        wp_enqueue_style('vgt-desktop-icons-css', VGT_WPDESK_URL . 'assets/css/desktop-icons.css', ['vgt-desktop-core-css'], '1.0.0-Beta-5');
+        wp_enqueue_style('vgt-desktop-widgets-css', VGT_WPDESK_URL . 'assets/css/desktop-widgets.css', ['vgt-desktop-core-css'], '1.0.0-Beta-5');
+        wp_enqueue_style('vgt-desktop-apps-css', VGT_WPDESK_URL . 'assets/css/desktop-apps.css', ['vgt-desktop-core-css'], '1.0.0-Beta-5');
 
         // Register JS components
-        wp_register_script('vgt-desktop-core', VGT_WPDESK_URL . 'assets/js/modules/desktop-core.js', [], '1.0.0-Beta', false);
-        wp_register_script('vgt-desktop-windows', VGT_WPDESK_URL . 'assets/js/modules/desktop-windows.js', ['vgt-desktop-core'], '1.0.0-Beta', false);
-        wp_register_script('vgt-desktop-draggable', VGT_WPDESK_URL . 'assets/js/modules/desktop-draggable.js', ['vgt-desktop-core'], '1.0.0-Beta', false);
-        wp_register_script('vgt-desktop-icons', VGT_WPDESK_URL . 'assets/js/modules/desktop-icons.js', ['vgt-desktop-core'], '1.0.0-Beta', false);
-        wp_register_script('vgt-desktop-menus', VGT_WPDESK_URL . 'assets/js/modules/desktop-menus.js', ['vgt-desktop-core'], '1.0.0-Beta', false);
-        wp_register_script('vgt-desktop-widgets', VGT_WPDESK_URL . 'assets/js/modules/desktop-widgets.js', ['vgt-desktop-core'], '1.0.0-Beta', false);
-        wp_register_script('vgt-desktop-spotlight', VGT_WPDESK_URL . 'assets/js/modules/desktop-spotlight.js', ['vgt-desktop-core'], '1.0.0-Beta', false);
-        wp_register_script('vgt-desktop-modals', VGT_WPDESK_URL . 'assets/js/modules/desktop-modals.js', ['vgt-desktop-core'], '1.0.0-Beta', false);
-        wp_register_script('vgt-desktop-folders', VGT_WPDESK_URL . 'assets/js/modules/desktop-folders.js', ['vgt-desktop-core'], '1.0.0-Beta', false);
-        wp_register_script('vgt-desktop-wizard', VGT_WPDESK_URL . 'assets/js/modules/desktop-wizard.js', ['vgt-desktop-core'], '1.0.0-Beta', false);
-        wp_register_script('vgt-desktop-taskmanager', VGT_WPDESK_URL . 'assets/js/modules/desktop-taskmanager.js', ['vgt-desktop-core'], '1.0.0-Beta', false);
+        wp_register_script('vgt-desktop-core', VGT_WPDESK_URL . 'assets/js/modules/desktop-core-v2.js', [], '1.0.0-Beta-5', false);
+        wp_register_script('vgt-desktop-windows', VGT_WPDESK_URL . 'assets/js/modules/desktop-windows-v2.js', ['vgt-desktop-core'], '1.0.0-Beta-5', false);
+        wp_register_script('vgt-desktop-draggable', VGT_WPDESK_URL . 'assets/js/modules/desktop-draggable.js', ['vgt-desktop-core'], '1.0.0-Beta-5', false);
+        wp_register_script('vgt-desktop-icons', VGT_WPDESK_URL . 'assets/js/modules/desktop-icons.js', ['vgt-desktop-core'], '1.0.0-Beta-5', false);
+        wp_register_script('vgt-desktop-menus', VGT_WPDESK_URL . 'assets/js/modules/desktop-menus.js', ['vgt-desktop-core'], '1.0.0-Beta-5', false);
+        wp_register_script('vgt-desktop-widgets', VGT_WPDESK_URL . 'assets/js/modules/desktop-widgets.js', ['vgt-desktop-core'], '1.0.0-Beta-5', false);
+        wp_register_script('vgt-desktop-spotlight', VGT_WPDESK_URL . 'assets/js/modules/desktop-spotlight.js', ['vgt-desktop-core'], '1.0.0-Beta-5', false);
+        wp_register_script('vgt-desktop-modals', VGT_WPDESK_URL . 'assets/js/modules/desktop-modals.js', ['vgt-desktop-core'], '1.0.0-Beta-5', false);
+        wp_register_script('vgt-desktop-folders', VGT_WPDESK_URL . 'assets/js/modules/desktop-folders.js', ['vgt-desktop-core'], '1.0.0-Beta-5', false);
+        wp_register_script('vgt-desktop-wizard', VGT_WPDESK_URL . 'assets/js/modules/desktop-wizard.js', ['vgt-desktop-core'], '1.0.0-Beta-5', false);
+        wp_register_script('vgt-desktop-taskmanager', VGT_WPDESK_URL . 'assets/js/modules/desktop-taskmanager.js', ['vgt-desktop-core'], '1.0.0-Beta-5', false);
 
         // Enqueue the primary orchestrator that depends on all sub-modules
         wp_enqueue_script('vgt-desktop-js', VGT_WPDESK_URL . 'assets/js/desktop.js', [
@@ -290,7 +290,7 @@ final class WPDeskPlugin
             'vgt-desktop-folders',
             'vgt-desktop-wizard',
             'vgt-desktop-taskmanager'
-        ], '1.0.0-Beta', false);
+        ], '1.0.0-Beta-5', false);
 
         $user_id       = get_current_user_id();
         $user_settings = WPDeskSettings::get_user_settings($user_id);

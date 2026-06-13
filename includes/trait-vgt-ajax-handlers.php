@@ -25,13 +25,17 @@ trait WPDeskAJAXTrait
             $type  = isset($_POST['setting_type']) ? sanitize_key($_POST['setting_type']) : '';
             $value = isset($_POST['value']) ? wp_unslash($_POST['value']) : '';
 
-            if (!in_array($type, ['wallpaper', 'accent_color', 'blur', 'icon_positions', 'window_settings', 'widgets_visible', 'icons_visible', 'audio_enabled', 'widget_positions', 'folders', 'auto_redirect', 'layout_style', 'pinned_apps', 'font_size', 'shortcuts', 'active_preset', 'first_run_completed', 'show_welcome_on_startup'], true)) {
+            if (!in_array($type, ['wallpaper', 'accent_color', 'blur', 'icon_positions', 'window_settings', 'widgets_visible', 'icons_visible', 'audio_enabled', 'widget_positions', 'folders', 'auto_redirect', 'layout_style', 'pinned_apps', 'font_size', 'shortcuts', 'active_preset', 'first_run_completed', 'show_welcome_on_startup', 'sound_pack'], true)) {
                 throw new ValidationException('Invalid configuration parameters submitted.');
             }
 
             // STRIKTES TYP- UND WERTE-WHITELISTING
             if ($type === 'accent_color' && !in_array($value, self::ALLOWED_ACCENT_COLORS, true)) {
                 throw new ValidationException('Illegal accent color value.');
+            }
+
+            if ($type === 'sound_pack' && !in_array($value, ['synth_default', 'cyber_neon', 'classic_bell', 'digital_minimal'], true)) {
+                throw new ValidationException('Illegal sound pack value.');
             }
 
             if ($type === 'layout_style' && !in_array($value, ['macos', 'windows', 'linux'], true)) {
