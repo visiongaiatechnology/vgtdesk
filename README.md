@@ -77,10 +77,12 @@ VGT WP-Desk Operator Workspace:
 → CSP-aware asset loading and DOM XSS hardening
 → Zero-CDN, zero-build, zero-framework runtime
 ```
-
 ### Security Center
 
 The WP-Desk Security Center brings the core VGT security components into one operator interface:
+
+<img width="2557" height="1232" alt="image" src="https://github.com/user-attachments/assets/212845ab-96e0-4845-9827-fded10cf5465" />
+
 
 ```text
 VGT WP-Desk Security Center
