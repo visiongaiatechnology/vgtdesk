@@ -69,7 +69,7 @@ window.VGTDeskEngine = {
 
         // Speicher-Objekt als Boolean normalisieren falls anwendbar
         let normalizedValue = value;
-        if (type === 'blur' || type === 'widgets_visible' || type === 'icons_visible' || type === 'audio_enabled' || type === 'auto_redirect' || type === 'first_run_completed') {
+        if (type === 'blur' || type === 'widgets_visible' || type === 'icons_visible' || type === 'audio_enabled' || type === 'auto_redirect' || type === 'first_run_completed' || type === 'show_welcome_on_startup') {
             normalizedValue = (value === 'true' || value === true);
         }
         this.userSettings[type] = normalizedValue;

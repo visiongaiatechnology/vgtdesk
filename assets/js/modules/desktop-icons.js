@@ -466,6 +466,16 @@ Object.assign(window.VGTDeskEngine, {
                 return this.openWindow('welcome');
             }
 
+            // Ignoriere Weiterleitungen zum Haupt-Dashboard oder leeren Admin-Pfaden
+            const targetPath = targetUrl.pathname;
+            const targetPage = targetUrl.searchParams.get('page');
+            if ((targetPath.endsWith('/wp-admin/') || targetPath.endsWith('/wp-admin/index.php') || targetPath.endsWith('/wp-admin')) && !targetPage) {
+                return;
+            }
+            if (targetPage === 'vgt-wp-desk') {
+                return;
+            }
+
             let matchedAppKey = null;
 
             const iframes = document.querySelectorAll('iframe[data-src]');

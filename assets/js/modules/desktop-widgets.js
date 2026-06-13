@@ -118,10 +118,10 @@ Object.assign(window.VGTDeskEngine, {
             if (saved) {
                 if (saved.left) {
                     widget.style.left = saved.left;
-                    widget.style.right = '';
+                    widget.style.right = 'auto';
                 } else if (saved.right) {
                     widget.style.right = saved.right;
-                    widget.style.left = '';
+                    widget.style.left = 'auto';
                 }
                 if (saved.top) {
                     widget.style.top = saved.top;
@@ -186,7 +186,7 @@ Object.assign(window.VGTDeskEngine, {
                     if (left > wsWidth - widgetWidth - 10) left = wsWidth - widgetWidth - 10;
                     if (top > wsHeight - widgetHeight - 10) top = wsHeight - widgetHeight - 10;
                     
-                    widget.style.right = '';
+                    widget.style.right = 'auto';
                     widget.style.left = `${left}px`;
                     widget.style.top = `${top}px`;
                 };
