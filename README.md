@@ -37,7 +37,8 @@ See: [SECURITY_POSTURE.md](SECURITY_POSTURE.md)
 
 ---
 
-<img width="2560" height="1232" alt="image" src="https://github.com/user-attachments/assets/336383e1-653c-4353-aaea-7414d909b3bf" />
+<img width="2558" height="1230" alt="image" src="https://github.com/user-attachments/assets/dad7dc14-ce7f-43cd-ac6c-3412cc7d2b6d" />
+
 
 ---
 
