@@ -322,7 +322,7 @@ final class WPDeskPlugin
             'sentinelEnabled' => $sentinel_active,
             'sentinelBans'    => $bans_count,
             'isSentinelV7'    => $sentinel_v7_active,
-            'superkeyActive'  => !empty(get_option('mcp_superkey_hash', '')),
+            'superkeyActive'  => !empty(get_user_meta($user_id, 'mcp_superkey_hash', true)) || !empty(get_option('mcp_superkey_hash', '')),
             'dattrackEnabled' => !$sentinel_v7_active && (get_option('vgt_dattrack_enabled') === 'true'),
             'apps'            => $this->apps
         ]);
@@ -733,7 +733,11 @@ final class WPDeskPlugin
         global $wpdb;
         $active_plugins = get_option('active_plugins', []);
         $theme = wp_get_theme();
-        $superkey_hash = get_option('mcp_superkey_hash', '');
+        $user_id = get_current_user_id();
+        $superkey_hash = get_user_meta($user_id, 'mcp_superkey_hash', true);
+        if (empty($superkey_hash)) {
+            $superkey_hash = get_option('mcp_superkey_hash', '');
+        }
         $sentinel_v7_active = defined('VIS_VERSION');
         
         $diagnostics = [

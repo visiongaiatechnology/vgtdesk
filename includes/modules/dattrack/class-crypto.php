@@ -10,8 +10,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-if (!class_exists('VGT_Crypto')) {
-final class VGT_Crypto {
+if (!class_exists('VGT_Crypto_Desk')) {
+final class VGT_Crypto_Desk {
     private const CIPHER_ALGO = 'aes-256-gcm';
 
     public static function init_vault(): void {
@@ -59,8 +59,8 @@ final class VGT_Crypto {
             return;
         }
 
-        if (class_exists('VGT_Aggregator')) {
-            VGT_Aggregator::run_rollup();
+        if (class_exists('VGT_Aggregator_Desk')) {
+            VGT_Aggregator_Desk::run_rollup();
         }
 
         $new_key = base64_encode(random_bytes(32));

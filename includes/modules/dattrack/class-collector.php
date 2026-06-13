@@ -10,8 +10,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-if (!class_exists('VGT_Collector')) {
-final class VGT_Collector {
+if (!class_exists('VGT_Collector_Desk')) {
+final class VGT_Collector_Desk {
     
     public static function intercept(): void {
         if (get_option('vgt_dattrack_enabled') !== 'true') {
@@ -94,7 +94,7 @@ final class VGT_Collector {
 
         // Token Verification
         $token = $decoded_json['tkn'];
-        $secret = VGT_Crypto::get_master_key();
+        $secret = VGT_Crypto_Desk::get_master_key();
         if (empty($secret)) {
             $secret = wp_salt('nonce');
         }
@@ -124,8 +124,8 @@ final class VGT_Collector {
 
         // VGT SUPREME UPGRADE: HMAC-SHA256 unter Nutzung des Master-Keys als Pepper
         // Dies verhindert Length-Extension-Attacks und sorgt für maximale kryptographische Isolation.
-        $master_key = VGT_Crypto::get_master_key();
-        $salt = VGT_Crypto::get_dynamic_salt();
+        $master_key = VGT_Crypto_Desk::get_master_key();
+        $salt = VGT_Crypto_Desk::get_dynamic_salt();
 
         if (empty($master_key) || empty($salt)) {
             wp_send_json_error(['status' => 'vault_offline'], 503);
@@ -142,7 +142,7 @@ final class VGT_Collector {
         // Die IP wird mit dem Master-Key verperlt, der dynamische Salt dient als Kontext-Entropie.
         $ip_hash = hash_hmac('sha256', trim($raw_ip) . $salt, $master_key); 
 
-        $crypto_packet = VGT_Crypto::encrypt_payload($event_data, $ip_hash);
+        $crypto_packet = VGT_Crypto_Desk::encrypt_payload($event_data, $ip_hash);
 
         if (empty($crypto_packet['payload'])) {
             wp_send_json_error(['status' => 'crypto_failure'], 500);

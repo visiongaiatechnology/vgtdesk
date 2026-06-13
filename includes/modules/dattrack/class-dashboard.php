@@ -10,8 +10,8 @@ if (!defined('ABSPATH')) {
  * TIER: PLATINUM / VGT SUPREME (CSRF HARDENED)
  * STATUS: 💠 DIAMANT VGT SUPREME
  */
-if (!class_exists('VGT_Dashboard')) {
-final class VGT_Dashboard {
+if (!class_exists('VGT_Dashboard_Desk')) {
+final class VGT_Dashboard_Desk {
 
     // --- VGT EXPORT KERNEL: DEDIZIERTE ROUTEN ---
 
@@ -19,8 +19,8 @@ final class VGT_Dashboard {
         if (!current_user_can('manage_options')) wp_die('Unauthorized');
         check_admin_referer('vgt_dt_action_nonce');
         
-        if (class_exists('VGT_Aggregator')) {
-            VGT_Aggregator::run_rollup();
+        if (class_exists('VGT_Aggregator_Desk')) {
+            VGT_Aggregator_Desk::run_rollup();
         }
         wp_redirect(admin_url('admin.php?page=vgt-dattrack'));
         exit;
@@ -84,7 +84,7 @@ final class VGT_Dashboard {
 
             foreach ($rows as $row) {
                 $last_id = (int)$row['id'];
-                $decrypted = VGT_Crypto::decrypt_payload($row['payload'], $row['iv'], $row['auth_tag'], $row['ip_hash']);
+                $decrypted = VGT_Crypto_Desk::decrypt_payload($row['payload'], $row['iv'], $row['auth_tag'], $row['ip_hash']);
                 
                 if ($decrypted) {
                     fputcsv($output, [
@@ -388,7 +388,7 @@ final class VGT_Dashboard {
         }
 
         $is_nginx = strpos(strtolower($_SERVER['SERVER_SOFTWARE'] ?? ''), 'nginx') !== false;
-        $master_key = VGT_Crypto::get_master_key();
+        $master_key = VGT_Crypto_Desk::get_master_key();
         $vault_failed = empty($master_key);
         
         $upload_dir = wp_upload_dir();

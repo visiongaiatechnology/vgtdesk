@@ -138,16 +138,16 @@ if (!defined('VGT_ALLOW_PROXIES')) {
 }
 
 // Absolute Path Definitions
-define('VGT_OMEGA_PATH', plugin_dir_path(__FILE__));
-define('VGT_OMEGA_URL', plugin_dir_url(__FILE__));
+define('VGT_BUILD_CENTER_PATH', plugin_dir_path(__FILE__));
+define('VGT_BUILD_CENTER_URL', plugin_dir_url(__FILE__));
 
 // Modular Kernel Loader
-require_once VGT_OMEGA_PATH . 'includes/class-vgt-omega-crypto.php';
-require_once VGT_OMEGA_PATH . 'includes/class-vgt-omega-scanner.php';
-require_once VGT_OMEGA_PATH . 'includes/class-vgt-omega-db.php';
-require_once VGT_OMEGA_PATH . 'includes/class-vgt-omega-api.php';
-require_once VGT_OMEGA_PATH . 'includes/class-vgt-omega-frontend.php';
-require_once VGT_OMEGA_PATH . 'includes/class-vgt-omega-ui.php';
+require_once VGT_BUILD_CENTER_PATH . 'includes/class-vgt-omega-crypto.php';
+require_once VGT_BUILD_CENTER_PATH . 'includes/class-vgt-omega-scanner.php';
+require_once VGT_BUILD_CENTER_PATH . 'includes/class-vgt-omega-db.php';
+require_once VGT_BUILD_CENTER_PATH . 'includes/class-vgt-omega-api.php';
+require_once VGT_BUILD_CENTER_PATH . 'includes/class-vgt-omega-frontend.php';
+require_once VGT_BUILD_CENTER_PATH . 'includes/class-vgt-omega-ui.php';
 
 /**
  * ==============================================================================
@@ -157,7 +157,7 @@ require_once VGT_OMEGA_PATH . 'includes/class-vgt-omega-ui.php';
 final class VGT_Omega_Bootstrapper {
     
     public static function ignite(): void {
-        register_activation_hook(VGT_OMEGA_PATH . 'vault.php', [\VGT_Omega_DB::class, 'install']);
+        register_activation_hook(VGT_BUILD_CENTER_PATH . 'vault.php', [\VGT_Omega_DB::class, 'install']);
         
         // Auto-Migration & Integrity checks
         add_action('init', [self::class, 'maybe_upgrade_db'], 5);
@@ -210,14 +210,14 @@ final class VGT_Omega_Bootstrapper {
 
         wp_enqueue_style(
             'vgt-vault-admin-style',
-            esc_url(VGT_OMEGA_URL . 'assets/css/vgt-vault-admin.css'),
+            esc_url(VGT_BUILD_CENTER_URL . 'assets/css/vgt-vault-admin.css'),
             [],
             '6.0.0'
         );
 
         wp_enqueue_script(
             'vgt-vault-admin-script',
-            esc_url(VGT_OMEGA_URL . 'assets/js/vgt-vault-admin.js'),
+            esc_url(VGT_BUILD_CENTER_URL . 'assets/js/vgt-vault-admin.js'),
             [],
             '6.0.0',
             true

@@ -13,16 +13,16 @@ if (!defined('ABSPATH')) {
 }
 
 // Require module files conditionally to prevent name clashes with other active plugins
-if (!class_exists('VGT_Crypto')) {
+if (!class_exists('VGT_Crypto_Desk')) {
     require_once VGT_WPDESK_PATH . 'includes/modules/dattrack/class-crypto.php';
 }
-if (!class_exists('VGT_Collector')) {
+if (!class_exists('VGT_Collector_Desk')) {
     require_once VGT_WPDESK_PATH . 'includes/modules/dattrack/class-collector.php';
 }
-if (!class_exists('VGT_Dashboard')) {
+if (!class_exists('VGT_Dashboard_Desk')) {
     require_once VGT_WPDESK_PATH . 'includes/modules/dattrack/class-dashboard.php';
 }
-if (!class_exists('VGT_Aggregator')) {
+if (!class_exists('VGT_Aggregator_Desk')) {
     require_once VGT_WPDESK_PATH . 'includes/modules/dattrack/class-aggregator.php';
 }
 
@@ -31,17 +31,17 @@ final class VGT_Dattrack_Engine {
 
     public static function boot(): void {
         // Tracking Endpoints
-        add_action('wp_ajax_vgt_sync_pulse', [\VGT_Collector::class, 'intercept']);
-        add_action('wp_ajax_nopriv_vgt_sync_pulse', [\VGT_Collector::class, 'intercept']);
+        add_action('wp_ajax_vgt_sync_pulse', [\VGT_Collector_Desk::class, 'intercept']);
+        add_action('wp_ajax_nopriv_vgt_sync_pulse', [\VGT_Collector_Desk::class, 'intercept']);
         
         // Cron Engines
-        add_action('vgt_dt_hourly_rollup', [\VGT_Aggregator::class, 'run_rollup']);
-        add_action('vgt_dt_aegis_rotation', [\VGT_Crypto::class, 'execute_aegis_protocol']);
+        add_action('vgt_dt_hourly_rollup', [\VGT_Aggregator_Desk::class, 'run_rollup']);
+        add_action('vgt_dt_aegis_rotation', [\VGT_Crypto_Desk::class, 'execute_aegis_protocol']);
         
         // VGT SUPREME: Dedicated Backend Routes
-        add_action('admin_post_vgt_sync', [\VGT_Dashboard::class, 'process_live_sync']);
-        add_action('admin_post_vgt_export_csv', [\VGT_Dashboard::class, 'stream_csv']);
-        add_action('admin_post_vgt_export_pdf', [\VGT_Dashboard::class, 'render_print_view']);
+        add_action('admin_post_vgt_sync', [\VGT_Dashboard_Desk::class, 'process_live_sync']);
+        add_action('admin_post_vgt_export_csv', [\VGT_Dashboard_Desk::class, 'stream_csv']);
+        add_action('admin_post_vgt_export_pdf', [\VGT_Dashboard_Desk::class, 'render_print_view']);
         
         // UI Endpoints
         add_action('admin_menu', [self::class, 'construct_command_center']);
@@ -63,7 +63,7 @@ final class VGT_Dattrack_Engine {
 
     public static function system_genesis(): void {
         global $wpdb;
-        \VGT_Crypto::init_vault();
+        \VGT_Crypto_Desk::init_vault();
 
         $table_vault = $wpdb->prefix . 'vgt_dattrack_vault';
         $table_stats = $wpdb->prefix . 'vgt_dattrack_stats';
@@ -114,12 +114,12 @@ final class VGT_Dattrack_Engine {
             'Dattrack',
             'manage_options',
             'vgt-dattrack',
-            [\VGT_Dashboard::class, 'render_sovereign_dashboard']
+            [\VGT_Dashboard_Desk::class, 'render_sovereign_dashboard']
         );
     }
 
     public static function generate_site_token(): string {
-        $secret = \VGT_Crypto::get_master_key();
+        $secret = \VGT_Crypto_Desk::get_master_key();
         if (empty($secret)) {
             $secret = wp_salt('nonce');
         }
@@ -155,8 +155,8 @@ final class VGT_Dattrack_Engine {
             'last7'     => ['events' => 0, 'unique_users' => 0, 'paths' => []],
             'all'       => ['events' => 0, 'unique_users' => 0, 'paths' => [], 'timeline_chart' => []]
         ];
-        if (class_exists('\\VGT_Dashboard') && method_exists('\\VGT_Dashboard', 'get_vault_metrics')) {
-            $metrics = \VGT_Dashboard::get_vault_metrics();
+        if (class_exists('\\VGT_Dashboard_Desk') && method_exists('\\VGT_Dashboard_Desk', 'get_vault_metrics')) {
+            $metrics = \VGT_Dashboard_Desk::get_vault_metrics();
         }
         wp_localize_script('vgt-dt-dashboard-js', 'vgtDashboardData', [
             'metrics' => $metrics

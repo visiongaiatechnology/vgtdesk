@@ -72,6 +72,7 @@ final class MasterUserControlPlugin {
         add_action('admin_post_mcp_save_roles', [$this, 'handle_save_roles']);
         add_action('admin_post_mcp_upload_file', [$this, 'handle_file_upload']);
         add_action('admin_post_mcp_admin_hardening', [$this, 'handle_admin_hardening']);
+        add_action('admin_post_mcp_change_superkey', [$this, 'handle_change_superkey']);
         
         // Zero-Trust Session Gating (GUI)
         add_action('admin_init', [$this, 'enforce_backend_lock'], 1);
@@ -153,12 +154,17 @@ final class MasterUserControlPlugin {
         $headers['Referrer-Policy'] = 'strict-origin-when-cross-origin';
         $headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()';
         
-        // CSP so konfiguriert, dass sie im Admin-Bereich kompatibel bleibt, auf dem Frontend jedoch hart sperrt
+        // CSP so konfiguriert, dass sie im Admin-Bereich kompatibel bleibt.
+        // Auf dem Frontend standardmäßig kompatibel mit Page Buildern und Dynamic Form Shortcodes (wie dem VGT Sentinel V7 Builder).
         if (is_admin()) {
-            $headers['Content-Security-Policy'] = "default-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self';";
+            $csp = "default-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self';";
         } else {
-            $headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'nonce-{$nonce}'; style-src 'self' 'nonce-{$nonce}'; object-src 'none'; base-uri 'self';";
+            // Highly compatible frontend CSP allowing inline styles/scripts and external HTTPS resources
+            $csp = "default-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; object-src 'none'; base-uri 'self';";
         }
+        
+        $headers['Content-Security-Policy'] = apply_filters('vgt_throne_guard_csp', $csp, is_admin(), $nonce);
+        
         return $headers;
     }
 
@@ -473,7 +479,18 @@ EOT;
     // Zero-Trust Session Gating (Headless / API / REST Lock)
     public function enforce_api_lock(): void {
         if (!current_user_can('mcp_master_access')) return;
-        if (empty(get_option('mcp_superkey_hash', ''))) return;
+        
+        $user_id = get_current_user_id();
+        $superkey_hash = get_user_meta($user_id, 'mcp_superkey_hash', true);
+        if (empty($superkey_hash)) {
+            $global_hash = get_option('mcp_superkey_hash', '');
+            if (!empty($global_hash)) {
+                $superkey_hash = $global_hash;
+                update_user_meta($user_id, 'mcp_superkey_hash', $global_hash);
+            }
+        }
+        
+        if (empty($superkey_hash)) return;
         
         if (!$this->is_session_unlocked()) {
             wp_die('VGT Enclave Locked: API execution blocked.', 'Unauthorized', 401);
@@ -483,7 +500,16 @@ EOT;
     public function enforce_backend_lock(): void {
         if (!current_user_can('mcp_master_access')) return;
 
-        $superkey_hash = get_option('mcp_superkey_hash', '');
+        $user_id = get_current_user_id();
+        $superkey_hash = get_user_meta($user_id, 'mcp_superkey_hash', true);
+        if (empty($superkey_hash)) {
+            $global_hash = get_option('mcp_superkey_hash', '');
+            if (!empty($global_hash)) {
+                $superkey_hash = $global_hash;
+                update_user_meta($user_id, 'mcp_superkey_hash', $global_hash);
+            }
+        }
+        
         if (empty($superkey_hash)) return; 
 
         if (defined('DOING_AJAX') && DOING_AJAX) {
@@ -712,7 +738,16 @@ EOT;
         if (!isset($_POST['mcp_nonce']) || !wp_verify_nonce($_POST['mcp_nonce'], 'mcp_unlock_backend')) wp_die('Nonce failed.');
         $this->verify_csrf_token($_POST['csrf_token'] ?? '');
 
-        $superkey_hash = get_option('mcp_superkey_hash', '');
+        $user_id = get_current_user_id();
+        $superkey_hash = get_user_meta($user_id, 'mcp_superkey_hash', true);
+        if (empty($superkey_hash)) {
+            $global_hash = get_option('mcp_superkey_hash', '');
+            if (!empty($global_hash)) {
+                $superkey_hash = $global_hash;
+                update_user_meta($user_id, 'mcp_superkey_hash', $global_hash);
+            }
+        }
+        
         $provided_key = $_POST['superkey'] ?? '';
 
         if (empty($superkey_hash) || !password_verify($provided_key, $superkey_hash)) {
@@ -776,7 +811,15 @@ EOT;
         global $wpdb;
         $roles = $wpdb->get_results("SELECT id, role_key, role_name, role_description FROM {$wpdb->prefix}mcp_user_roles;", ARRAY_A);
         
-        $superkey_hash = get_option('mcp_superkey_hash', '');
+        $user_id = get_current_user_id();
+        $superkey_hash = get_user_meta($user_id, 'mcp_superkey_hash', true);
+        if (empty($superkey_hash)) {
+            $global_hash = get_option('mcp_superkey_hash', '');
+            if (!empty($global_hash)) {
+                $superkey_hash = $global_hash;
+                update_user_meta($user_id, 'mcp_superkey_hash', $global_hash);
+            }
+        }
         $is_superkey_set = !empty($superkey_hash);
         
         $admin_role = get_role('administrator');
@@ -837,6 +880,30 @@ EOT;
                 </form>
             </div>
 
+            <?php if ($is_superkey_set): ?>
+            <div style="background: rgba(15, 23, 42, 0.45); padding: 25px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; margin-bottom: 20px;">
+                <h2 style="margin-top: 0; color: #6366f1;">🔑 Superkey ändern</h2>
+                <p>Ändere deinen persönlichen Throneguard Superkey. Der Superkey schützt den Zugang zu deinen Master-Privilegien.</p>
+                
+                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                    <?php wp_nonce_field('mcp_change_superkey', 'mcp_nonce'); ?>
+                    <input type="hidden" name="action" value="mcp_change_superkey">
+                    <input type="hidden" name="csrf_token" value="<?php echo esc_attr($csrf_token); ?>">
+                    
+                    <p>
+                        <label><strong>Aktueller Superkey:</strong></label><br>
+                        <input type="password" name="current_superkey" autocomplete="current-password" required style="width: 300px; margin-top: 8px;">
+                    </p>
+                    <p>
+                        <label><strong>Neuer Superkey (mind. 12 Zeichen):</strong></label><br>
+                        <input type="password" name="new_superkey" autocomplete="new-password" required minlength="12" style="width: 300px; margin-top: 8px;">
+                    </p>
+                    
+                    <?php submit_button('Superkey ändern', 'primary', 'submit', false, ['style' => 'background: linear-gradient(135deg, #6366f1, #4f46e5); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);']); ?>
+                </form>
+            </div>
+            <?php endif; ?>
+
             <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.05); margin: 30px 0;">
             <h2><?php esc_html_e('Rollen-Beschreibungen', 'mcp'); ?></h2>
             <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
@@ -885,13 +952,21 @@ EOT;
             if (!isset($_POST['mcp_nonce']) || !wp_verify_nonce($_POST['mcp_nonce'], 'mcp_admin_hardening')) throw new SecurityException('Nonce failed.');
             $this->verify_csrf_token($_POST['csrf_token'] ?? '');
 
-            $superkey_hash = get_option('mcp_superkey_hash', '');
+            $user_id = get_current_user_id();
+            $superkey_hash = get_user_meta($user_id, 'mcp_superkey_hash', true);
+            if (empty($superkey_hash)) {
+                $global_hash = get_option('mcp_superkey_hash', '');
+                if (!empty($global_hash)) {
+                    $superkey_hash = $global_hash;
+                    update_user_meta($user_id, 'mcp_superkey_hash', $global_hash);
+                }
+            }
             
             if (empty($superkey_hash)) {
                 $new_key = $_POST['new_superkey'] ?? '';
                 if (strlen($new_key) < 12) throw new ValidationException('Superkey muss mind. 12 Zeichen haben.');
                 $hash = password_hash($new_key, PASSWORD_DEFAULT);
-                update_option('mcp_superkey_hash', $hash);
+                update_user_meta($user_id, 'mcp_superkey_hash', $hash);
             } else {
                 $provided_key = $_POST['superkey'] ?? '';
                 if (!password_verify($provided_key, $superkey_hash)) {
@@ -919,6 +994,46 @@ EOT;
 
         } catch (ValidationException|SecurityException|StorageException $e) {
             error_log('[SEC/HARDENING] ' . $e->getMessage());
+            wp_redirect(admin_url('admin.php?page=mcp-dashboard&error=1'));
+            exit;
+        }
+    }
+
+    public function handle_change_superkey(): void {
+        try {
+            if (!current_user_can('mcp_master_access')) throw new SecurityException('Insufficient permissions.');
+            if (!isset($_POST['mcp_nonce']) || !wp_verify_nonce($_POST['mcp_nonce'], 'mcp_change_superkey')) throw new SecurityException('Nonce failed.');
+            $this->verify_csrf_token($_POST['csrf_token'] ?? '');
+
+            $user_id = get_current_user_id();
+            $superkey_hash = get_user_meta($user_id, 'mcp_superkey_hash', true);
+            if (empty($superkey_hash)) {
+                $global_hash = get_option('mcp_superkey_hash', '');
+                if (!empty($global_hash)) {
+                    $superkey_hash = $global_hash;
+                }
+            }
+
+            $current_superkey = $_POST['current_superkey'] ?? '';
+            $new_superkey = $_POST['new_superkey'] ?? '';
+
+            if (empty($superkey_hash) || !password_verify($current_superkey, $superkey_hash)) {
+                sleep(2);
+                throw new SecurityException('Aktueller Superkey ist inkorrekt.');
+            }
+
+            if (strlen($new_superkey) < 12) {
+                throw new ValidationException('Der neue Superkey muss mindestens 12 Zeichen lang sein.');
+            }
+
+            $new_hash = password_hash($new_superkey, PASSWORD_DEFAULT);
+            update_user_meta($user_id, 'mcp_superkey_hash', $new_hash);
+
+            wp_redirect(admin_url('admin.php?page=mcp-dashboard&success=1'));
+            exit;
+
+        } catch (ValidationException|SecurityException $e) {
+            error_log('[SEC/SUPERKEY] ' . $e->getMessage());
             wp_redirect(admin_url('admin.php?page=mcp-dashboard&error=1'));
             exit;
         }

@@ -10,8 +10,8 @@ if (!defined('ABSPATH')) {
  * PLATINUM -> DIAMOND UPGRADE: O(1) Keyset Pagination Memory Chunking.
  * STATUS: 💠 DIAMANT VGT SUPREME
  */
-if (!class_exists('VGT_Aggregator')) {
-final class VGT_Aggregator {
+if (!class_exists('VGT_Aggregator_Desk')) {
+final class VGT_Aggregator_Desk {
 
     public static function run_rollup(): void {
         if (get_option('vgt_dattrack_enabled') !== 'true') {
@@ -51,7 +51,7 @@ final class VGT_Aggregator {
         $daily_data = [];
 
         foreach($generator() as $row) {
-            $decrypted = VGT_Crypto::decrypt_payload($row['payload'], $row['iv'], $row['auth_tag'], $row['ip_hash']);
+            $decrypted = VGT_Crypto_Desk::decrypt_payload($row['payload'], $row['iv'], $row['auth_tag'], $row['ip_hash']);
             if(!$decrypted) continue;
 
             $date = substr($row['timestamp'], 0, 10);

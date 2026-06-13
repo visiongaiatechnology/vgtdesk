@@ -56,7 +56,7 @@ trait WPDeskAJAXTrait
 
             global $wpdb;
             $table_name = $wpdb->prefix . 'vgt_desk_settings';
-            $this->maybe_create_table();
+            WPDeskSettings::maybe_create_table();
 
             if (in_array($type, ['icon_positions', 'window_settings', 'widget_positions', 'folders', 'pinned_apps', 'shortcuts'], true)) {
                 if (!is_string($value)) {
@@ -550,7 +550,15 @@ trait WPDeskAJAXTrait
             $current_superkey = isset($_POST['current_superkey']) ? $_POST['current_superkey'] : '';
             $new_superkey = isset($_POST['new_superkey']) ? $_POST['new_superkey'] : '';
 
-            $superkey_hash = get_option('mcp_superkey_hash', '');
+            $user_id = get_current_user_id();
+            $superkey_hash = get_user_meta($user_id, 'mcp_superkey_hash', true);
+            if (empty($superkey_hash)) {
+                $global_hash = get_option('mcp_superkey_hash', '');
+                if (!empty($global_hash)) {
+                    $superkey_hash = $global_hash;
+                }
+            }
+
             if (!empty($superkey_hash)) {
                 if (empty($current_superkey) || !password_verify($current_superkey, $superkey_hash)) {
                     sleep(1);
@@ -563,7 +571,7 @@ trait WPDeskAJAXTrait
             }
 
             $new_hash = password_hash($new_superkey, PASSWORD_DEFAULT);
-            update_option('mcp_superkey_hash', $new_hash);
+            update_user_meta($user_id, 'mcp_superkey_hash', $new_hash);
 
             wp_send_json_success('Superkey erfolgreich aktualisiert.');
 

@@ -307,8 +307,8 @@ final class VGTSecurityCenter {
                 }
                 break;
             case 'dattrack':
-                if (class_exists('VGT_Dashboard')) {
-                    \VGT_Dashboard::render_sovereign_dashboard();
+                if (class_exists('VGT_Dashboard_Desk')) {
+                    \VGT_Dashboard_Desk::render_sovereign_dashboard();
                 } else {
                     echo '<div class="notice notice-error"><p>Dattrack konnte nicht geladen werden.</p></div>';
                 }
@@ -351,7 +351,7 @@ final class VGTSecurityCenter {
         }
 
         $sentinel_active = (get_option('vgt_sentinel_enabled') === 'true') || defined('VIS_VERSION');
-        $throne_guard_active = !empty(get_option('mcp_superkey_hash', ''));
+        $throne_guard_active = !empty(get_user_meta(get_current_user_id(), 'mcp_superkey_hash', true)) || !empty(get_option('mcp_superkey_hash', ''));
         $dattrack_active = (get_option('vgt_dattrack_enabled') === 'true') || defined('VIS_VERSION');
 
         // Diagnostics
