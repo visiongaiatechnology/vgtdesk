@@ -109,6 +109,9 @@ VGT WP-Desk Security Center
 
 Beta v4 consolidates the builder toolchain under a single unified app icon (`dashicons-hammer`), replacing three separate menu entries:
 
+<img width="2558" height="1236" alt="image" src="https://github.com/user-attachments/assets/dcfeca29-6686-400c-bd58-e6d32648a67a" />
+
+
 ```text
 VGT Build Center
 ├── Form Builder (Omega Vault)   ← AES-256-GCM encrypted form submissions
@@ -204,6 +207,10 @@ Persistent Settings (Relational DB)
 
 ### 🖱️ 2.2 Multi-Window Workspace
 
+<img width="2559" height="1231" alt="image" src="https://github.com/user-attachments/assets/46a011c7-912d-49bb-ac82-0397a700b0be" />
+
+
+
 | Feature | Detail |
 |---|---|
 | **8-Edge Resizing** | Eight invisible edge/corner zones on every window |
@@ -216,13 +223,16 @@ Persistent Settings (Relational DB)
 | **Hades Continuity** | Plugin redirect breakouts from iframe workspace structurally prevented |
 | **Custom Scrollbars** | Global slim translucent scrollbars matching glassmorphic style |
 
-<img width="1917" height="908" alt="Multi-Window Workspace" src="https://github.com/user-attachments/assets/1b9b8656-5866-4443-a9a8-ed2c7f7a724b" />
 
 ---
 
 ### 📁 2.3 Desktop Folder Mode
 
 App grouping directly on the desktop workspace — no page reload required.
+
+
+<img width="2561" height="1231" alt="image" src="https://github.com/user-attachments/assets/a88bf4f5-ecfd-41c7-aa98-4be4704bc7f1" />
+
 
 **Creating & Managing Folders:**
 - Right-click empty desktop area → context menu → **📁 New Folder** → glassmorphic name prompt
@@ -267,6 +277,18 @@ Native WordPress submenus surfaced as glassmorphic dropdown popups — no naviga
 
 Three complete OS aesthetic styles, switchable at runtime via Control Center or Spotlight CLI.
 
+## Linux 
+<img width="2558" height="1236" alt="image" src="https://github.com/user-attachments/assets/af0510c9-424b-4dc5-bd4c-5f81798cc6d2" />
+
+
+## MACOS
+<img width="2560" height="1233" alt="image" src="https://github.com/user-attachments/assets/9df359d3-bbb8-4b89-b633-abba9e491fa1" />
+
+
+## Windows
+<img width="2558" height="1235" alt="image" src="https://github.com/user-attachments/assets/b32d350f-0cd6-4096-8f3f-b7d6d3835768" />
+
+
 | Layout | Style | Dock Position | Maximize Behavior |
 |---|---|---|---|
 | **macOS Cupertino** | Menu bar top, floating centered dock | Bottom | Full workspace bounds |
@@ -287,6 +309,9 @@ Three-column layout: left sidebar strip (user profile, settings, power), center 
 ### ⚙️ 2.6 Command Center
 
 Unified administration panel replacing the previous settings window — split glassmorphic layout with left navigation tabs and scrollable right content.
+
+<img width="2559" height="1173" alt="image" src="https://github.com/user-attachments/assets/8f7784f2-d537-4819-abc6-b87e10714b09" />
+
 
 **Real-Time Diagnostics:**
 - CPU load + RAM usage with live progress bars (red highlight above 80%)
@@ -317,6 +342,9 @@ Unified administration panel replacing the previous settings window — split gl
 
 The WordPress security audit system is now deeply integrated into the VGT Security Center, replacing the previous standalone view.
 
+<img width="2560" height="1171" alt="image" src="https://github.com/user-attachments/assets/57fa67cb-d57e-4e6c-b703-903be8104441" />
+
+
 **Sentinel Auto-Awareness:**
 Automatically detects whether Sentinel CE or Enterprise V7 is active, checks which defense modules are running (Airlock, Cerberus, Titan) and reflects their state positively in the security index — no manual configuration.
 
@@ -338,6 +366,9 @@ Automatically detects whether Sentinel CE or Enterprise V7 is active, checks whi
 **Integrated Sentinel CE (v1.7.0):**
 
 AEGIS, CERBERUS, AIRLOCK, HADES, CHRONOS, and GHOST TRAP integrated into boot sequence. See [Sentinel CE README](https://github.com/visiongaiatechnology/sentinelcom) for full module documentation.
+
+<img width="2559" height="1231" alt="image" src="https://github.com/user-attachments/assets/1100dacf-2e32-4f65-ae45-6f3737194b0e" />
+
 
 **AEGIS WAF Exceptions:**
 - `edit_posts` / `manage_options` users: all pattern weights zeroed on `post.php`, `edit.php`, `/wp-json/wp/v2/` — administrators can save posts containing technical terms without 403 blocks
