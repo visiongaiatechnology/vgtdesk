@@ -485,7 +485,14 @@ final class VGTSecurityCenter {
             if (!(error_reporting() & $sev)) {
                 return false;
             }
-            throw new \ErrorException($msg, 0, $sev, $file, $line);
+            
+            $normalized_file = str_replace('\\', '/', $file);
+            $normalized_path = defined('VGT_WPDESK_PATH') ? str_replace('\\', '/', VGT_WPDESK_PATH) : '';
+            
+            if (!empty($normalized_path) && str_contains($normalized_file, $normalized_path)) {
+                throw new \ErrorException($msg, 0, $sev, $file, $line);
+            }
+            return false;
         });
 
         try {
@@ -523,7 +530,7 @@ final class VGTSecurityCenter {
             "IssueDate" => gmdate("Y-m-d\TH:i:s\Z"),
             "ValidUntil" => gmdate("Y-m-d\TH:i:s\Z", strtotime('+1 year')),
             "ScoreRaw" => 0,
-            "ScoreMax" => 33, // 33 gehärtete Parameterprüfungen
+            "ScoreMax" => 29, // 29 gehärtete Parameterprüfungen
             "ScorePercent" => 0,
             "AchievedTier" => 1,
             "TierName" => "VULNERABLE",
@@ -851,6 +858,12 @@ final class VGTSecurityCenter {
         // ==========================================
         // FINALE SCORE-BERECHNUNG & AUDITIERUNG
         // ==========================================
+        $total_checks = 0;
+        foreach ($results['SystemVectors'] as $phase => $checks) {
+            $total_checks += count($checks);
+        }
+        $results['ScoreMax'] = $total_checks;
+
         $results['ScoreRaw'] = $points;
         $percent = (int) round(($points / $results['ScoreMax']) * 100);
         $results['ScorePercent'] = $percent;

@@ -40,7 +40,14 @@ ini_set('display_errors', '0');              // Sichtbare Fehlerausgabe für Use
 error_reporting(E_ALL);                      // Internes Fehler-Reporting auf Maximum gesetzt
 set_error_handler(static function(int $sev, string $msg, string $file, int $line): bool {
     if (!(error_reporting() & $sev)) return false;
-    throw new ErrorException($msg, 0, $sev, $file, $line);
+    
+    $normalized_file = str_replace('\\', '/', $file);
+    $normalized_path = str_replace('\\', '/', __DIR__);
+    
+    if (str_contains($normalized_file, $normalized_path)) {
+        throw new ErrorException($msg, 0, $sev, $file, $line);
+    }
+    return false;
 });
 
 /**
@@ -71,7 +78,8 @@ final class CoreEngine
         // Sicherheits-Header injizieren (Section 3.3 Compliance)
         if (!headers_sent()) {
             header('X-Content-Type-Options: nosniff');
-            header('X-Frame-Options: DENY');
+            header('X-Frame-Options: SAMEORIGIN');
+            header("Content-Security-Policy: frame-ancestors 'self'");
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('Referrer-Policy: strict-origin-when-cross-origin');
             header('X-XSS-Protection: 0'); // Explizit deaktiviert, da veraltet/kontraproduktiv

@@ -117,6 +117,24 @@ trait WPDeskAJAXTrait
                 }
             } elseif ($type === 'wallpaper') {
                 $value = esc_url_raw($value);
+                // Hardening: Enforce same-origin, wp-content/uploads, or data: presets
+                $site_host = parse_url(site_url(), PHP_URL_HOST);
+                $value_host = parse_url($value, PHP_URL_HOST);
+                $upload_dir = wp_upload_dir();
+                $upload_host = parse_url($upload_dir['baseurl'] ?? '', PHP_URL_HOST);
+                
+                $is_same_origin = (
+                    empty($value_host) || 
+                    $value_host === $site_host || 
+                    $value_host === $upload_host || 
+                    str_starts_with($value, 'data:image/') || 
+                    str_starts_with($value, '/') ||
+                    str_contains($value, '/wp-content/uploads/')
+                );
+                
+                if (!$is_same_origin) {
+                    throw new ValidationException('Wallpaper-URL muss Same-Origin, aus der WordPress-Mediathek oder eine lokale Ressource sein.');
+                }
             } else {
                 $value = sanitize_key($value);
             }
@@ -789,7 +807,8 @@ trait WPDeskAJAXTrait
             global $wpdb;
             $tables = $wpdb->get_col("SHOW TABLES");
             foreach ($tables as $table) {
-                $wpdb->query("OPTIMIZE TABLE `$table`");
+                $safe_table = '`' . str_replace('`', '``', $table) . '`';
+                $wpdb->query("OPTIMIZE TABLE {$safe_table}");
             }
             
             $wpdb->query("DELETE pm FROM {$wpdb->postmeta} pm LEFT JOIN {$wpdb->posts} p ON pm.post_id = p.ID WHERE p.ID IS NULL");
