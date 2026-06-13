@@ -637,7 +637,7 @@ EOT;
 
     private function ip_in_range(string $ip, string $range): bool {
         if (strpos($range, '/') === false) {
-        $range .= filter_var($range, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? '/128' : '/32';
+            $range .= '/32';
         }
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) && filter_var(explode('/', $range)[0], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             list($subnet, $bits) = explode('/', $range);
