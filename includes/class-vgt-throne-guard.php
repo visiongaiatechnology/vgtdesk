@@ -49,6 +49,40 @@ final class MasterUserControlPlugin {
         'edit_users', 'delete_users', 'create_users', 'promote_users'
     ];
 
+    private const CLOUDFLARE_IPS = [
+        '173.245.48.0/20',
+        '103.21.244.0/22',
+        '103.22.200.0/22',
+        '103.31.4.0/22',
+        '141.101.64.0/18',
+        '108.162.192.0/18',
+        '190.93.240.0/20',
+        '188.114.96.0/20',
+        '197.234.240.0/22',
+        '198.41.128.0/17',
+        '162.158.0.0/15',
+        '104.16.0.0/13',
+        '104.24.0.0/14',
+        '172.64.0.0/13',
+        '131.0.72.0/22',
+        '2400:cb00::/32',
+        '2606:4700::/32',
+        '2803:f800::/32',
+        '2405:b500::/32',
+        '2405:8100::/32',
+        '2a06:98c0::/29',
+        '2c0f:f248::/32'
+    ];
+
+    private const PRIVATE_IPS = [
+        '127.0.0.0/8',
+        '::1',
+        '10.0.0.0/8',
+        '172.16.0.0/12',
+        '192.168.0.0/16',
+        'fc00::/7'
+    ];
+
     public static function get_instance(): ?self {
         return self::$instance;
     }
@@ -565,13 +599,79 @@ EOT;
     }
 
     private function get_hardened_ip(): string {
-        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-        if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
-            $ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
-        } elseif (!empty($_SERVER['HTTP_X_REAL_IP'])) {
-            $ip = $_SERVER['HTTP_X_REAL_IP'];
+        $remote_ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $ip = $remote_ip;
+        
+        if ($this->is_trusted_proxy($remote_ip)) {
+            if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+                $ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
+            } elseif (!empty($_SERVER['HTTP_X_REAL_IP'])) {
+                $ip = $_SERVER['HTTP_X_REAL_IP'];
+            }
         }
         return trim((string)$ip);
+    }
+
+    private function is_trusted_proxy(string $ip): bool {
+        foreach (self::CLOUDFLARE_IPS as $range) {
+            if ($this->ip_in_range($ip, $range)) {
+                return true;
+            }
+        }
+        foreach (self::PRIVATE_IPS as $range) {
+            if ($this->ip_in_range($ip, $range)) {
+                return true;
+            }
+        }
+        $custom_proxies = get_option('mcp_trusted_proxies', '');
+        if (!empty($custom_proxies)) {
+            $ranges = array_map('trim', explode(',', $custom_proxies));
+            foreach ($ranges as $range) {
+                if (!empty($range) && $this->ip_in_range($ip, $range)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private function ip_in_range(string $ip, string $range): bool {
+        if (strpos($range, '/') === false) {
+            $range .= '/32';
+        }
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) && filter_var(explode('/', $range)[0], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            list($subnet, $bits) = explode('/', $range);
+            $ip_dec = ip2long($ip);
+            $subnet_dec = ip2long($subnet);
+            $mask = ~((1 << (32 - $bits)) - 1);
+            if ($bits == 0) {
+                $mask = 0;
+            }
+            return ($ip_dec & $mask) === ($subnet_dec & $mask);
+        }
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) && filter_var(explode('/', $range)[0], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            list($subnet, $bits) = explode('/', $range);
+            $ip_bin = inet_pton($ip);
+            $subnet_bin = inet_pton($subnet);
+            if ($ip_bin === false || $subnet_bin === false) {
+                return false;
+            }
+            $bits = (int)$bits;
+            $mask = '';
+            for ($i = 0; $i < 16; $i++) {
+                if ($bits >= 8) {
+                    $mask .= chr(255);
+                    $bits -= 8;
+                } elseif ($bits > 0) {
+                    $mask .= chr(256 - (1 << (8 - $bits)));
+                    $bits = 0;
+                } else {
+                    $mask .= chr(0);
+                }
+            }
+            return ($ip_bin & $mask) === ($subnet_bin & $mask);
+        }
+        return false;
     }
 
     private function render_lock_screen(): void {
