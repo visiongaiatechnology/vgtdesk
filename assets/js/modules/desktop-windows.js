@@ -14,7 +14,6 @@ Object.assign(window.VGTDeskEngine, {
             return;
         }
 
-        // Maximale Sicherheit: Verhindert externe Open-Redirects
         try {
             const parsedUrl = new URL(cleanTargetUrl, window.location.origin);
             if (parsedUrl.origin !== window.location.origin) {
@@ -26,71 +25,82 @@ Object.assign(window.VGTDeskEngine, {
             return;
         }
 
-        const safeUrl = new URL(cleanTargetUrl);
+        const safeUrl = new URL(cleanTargetUrl, window.location.origin);
         safeUrl.searchParams.set('vgt_iframe', 'true');
+        const domId = String(id);
 
-        const escapedId = this.escapeHTML(id);
-        const escapedUrl = this.escapeHTML(safeUrl.toString());
+        const winEl = document.createElement('div');
+        winEl.id = `win-${domId}`;
+        winEl.className = 'window absolute vgt-window';
+        winEl.style.cssText = `width: 850px; height: 550px; top: 12%; left: 22%; z-index: ${this.activeZIndex + 5};`;
+        winEl.addEventListener('click', () => this.focusWindow(id));
 
-        // PATTERN 1.5.F — Render with placeholder and inject text via textContent post-construction
-        const windowHtml = `
-            <div id="win-${escapedId}" class="window absolute vgt-window" style="width: 850px; height: 550px; top: 12%; left: 22%; z-index: ${this.activeZIndex + 5};" onclick="VGTDeskEngine.focusWindow('${escapedId}')">
-                
-                <!-- 8 Resize Handles -->
-                <div class="resize-handle resize-handle-n" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 'n')"></div>
-                <div class="resize-handle resize-handle-s" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 's')"></div>
-                <div class="resize-handle resize-handle-e" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 'e')"></div>
-                <div class="resize-handle resize-handle-w" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 'w')"></div>
-                <div class="resize-handle resize-handle-nw" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 'nw')"></div>
-                <div class="resize-handle resize-handle-ne" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 'ne')"></div>
-                <div class="resize-handle resize-handle-sw" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 'sw')"></div>
-                <div class="resize-handle resize-handle-se" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 'se')"></div>
+        ['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se'].forEach((direction) => {
+            const handle = document.createElement('div');
+            handle.className = `resize-handle resize-handle-${direction}`;
+            handle.addEventListener('mousedown', (event) => this.startResize(event, id, direction));
+            winEl.appendChild(handle);
+        });
 
-                <!-- Titlebar -->
-                <div class="vgt-window-header cursor-move window-header">
-                    <div class="vgt-window-dots">
-                        <span class="vgt-window-dot dot-rose" onclick="VGTDeskEngine.closeWindow('${escapedId}')"></span>
-                        <span class="vgt-window-dot dot-amber" onclick="VGTDeskEngine.minimizeWindow('${escapedId}')"></span>
-                        <span class="vgt-window-dot dot-emerald" onclick="VGTDeskEngine.maximizeWindow('${escapedId}')"></span>
-                    </div>
-                    <span class="vgt-window-title"></span>
-                    <div class="vgt-window-badge-wrap">
-                        <div id="spinner-${escapedId}" class="spinner-vgt" style="display: block;"></div>
-                        <span class="vgt-badge-item vgt-accent-badge-item">Dynamic</span>
-                    </div>
-                </div>
-                <!-- Iframe Box -->
-                <div class="flex-1 iframe-container relative">
-                    <div class="drag-overlay absolute inset-0 hidden z-50 bg-transparent"></div>
-                    <iframe 
-                        id="iframe-${escapedId}" 
-                        src="${escapedUrl}" 
-                        data-src="${escapedUrl}"
-                        data-loaded="true"
-                        onload="window.VGTDeskEngine && VGTDeskEngine.handleIframeLoaded('${escapedId}')">
-                    </iframe>
-                </div>
-            </div>
-        `;
+        const header = document.createElement('div');
+        header.className = 'vgt-window-header cursor-move window-header';
 
-        container.insertAdjacentHTML('beforeend', windowHtml);
-        
-        const winEl = document.getElementById(`win-${escapedId}`);
-        if (winEl) {
-            winEl.querySelector('.vgt-window-title').textContent = title;
-            this.attachSnapMenuListeners(winEl);
-        }
+        const dots = document.createElement('div');
+        dots.className = 'vgt-window-dots';
+        [
+            ['dot-rose', () => this.closeWindow(id)],
+            ['dot-amber', () => this.minimizeWindow(id)],
+            ['dot-emerald', () => this.maximizeWindow(id)]
+        ].forEach(([className, handler]) => {
+            const dot = document.createElement('span');
+            dot.className = `vgt-window-dot ${className}`;
+            dot.addEventListener('click', (event) => {
+                event.stopPropagation();
+                handler();
+            });
+            dots.appendChild(dot);
+        });
+
+        const titleEl = document.createElement('span');
+        titleEl.className = 'vgt-window-title';
+        titleEl.textContent = title;
+
+        const badgeWrap = document.createElement('div');
+        badgeWrap.className = 'vgt-window-badge-wrap';
+        const spinner = document.createElement('div');
+        spinner.id = `spinner-${domId}`;
+        spinner.className = 'spinner-vgt';
+        spinner.style.display = 'block';
+        const badge = document.createElement('span');
+        badge.className = 'vgt-badge-item vgt-accent-badge-item';
+        badge.textContent = 'Dynamic';
+        badgeWrap.append(spinner, badge);
+
+        header.append(dots, titleEl, badgeWrap);
+
+        const iframeBox = document.createElement('div');
+        iframeBox.className = 'flex-1 iframe-container relative';
+        const overlay = document.createElement('div');
+        overlay.className = 'drag-overlay absolute inset-0 hidden z-50 bg-transparent';
+        const iframe = document.createElement('iframe');
+        iframe.id = `iframe-${domId}`;
+        iframe.src = safeUrl.toString();
+        iframe.dataset.src = safeUrl.toString();
+        iframe.dataset.loaded = 'true';
+        iframe.addEventListener('load', () => this.handleIframeLoaded(id));
+        iframeBox.append(overlay, iframe);
+
+        winEl.append(header, iframeBox);
+        container.appendChild(winEl);
+        this.attachSnapMenuListeners(winEl);
 
         this.addDynamicTaskToDock(id, title);
 
         this.activeWindows[id] = true;
         this.minimizedWindows[id] = false;
 
-        this.makeWindowDraggable(document.getElementById(`win-${id}`));
-
-        // Übernehme benutzerdefinierte Fenster-Abmessungen falls bereits in den Meta-Daten existent
+        this.makeWindowDraggable(winEl);
         this.applySingleWindowSettings(id);
-
         this.focusWindow(id);
         this.showInTaskbar(id, true);
         this.updateDockIndicators();
@@ -100,25 +110,30 @@ Object.assign(window.VGTDeskEngine, {
         const taskBar = document.getElementById('vgt-dynamic-task-bar');
         if (!taskBar) return;
 
-        const escapedId = this.escapeHTML(id);
+        const domId = String(id);
+        const taskEl = document.createElement('div');
+        taskEl.className = 'vgt-dock-item';
+        taskEl.id = `dock-task-${domId}`;
+        taskEl.addEventListener('click', () => this.handleDockClick(id));
 
-        // PATTERN 1.5.F — Placeholders for user data to avoid innerHTML injection
-        const taskHtml = `
-            <div class="vgt-dock-item" id="dock-task-${escapedId}" onclick="VGTDeskEngine.handleDockClick('${escapedId}')">
-                <div class="vgt-dock-icon vgt-color-gradient-settings">
-                    <span class="vgt-icon-label" style="margin-top:0; padding:0; text-shadow:none;"></span>
-                </div>
-                <span class="vgt-dock-tooltip"></span>
-                <span class="vgt-dock-indicator" id="indicator-${escapedId}"></span>
-            </div>
-        `;
-        taskBar.insertAdjacentHTML('beforeend', taskHtml);
-        
-        const taskEl = document.getElementById(`dock-task-${escapedId}`);
-        if (taskEl) {
-            taskEl.querySelector('.vgt-icon-label').textContent = title.substring(0, 2).toUpperCase();
-            taskEl.querySelector('.vgt-dock-tooltip').textContent = title;
-        }
+        const icon = document.createElement('div');
+        icon.className = 'vgt-dock-icon vgt-color-gradient-settings';
+        const label = document.createElement('span');
+        label.className = 'vgt-icon-label';
+        label.style.cssText = 'margin-top:0; padding:0; text-shadow:none;';
+        label.textContent = title.substring(0, 2).toUpperCase();
+        icon.appendChild(label);
+
+        const tooltip = document.createElement('span');
+        tooltip.className = 'vgt-dock-tooltip';
+        tooltip.textContent = title;
+
+        const indicator = document.createElement('span');
+        indicator.className = 'vgt-dock-indicator';
+        indicator.id = `indicator-${domId}`;
+
+        taskEl.append(icon, tooltip, indicator);
+        taskBar.appendChild(taskEl);
     },
 
     handleDockClick(id) {

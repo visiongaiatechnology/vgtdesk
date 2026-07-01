@@ -831,7 +831,11 @@ Object.assign(window.VGTDeskEngine, {
 
         const item = document.createElement('div');
         item.className = 'vgt-context-menu-item';
-        item.innerHTML = `<span>${actionIcon}</span><span>${actionText}</span>`;
+        const iconSlot = document.createElement('span');
+        iconSlot.textContent = actionIcon;
+        const textSlot = document.createElement('span');
+        textSlot.textContent = actionText;
+        item.replaceChildren(iconSlot, textSlot);
         item.onclick = () => {
             this.togglePinApp(key, !isPinned);
             menu.remove();

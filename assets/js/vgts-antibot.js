@@ -103,15 +103,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (activeContainer.innerHTML.includes('Keine dynamischen Hooks aktiv.') || activeContainer.innerHTML.includes('No dynamic hooks active.')) {
                             activeContainer.innerHTML = '';
                         }
-                        
-                        const existingInput = document.querySelector(`input[name="vgts_config[antibot_custom_hooks][]"][value="${checkbox.value}"]`);
+                        const existingInput = Array.from(document.querySelectorAll('input[name="vgts_config[antibot_custom_hooks][]"]'))
+                            .find(input => input.value === checkbox.value);
                         if (!existingInput) {
-                            activeContainer.insertAdjacentHTML('beforeend', `
-                                <div class="vgts-hook-item">
-                                    <input type="checkbox" name="vgts_config[antibot_custom_hooks][]" value="${checkbox.value}" checked>
-                                    ${checkbox.value}
-                                </div>
-                            `);
+                            const item = document.createElement('div');
+                            item.className = 'vgts-hook-item';
+                            const input = document.createElement('input');
+                            input.type = 'checkbox';
+                            input.name = 'vgts_config[antibot_custom_hooks][]';
+                            input.value = checkbox.value;
+                            input.checked = true;
+                            item.append(input, document.createTextNode(` ${checkbox.value}`));
+                            activeContainer.appendChild(item);
                         }
                     }
                 }

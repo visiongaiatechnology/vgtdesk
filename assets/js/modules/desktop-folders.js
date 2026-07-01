@@ -118,52 +118,90 @@ Object.assign(window.VGTDeskEngine, {
         if (!folderData) return;
 
         const container = document.getElementById('vgt-dynamic-windows') || document.body;
-        
-        const escapedId = this.escapeHTML(winId);
-        const escapedFolderId = this.escapeHTML(folderId);
 
-        const windowHtml = `
-            <div id="win-${escapedId}" class="window absolute vgt-window folder-window" style="width: 500px; height: 350px; top: 20%; left: 30%; z-index: ${this.activeZIndex + 5};" onclick="VGTDeskEngine.focusWindow('${escapedId}')">
-                
-                <!-- Resize Handles -->
-                <div class="resize-handle resize-handle-n" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 'n')"></div>
-                <div class="resize-handle resize-handle-s" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 's')"></div>
-                <div class="resize-handle resize-handle-e" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 'e')"></div>
-                <div class="resize-handle resize-handle-w" onmousedown="VGTDeskEngine.startResize(event, '${escapedId}', 'w')"></div>
-                
-                <!-- Titlebar -->
-                <div class="vgt-window-header cursor-move window-header">
-                    <div class="vgt-window-dots">
-                        <span class="vgt-window-dot dot-rose" onclick="VGTDeskEngine.closeWindow('${escapedId}')"></span>
-                        <span class="vgt-window-dot dot-amber" onclick="VGTDeskEngine.minimizeWindow('${escapedId}')"></span>
-                        <span class="vgt-window-dot dot-emerald" onclick="VGTDeskEngine.maximizeWindow('${escapedId}')"></span>
-                    </div>
-                    <span class="vgt-window-title"></span>
-                    <div class="vgt-window-badge-wrap" style="display:flex; align-items:center; gap:8px;">
-                        <button class="vgt-folder-rename-btn" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:12px;" onclick="VGTDeskEngine.renameFolder('${escapedFolderId}')">✏️</button>
-                        <button class="vgt-folder-delete-btn" style="background:none; border:none; color:#f43f5e; cursor:pointer; font-size:12px;" onclick="VGTDeskEngine.deleteFolder('${escapedFolderId}')">🗑️</button>
-                        <span class="vgt-badge-item vgt-accent-badge-item">Ordner</span>
-                    </div>
-                </div>
-                <!-- Body -->
-                <div class="vgt-window-body folder-window-body" style="padding: 20px; overflow-y: auto;">
-                    <div class="folder-apps-grid" id="folder-grid-${escapedFolderId}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 16px;">
-                    </div>
-                </div>
-            </div>
-        `;
+        const winEl = document.createElement('div');
+        winEl.id = `win-${winId}`;
+        winEl.className = 'window absolute vgt-window folder-window';
+        winEl.style.cssText = `width: 500px; height: 350px; top: 20%; left: 30%; z-index: ${this.activeZIndex + 5};`;
+        winEl.addEventListener('click', () => this.focusWindow(winId));
 
-        container.insertAdjacentHTML('beforeend', windowHtml);
-        
-        const winEl = document.getElementById(`win-${escapedId}`);
-        if (winEl) {
-            winEl.querySelector('.vgt-window-title').textContent = folderData.title;
-            this.makeWindowDraggable(winEl);
-        }
+        ['n', 's', 'e', 'w'].forEach((direction) => {
+            const handle = document.createElement('div');
+            handle.className = `resize-handle resize-handle-${direction}`;
+            handle.addEventListener('mousedown', (event) => this.startResize(event, winId, direction));
+            winEl.appendChild(handle);
+        });
 
+        const header = document.createElement('div');
+        header.className = 'vgt-window-header cursor-move window-header';
+
+        const dots = document.createElement('div');
+        dots.className = 'vgt-window-dots';
+        [
+            ['dot-rose', () => this.closeWindow(winId)],
+            ['dot-amber', () => this.minimizeWindow(winId)],
+            ['dot-emerald', () => this.maximizeWindow(winId)]
+        ].forEach(([className, handler]) => {
+            const dot = document.createElement('span');
+            dot.className = `vgt-window-dot ${className}`;
+            dot.addEventListener('click', (event) => {
+                event.stopPropagation();
+                handler();
+            });
+            dots.appendChild(dot);
+        });
+
+        const titleEl = document.createElement('span');
+        titleEl.className = 'vgt-window-title';
+        titleEl.textContent = folderData.title;
+
+        const badgeWrap = document.createElement('div');
+        badgeWrap.className = 'vgt-window-badge-wrap';
+        badgeWrap.style.cssText = 'display:flex; align-items:center; gap:8px;';
+
+        const rename = document.createElement('button');
+        rename.className = 'vgt-folder-rename-btn';
+        rename.type = 'button';
+        rename.style.cssText = 'background:none; border:none; color:#94a3b8; cursor:pointer; font-size:12px;';
+        rename.textContent = 'Edit';
+        rename.addEventListener('click', (event) => {
+            event.stopPropagation();
+            this.renameFolder(folderId);
+        });
+
+        const remove = document.createElement('button');
+        remove.className = 'vgt-folder-delete-btn';
+        remove.type = 'button';
+        remove.style.cssText = 'background:none; border:none; color:#f43f5e; cursor:pointer; font-size:12px;';
+        remove.textContent = 'Delete';
+        remove.addEventListener('click', (event) => {
+            event.stopPropagation();
+            this.deleteFolder(folderId);
+        });
+
+        const badge = document.createElement('span');
+        badge.className = 'vgt-badge-item vgt-accent-badge-item';
+        badge.textContent = 'Ordner';
+        badgeWrap.append(rename, remove, badge);
+
+        header.append(dots, titleEl, badgeWrap);
+
+        const body = document.createElement('div');
+        body.className = 'vgt-window-body folder-window-body';
+        body.style.cssText = 'padding: 20px; overflow-y: auto;';
+
+        const grid = document.createElement('div');
+        grid.className = 'folder-apps-grid';
+        grid.id = `folder-grid-${folderId}`;
+        grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 16px;';
+        body.appendChild(grid);
+
+        winEl.append(header, body);
+        container.appendChild(winEl);
+
+        this.makeWindowDraggable(winEl);
         this.activeWindows[winId] = true;
         this.minimizedWindows[winId] = false;
-        
         this.focusWindow(winId);
         this.renderFolderContents(folderId);
     },

@@ -106,6 +106,59 @@ Object.assign(window.VGTDeskEngine, {
         }
     },
 
+    getWorkspaceMetrics() {
+        const workspace = document.getElementById('desktop-workspace');
+        if (!workspace) return null;
+        const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
+        const rect = workspace.getBoundingClientRect();
+        return {
+            workspace,
+            zoom,
+            width: rect.width / zoom,
+            height: rect.height / zoom
+        };
+    },
+
+    clampWidgetToWorkspace(widget) {
+        const metrics = this.getWorkspaceMetrics();
+        if (!metrics || !widget || widget.style.display === 'none') return;
+
+        const rect = widget.getBoundingClientRect();
+        const widgetWidth = Math.max(160, rect.width / metrics.zoom);
+        const widgetHeight = Math.max(120, rect.height / metrics.zoom);
+        const maxLeft = Math.max(10, metrics.width - widgetWidth - 10);
+        const maxTop = Math.max(10, metrics.height - widgetHeight - 10);
+
+        let left;
+        if (widget.style.left && widget.style.left !== 'auto') {
+            left = parseFloat(widget.style.left);
+        } else if (widget.style.right && widget.style.right !== 'auto') {
+            left = metrics.width - parseFloat(widget.style.right) - widgetWidth;
+        } else {
+            left = Math.min(maxLeft, Math.max(10, rect.left / metrics.zoom));
+        }
+
+        let top;
+        if (widget.style.top && widget.style.top !== 'auto') {
+            top = parseFloat(widget.style.top);
+        } else if (widget.style.bottom && widget.style.bottom !== 'auto') {
+            top = metrics.height - parseFloat(widget.style.bottom) - widgetHeight;
+        } else {
+            top = Math.min(maxTop, Math.max(10, rect.top / metrics.zoom));
+        }
+
+        left = Math.min(maxLeft, Math.max(10, Number.isFinite(left) ? left : 10));
+        top = Math.min(maxTop, Math.max(10, Number.isFinite(top) ? top : 10));
+
+        widget.style.left = `${left}px`;
+        widget.style.top = `${top}px`;
+        widget.style.right = 'auto';
+        widget.style.bottom = 'auto';
+    },
+
+    normalizeWidgetsToViewport() {
+        document.querySelectorAll('.vgt-widget').forEach(widget => this.clampWidgetToWorkspace(widget));
+    },
     initWidgetDraggables() {
         const widgets = document.querySelectorAll('.vgt-widget');
         const workspace = document.getElementById('desktop-workspace');
