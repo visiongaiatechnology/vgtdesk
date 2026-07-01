@@ -1106,17 +1106,31 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const activeFields = fields.filter(f => f.type !== 'step_break' && f.type !== 'image' && f.type !== 'video' && f.type !== 'heading' && f.type !== 'paragraph');
 
-        let headersHTML = `<th>Eingegangen am</th>`;
-        activeFields.forEach(f => {
-            headersHTML += `<th>${f.label}</th>`;
-        });
-        headersHTML += `<th>Host IP (Socket)</th>`;
-        headersHTML += `<th class="text-right">Purge</th>`;
-        headersRow.innerHTML = headersHTML;
+        const appendHeader = (text, className = '') => {
+            const th = document.createElement('th');
+            th.textContent = text;
+            if (className) th.className = className;
+            headersRow.appendChild(th);
+        };
+        appendHeader('Eingegangen am');
+        activeFields.forEach(f => appendHeader(String(f.label || f.id || 'Field')));
+        appendHeader('Host IP (Socket)');
+        appendHeader('Purge', 'text-right');
 
         // Fetch submissions via AJAX (RAM decryption endpoint)
         const tbody = document.getElementById('vgt-subs-table-body');
-        tbody.innerHTML = `<tr><td colspan="${activeFields.length + 3}" class="vgt-mono" style="text-align:center; padding:3rem;">Decrypting packets inside memory (RAM)...</td></tr>`;
+        const setTableMessage = (message, className = 'vgt-mono') => {
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.colSpan = activeFields.length + 3;
+            cell.className = className;
+            cell.style.textAlign = 'center';
+            cell.style.padding = '3rem';
+            cell.textContent = message;
+            row.appendChild(cell);
+            tbody.replaceChildren(row);
+        };
+        setTableMessage('Decrypting packets inside memory (RAM)...');
 
         const formData = new FormData();
         formData.append('action', 'vgt_get_submissions');
@@ -1135,7 +1149,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 tbody.innerHTML = '';
 
                 if (subs.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="${activeFields.length + 3}" class="vgt-mono" style="text-align:center; padding:3rem; color:var(--vgt-text-muted);">No records registered.</td></tr>`;
+                    setTableMessage('No records registered.', 'vgt-mono');
+                    tbody.querySelector('td').style.color = 'var(--vgt-text-muted)';
                     return;
                 }
 
@@ -1230,10 +1245,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } else {
-                tbody.innerHTML = `<tr><td colspan="${activeFields.length + 3}" class="vgt-mono text-red" style="text-align:center; padding:3rem;">Failed to decrypt payload records. GCM integrity check failed.</td></tr>`;
+                setTableMessage('Failed to decrypt payload records. GCM integrity check failed.', 'vgt-mono text-red');
             }
         } catch (error) {
-            tbody.innerHTML = `<tr><td colspan="${activeFields.length + 3}" class="vgt-mono text-red" style="text-align:center; padding:3rem;">Connection architecture error. Decryption halted.</td></tr>`;
+            setTableMessage('Connection architecture error. Decryption halted.', 'vgt-mono text-red');
         }
     };
 

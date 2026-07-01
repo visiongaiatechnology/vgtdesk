@@ -143,7 +143,7 @@ class VGTS_Dashboard_Core {
             update_option('vgts_config', array_merge($current, $new));
             
             $request_uri = isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : admin_url('admin.php?page=vgts-sentinel');
-            wp_redirect(add_query_arg('settings-updated', 'true', $request_uri));
+            wp_safe_redirect(add_query_arg('settings-updated', 'true', $request_uri));
             exit;
         }
     }

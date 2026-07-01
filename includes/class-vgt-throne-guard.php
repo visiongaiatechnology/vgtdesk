@@ -852,7 +852,7 @@ EOT;
 
         if (empty($superkey_hash) || !password_verify($provided_key, $superkey_hash)) {
             sleep(2); 
-            wp_redirect(admin_url('?mcp_locked=1&mcp_error=1'));
+            wp_safe_redirect(admin_url('?mcp_locked=1&mcp_error=1'));
             exit;
         }
 
@@ -878,7 +878,7 @@ EOT;
             'samesite' => 'Strict'
         ]);
 
-        wp_redirect(admin_url());
+        wp_safe_redirect(admin_url());
         exit;
     }
 
@@ -1089,12 +1089,12 @@ EOT;
                 }
             }
             
-            wp_redirect(admin_url('admin.php?page=mcp-dashboard&success=1'));
+            wp_safe_redirect(admin_url('admin.php?page=mcp-dashboard&success=1'));
             exit;
 
         } catch (ValidationException|SecurityException|StorageException $e) {
             error_log('[SEC/HARDENING] ' . $e->getMessage());
-            wp_redirect(admin_url('admin.php?page=mcp-dashboard&error=1'));
+            wp_safe_redirect(admin_url('admin.php?page=mcp-dashboard&error=1'));
             exit;
         }
     }
@@ -1129,12 +1129,12 @@ EOT;
             $new_hash = password_hash($new_superkey, PASSWORD_DEFAULT);
             update_user_meta($user_id, 'mcp_superkey_hash', $new_hash);
 
-            wp_redirect(admin_url('admin.php?page=mcp-dashboard&success=1'));
+            wp_safe_redirect(admin_url('admin.php?page=mcp-dashboard&success=1'));
             exit;
 
         } catch (ValidationException|SecurityException $e) {
             error_log('[SEC/SUPERKEY] ' . $e->getMessage());
-            wp_redirect(admin_url('admin.php?page=mcp-dashboard&error=1'));
+            wp_safe_redirect(admin_url('admin.php?page=mcp-dashboard&error=1'));
             exit;
         }
     }
@@ -1177,7 +1177,7 @@ EOT;
             }
             $wpdb->query('COMMIT');
             
-            wp_redirect(admin_url('admin.php?page=mcp-dashboard&success=1'));
+            wp_safe_redirect(admin_url('admin.php?page=mcp-dashboard&success=1'));
             exit;
 
         } catch (ValidationException $e) {
@@ -1273,7 +1273,7 @@ EOT;
             }
 
             chmod($destination, 0600);
-            wp_redirect(admin_url('admin.php?page=mcp-dashboard&upload=success'));
+            wp_safe_redirect(admin_url('admin.php?page=mcp-dashboard&upload=success'));
             exit;
 
         } catch (ValidationException $e) {

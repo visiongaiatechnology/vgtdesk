@@ -40,6 +40,7 @@ if (file_exists(VGT_WPDESK_PATH . 'includes/trait-vgt-ajax-handlers.php')) {
 }
 
 // Lade modulare Core-Klassen
+require_once VGT_WPDESK_PATH . 'includes/core/class-vgt-wpdesk-security.php';
 require_once VGT_WPDESK_PATH . 'includes/core/class-vgt-wpdesk-settings.php';
 require_once VGT_WPDESK_PATH . 'includes/core/class-vgt-wpdesk-app-builder.php';
 require_once VGT_WPDESK_PATH . 'includes/core/class-vgt-wpdesk-plugin.php';

@@ -22,7 +22,7 @@ final class VGT_Dashboard_Desk {
         if (class_exists('VGT_Aggregator_Desk')) {
             VGT_Aggregator_Desk::run_rollup();
         }
-        wp_redirect(admin_url('admin.php?page=vgt-dattrack'));
+        wp_safe_redirect(admin_url('admin.php?page=vgt-dattrack'));
         exit;
     }
 

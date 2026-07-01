@@ -9,8 +9,8 @@ if (!defined('ABSPATH')) {
 
 /**
  * MODULE CONTROLLER: WPDeskPlugin
- * STATUS: 💠 DIAMANT VGT SUPREME
- * Zentraler Boot-Controller und Hook-Manager für das Slim Desktop-System.
+ * STATUS: ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â  DIAMANT VGT SUPREME
+ * Zentraler Boot-Controller und Hook-Manager fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼r das Slim Desktop-System.
  */
 final class WPDeskPlugin
 {
@@ -19,7 +19,7 @@ final class WPDeskPlugin
     private static ?self $instance = null;
     private array $apps = [];
 
-    // Erlaubte Konfigurations-Werte für Strict-Whitelisting
+    // Erlaubte Konfigurations-Werte fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼r Strict-Whitelisting
     private const ALLOWED_ACCENT_COLORS = ['indigo', 'emerald', 'cyan', 'amber', 'rose', 'gold', 'purple', 'violet', 'neon'];
 
     public static function getInstance(): self
@@ -32,7 +32,7 @@ final class WPDeskPlugin
 
     private function __construct()
     {
-        // PATTERN 1.5.C — Separation of internal reporting vs. display
+        // PATTERN 1.5.C ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Separation of internal reporting vs. display
         ini_set('display_errors', '0');              // User-visible output suppressed
         error_reporting(E_ALL);                      // Internal sensitivity maximum
         set_error_handler(static function(int $sev, string $msg, string $file, int $line): bool {
@@ -82,7 +82,7 @@ final class WPDeskPlugin
         }
 
         add_action('plugins_loaded', function() {
-            if (!defined('VIS_VERSION') && !class_exists('VisionGaia\\WPDesk\\VGT_Dattrack_Engine')) {
+            if (!WPDeskSecurity::is_sentinel_v7_active() && !class_exists('VisionGaia\\WPDesk\\VGT_Dattrack_Engine')) {
                 if (file_exists(VGT_WPDESK_PATH . 'includes/modules/dattrack/class-dattrack-engine.php')) {
                     require_once VGT_WPDESK_PATH . 'includes/modules/dattrack/class-dattrack-engine.php';
                     VGT_Dattrack_Engine::boot();
@@ -297,21 +297,20 @@ final class WPDeskPlugin
 
         global $wpdb;
         $bans_count = 0;
-
-        // Check Sentinel V5/CE Bans
+        // Check Sentinel CE and V7 bans through the same table-existence gate.
         $table_bans_v5 = $wpdb->prefix . 'vgts_apex_bans';
-        if ($wpdb->get_var("SHOW TABLES LIKE '$table_bans_v5'") === $table_bans_v5) {
+        if (WPDeskSecurity::table_exists($table_bans_v5)) {
             $bans_count += (int) $wpdb->get_var("SELECT COUNT(*) FROM $table_bans_v5");
         }
 
-        // Check Sentinel V7 Bans
         $table_bans_v7 = $wpdb->prefix . 'vis_apex_bans';
-        if ($wpdb->get_var("SHOW TABLES LIKE '$table_bans_v7'") === $table_bans_v7) {
+        if (WPDeskSecurity::table_exists($table_bans_v7)) {
             $bans_count += (int) $wpdb->get_var("SELECT COUNT(*) FROM $table_bans_v7");
         }
 
-        $sentinel_v7_active = defined('VIS_VERSION');
-        $sentinel_active = (get_option('vgt_sentinel_enabled') === 'true') || $sentinel_v7_active;
+        $sentinel_state = WPDeskSecurity::sentinel_state();
+        $sentinel_v7_active = $sentinel_state['v7_active'];
+        $sentinel_active = $sentinel_state['active'];
 
         wp_localize_script('vgt-desktop-core', 'vgtConfig', [
             'ajaxUrl'      => admin_url('admin-ajax.php'),
@@ -322,7 +321,8 @@ final class WPDeskPlugin
             'sentinelEnabled' => $sentinel_active,
             'sentinelBans'    => $bans_count,
             'isSentinelV7'    => $sentinel_v7_active,
-            'superkeyActive'  => !empty(get_user_meta($user_id, 'mcp_superkey_hash', true)) || !empty(get_option('mcp_superkey_hash', '')),
+            'sentinelMode'    => $sentinel_state['mode'],
+            'superkeyActive'  => WPDeskSecurity::throne_guard_active(),
             'dattrackEnabled' => !$sentinel_v7_active && (get_option('vgt_dattrack_enabled') === 'true'),
             'apps'            => $this->apps
         ]);
@@ -342,7 +342,7 @@ final class WPDeskPlugin
         if (isset($_GET['vgt_action']) && $user_id) {
             $nonce = $_GET['_wpnonce'] ?? '';
             if (!wp_verify_nonce($nonce, 'vgt_toggle_desktop')) {
-                wp_die(esc_html__('Sicherheitsüberprüfung (CSRF-Schutz) fehlgeschlagen.', 'vgt-wp-desk'), '', ['response' => 403]);
+                wp_die(esc_html__('SicherheitsÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼berprÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼fung (CSRF-Schutz) fehlgeschlagen.', 'vgt-wp-desk'), '', ['response' => 403]);
             }
 
             $cookie_options = [
@@ -551,7 +551,7 @@ final class WPDeskPlugin
                 color: #cbd5e1 !important;
             }
 
-            /* Menüs (nav-menus.php) Screen Fixes */
+            /* MenÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼s (nav-menus.php) Screen Fixes */
             #nav-menus-frame, #menu-settings-column, .posttypediv, .postboxes-column, .postbox, 
             .accordion-container, .accordion-section, .accordion-section-title, .accordion-trigger,
             .accordion-section-content, .menu-item-bar, .menu-item-handle, .menu-item-settings, .nav-menu-header, 
@@ -616,7 +616,7 @@ final class WPDeskPlugin
         }
 
         if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Zu dieser Aktion besitzen Sie nicht genügend Rechte.', 'vgt-wp-desk'));
+            wp_die(esc_html__('Zu dieser Aktion besitzen Sie nicht genÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼gend Rechte.', 'vgt-wp-desk'));
         }
 
         $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : 'vgt-security-center';
@@ -697,7 +697,7 @@ final class WPDeskPlugin
     public function render_recovery_center(): void
     {
         if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Zu dieser Aktion besitzen Sie nicht genügend Rechte.', 'vgt-wp-desk'));
+            wp_die(esc_html__('Zu dieser Aktion besitzen Sie nicht genÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼gend Rechte.', 'vgt-wp-desk'));
         }
 
         $message = '';
@@ -706,9 +706,9 @@ final class WPDeskPlugin
         if (isset($_GET['vgt_recovery_msg'])) {
             $msg_key = sanitize_key($_GET['vgt_recovery_msg']);
             if ($msg_key === 'force_classic') {
-                $message = 'Klassische Ansicht wurde erzwungen (Bypass Cookie für 30 Tage gesetzt).';
+                $message = 'Klassische Ansicht wurde erzwungen (Bypass Cookie fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼r 30 Tage gesetzt).';
             } elseif ($msg_key === 'disable_redirect') {
-                $message = 'Auto-Redirect wurde für Ihren Account deaktiviert.';
+                $message = 'Auto-Redirect wurde fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼r Ihren Account deaktiviert.';
             } elseif ($msg_key === 'disable_dattrack') {
                 $message = 'Dattrack Telemetrie wurde global deaktiviert.';
             }
@@ -717,7 +717,7 @@ final class WPDeskPlugin
         if (isset($_GET['vgt_recovery_err'])) {
             $err_key = sanitize_key($_GET['vgt_recovery_err']);
             if ($err_key === 'invalid_nonce') {
-                $error = 'Ungültiger CSRF Token.';
+                $error = 'UngÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼ltiger CSRF Token.';
             }
         }
 
@@ -738,8 +738,9 @@ final class WPDeskPlugin
         if (empty($superkey_hash)) {
             $superkey_hash = get_option('mcp_superkey_hash', '');
         }
-        $sentinel_v7_active = defined('VIS_VERSION');
-        
+        $sentinel_state = WPDeskSecurity::sentinel_state();
+        $sentinel_v7_active = $sentinel_state['v7_active'];
+
         $diagnostics = [
             'timestamp' => current_time('mysql'),
             'wp_version' => get_bloginfo('version'),
@@ -751,10 +752,11 @@ final class WPDeskPlugin
             ],
             'plugins' => $active_plugins,
             'throne_guard' => [
-                'active' => !empty($superkey_hash),
+                'active' => WPDeskSecurity::throne_guard_active(),
             ],
             'sentinel' => [
-                'enabled' => get_option('vgt_sentinel_enabled') === 'true',
+                'enabled' => $sentinel_state['active'],
+                'mode' => $sentinel_state['mode'],
                 'v7_active' => $sentinel_v7_active
             ],
             'dattrack' => [

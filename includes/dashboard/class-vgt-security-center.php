@@ -60,8 +60,13 @@ final class VGTSecurityCenter {
         if (isset($_POST['vgt_activate_sentinel'])) {
             $nonce = $_POST['_wpnonce'] ?? '';
             if (wp_verify_nonce($nonce, 'vgt_activate_sentinel_action') && current_user_can('manage_options')) {
-                update_option('vgt_sentinel_enabled', 'true');
-                wp_redirect(admin_url('admin.php?page=vgt-security-center&view=sentinel'));
+                if (class_exists(WPDeskSecurity::class) && WPDeskSecurity::is_sentinel_v7_active()) {
+                    update_option('vgt_sentinel_enabled', 'false', false);
+                    wp_safe_redirect(admin_url('admin.php?page=vgt-suite'));
+                } else {
+                    update_option('vgt_sentinel_enabled', 'true', false);
+                    wp_safe_redirect(admin_url('admin.php?page=vgt-security-center&view=sentinel'));
+                }
                 exit;
             }
         }
@@ -81,11 +86,11 @@ final class VGTSecurityCenter {
 
         if (defined('VIS_VERSION')) {
             if ($page === 'vgts-sentinel') {
-                wp_redirect(admin_url('admin.php?page=vgt-suite'));
+                wp_safe_redirect(admin_url('admin.php?page=vgt-suite'));
                 exit;
             }
             if ($page === 'vgt-dattrack') {
-                wp_redirect(admin_url('admin.php?page=vision-legal-pro'));
+                wp_safe_redirect(admin_url('admin.php?page=vision-legal-pro'));
                 exit;
             }
         }
@@ -98,7 +103,7 @@ final class VGTSecurityCenter {
             $query_args['view'] = $view;
 
             $redirect_url = add_query_arg($query_args, admin_url('admin.php'));
-            wp_redirect($redirect_url);
+            wp_safe_redirect($redirect_url);
             exit;
         }
     }
@@ -136,11 +141,11 @@ final class VGTSecurityCenter {
         
         if (defined('VIS_VERSION')) {
             if ($view === 'sentinel') {
-                wp_redirect(admin_url('admin.php?page=vgt-suite'));
+                wp_safe_redirect(admin_url('admin.php?page=vgt-suite'));
                 exit;
             }
             if ($view === 'dattrack') {
-                wp_redirect(admin_url('admin.php?page=vision-legal-pro'));
+                wp_safe_redirect(admin_url('admin.php?page=vision-legal-pro'));
                 exit;
             }
         }
@@ -336,11 +341,21 @@ final class VGTSecurityCenter {
     private function render_overview_dashboard(): void {
         global $wpdb;
 
-        // Fetch Sentinel Bans count
+        $sentinel_state = class_exists(WPDeskSecurity::class)
+            ? WPDeskSecurity::sentinel_state()
+            : [
+                'v7_active' => defined('VIS_VERSION'),
+                'ce_enabled' => get_option('vgt_sentinel_enabled') === 'true',
+                'active' => defined('VIS_VERSION') || get_option('vgt_sentinel_enabled') === 'true',
+                'mode' => defined('VIS_VERSION') ? 'v7' : (get_option('vgt_sentinel_enabled') === 'true' ? 'ce' : 'none'),
+            ];
+
+        // Fetch Sentinel Bans count from CE and V7 stores.
         $sentinel_bans = 0;
-        $table_bans = $wpdb->prefix . 'vgts_apex_bans';
-        if ($wpdb->get_var("SHOW TABLES LIKE '$table_bans'") === $table_bans) {
-            $sentinel_bans = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table_bans");
+        foreach ([$wpdb->prefix . 'vgts_apex_bans', $wpdb->prefix . 'vis_apex_bans'] as $table_bans) {
+            if (class_exists(WPDeskSecurity::class) && WPDeskSecurity::table_exists($table_bans)) {
+                $sentinel_bans += (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table_bans}");
+            }
         }
 
         // Fetch Dattrack Events count
@@ -350,9 +365,13 @@ final class VGTSecurityCenter {
             $dattrack_events = (int) $wpdb->get_var("SELECT SUM(events) FROM $table_dt");
         }
 
-        $sentinel_active = (get_option('vgt_sentinel_enabled') === 'true') || defined('VIS_VERSION');
-        $throne_guard_active = !empty(get_user_meta(get_current_user_id(), 'mcp_superkey_hash', true)) || !empty(get_option('mcp_superkey_hash', ''));
-        $dattrack_active = (get_option('vgt_dattrack_enabled') === 'true') || defined('VIS_VERSION');
+        $sentinel_active = !empty($sentinel_state['active']);
+        $throne_guard_active = class_exists(WPDeskSecurity::class)
+            ? WPDeskSecurity::throne_guard_active()
+            : !empty(get_option('mcp_superkey_hash', ''));
+        $dattrack_active = !empty($sentinel_state['v7_active'])
+            ? true
+            : get_option('vgt_dattrack_enabled') === 'true';
 
         // Diagnostics
         $active_plugins = get_option('active_plugins', []);
@@ -551,32 +570,75 @@ final class VGTSecurityCenter {
         };
 
         // --- SENTINEL PROTECTION STATE ---
-        $sentinel_v7_active = defined('VIS_VERSION');
-        $sentinel_ce_active = !defined('VIS_VERSION') && (get_option('vgt_sentinel_enabled') === 'true');
-        $sentinel_active = $sentinel_v7_active || $sentinel_ce_active;
-        
-        $v7_config = $sentinel_v7_active ? (array) get_option('vis_config', []) : [];
-        $ce_config = $sentinel_ce_active ? (array) get_option('vgts_config', []) : [];
+        $sentinel_state = class_exists(WPDeskSecurity::class)
+            ? WPDeskSecurity::sentinel_state()
+            : [
+                'v7_active' => defined('VIS_VERSION'),
+                'ce_enabled' => get_option('vgt_sentinel_enabled') === 'true',
+                'active' => defined('VIS_VERSION') || get_option('vgt_sentinel_enabled') === 'true',
+                'mode' => defined('VIS_VERSION') ? 'v7' : (get_option('vgt_sentinel_enabled') === 'true' ? 'ce' : 'none'),
+            ];
+
+        $sentinel_v7_active = !empty($sentinel_state['v7_active']);
+        $sentinel_ce_active = !empty($sentinel_state['ce_enabled']);
+        $sentinel_active = !empty($sentinel_state['active']);
+        $sentinel_mode = (string)($sentinel_state['mode'] ?? 'none');
+        $results['SentinelMode'] = strtoupper($sentinel_mode);
+
+        $v7_config = $sentinel_v7_active ? (array)get_option('vis_config', []) : [];
+        $ce_config = $sentinel_ce_active ? (array)get_option('vgts_config', []) : [];
 
         $titan_enabled = false;
+        $titan_protects = false;
+        $aegis_protects = false;
+        $cerberus_protects = false;
+        $airlock_protects = false;
+        $antibot_protects = false;
+        $hades_protects = false;
         $xmlrpc_blocked = false;
         $anti_enum = false;
         $hide_version = false;
         $disallow_file_edit = false;
 
         if ($sentinel_v7_active) {
-            $titan_enabled = !empty($v7_config['titan_enabled']);
-            $xmlrpc_blocked = $titan_enabled && !empty($v7_config['titan_xmlrpc_honeypot']);
-            $anti_enum = $titan_enabled && !empty($v7_config['titan_anti_enum']);
-            $hide_version = $titan_enabled && !empty($v7_config['titan_hide_version']);
-            $disallow_file_edit = $titan_enabled; // V7 always defines DISALLOW_FILE_EDIT if Titan is enabled
+            $aegis_protects = !empty($v7_config['aegis_enabled']) || class_exists('VIS_Aegis', false);
+            $cerberus_protects = !empty($v7_config['cerberus_enabled']) || class_exists('VIS_Cerberus', false);
+            $airlock_protects = !empty($v7_config['airlock_enabled']) || class_exists('VIS_Airlock', false);
+            $antibot_protects = !empty($v7_config['antibot_enabled']) || $aegis_protects;
+            $hades_protects = !empty($v7_config['hades_enabled']) || class_exists('VIS_Hades', false);
+            $titan_enabled = !empty($v7_config['titan_enabled']) || class_exists('VIS_Titan', false);
+            $titan_protects = $titan_enabled;
+            $xmlrpc_blocked = $titan_enabled && (!empty($v7_config['titan_block_xmlrpc']) || !empty($v7_config['titan_xmlrpc_honeypot']));
+            $anti_enum = $titan_enabled && (!empty($v7_config['titan_anti_enum']) || !empty($v7_config['titan_block_rest']));
+            $hide_version = $titan_enabled;
+            $disallow_file_edit = $titan_enabled;
         } elseif ($sentinel_ce_active) {
-            $titan_enabled = !empty($ce_config['titan_enabled']);
-            $xmlrpc_blocked = $titan_enabled && !empty($ce_config['titan_block_xmlrpc']);
-            $anti_enum = $titan_enabled && !empty($ce_config['titan_block_rest']);
+            $aegis_protects = !empty($ce_config['aegis_enabled']) || class_exists('VGTS_Aegis', false);
+            $cerberus_protects = !empty($ce_config['cerberus_enabled']) || class_exists('VGTS_Cerberus', false);
+            $airlock_protects = !empty($ce_config['airlock_enabled']) || class_exists('VGTS_Airlock', false);
+            $antibot_protects = !empty($ce_config['antibot_enabled']) || class_exists('VGTS_Antibot', false);
+            $hades_protects = !empty($ce_config['hades_enabled']) || class_exists('VGTS_Hades', false);
+            $titan_enabled = !empty($ce_config['titan_enabled']) || class_exists('VGTS_Titan', false);
+            $titan_protects = $titan_enabled;
+            $xmlrpc_blocked = $titan_enabled && (!empty($ce_config['titan_block_xmlrpc']) || !empty($ce_config['titan_xmlrpc_honeypot']));
+            $anti_enum = $titan_enabled && (!empty($ce_config['titan_anti_enum']) || !empty($ce_config['titan_block_rest']));
             $hide_version = $titan_enabled && !empty($ce_config['titan_hide_version']);
-            $disallow_file_edit = $titan_enabled && !empty($ce_config['titan_disallow_file_edit']);
+            $disallow_file_edit = $titan_enabled && (!empty($ce_config['titan_disallow_file_edit']) || defined('DISALLOW_FILE_EDIT'));
         }
+
+        if (defined('DISALLOW_FILE_EDIT') && DISALLOW_FILE_EDIT) {
+            $disallow_file_edit = true;
+        }
+
+        $sentinel_label = $sentinel_v7_active ? 'Sentinel V7' : ($sentinel_ce_active ? 'Sentinel CE' : 'Kein Sentinel');
+        $results['SystemVectors']['Phase0_SentinelCoverage'] = [
+            "SentinelRuntime" => $eval($sentinel_active, "[AKTIV ($sentinel_label)] Schutzstack erkannt und priorisiert.", "[WARNUNG] Kein Sentinel-Schutzstack aktiv."),
+            "AegisWafLayer" => $eval($aegis_protects, "[AKTIV] Aegis/WAF-Schutzschicht wird vom aktiven Sentinel bereitgestellt.", "[WARNUNG] Keine erkannte Aegis/WAF-Schutzschicht."),
+            "CerberusBanLayer" => $eval($cerberus_protects, "[AKTIV] Cerberus/Ban-Perimeter wird vom aktiven Sentinel bereitgestellt.", "[WARNUNG] Kein erkannter Cerberus/Ban-Perimeter."),
+            "AirlockUploadLayer" => $eval($airlock_protects, "[AKTIV] Airlock/Upload-Haertung wird vom aktiven Sentinel bereitgestellt.", "[WARNUNG] Keine erkannte Airlock/Upload-Haertung."),
+            "TitanHardeningLayer" => $eval($titan_protects, "[AKTIV] Titan-Systemhaertung wird vom aktiven Sentinel bereitgestellt.", "[WARNUNG] Keine erkannte Titan-Systemhaertung."),
+            "AntibotLayer" => $eval($antibot_protects, "[AKTIV] Antibot-/Bot-Mitigation wird vom aktiven Sentinel bereitgestellt.", "[WARNUNG] Keine erkannte Bot-Mitigation."),
+        ];
 
         // ==========================================
         // PHASE 1: CORE & VERSION
@@ -615,7 +677,7 @@ final class VGTSecurityCenter {
             "AdminUsername" => $eval(!username_exists('admin'), "[AKTIV (Sicher)]", "[GEFAHR ('admin' existiert)]"),
             "LoginUrlCloaking" => $eval(!$is_default_login, "[AKTIV (Verschleiert)]", "[WARNUNG (Standard URL)]"),
             "XmlRpcStatus" => $eval($xmlrpc_status_val, $xmlrpc_text, "[WARNUNG (Aktiv)]"),
-            "LoginBruteForceLimit" => $eval($limit_active || $sentinel_active, ($limit_active ? "[AKTIV (Geschützt)]" : "[GESCHÜTZT (Sentinel Cerberus)]"), "[VULNERABLE (Ungeschützt)]")
+            "LoginBruteForceLimit" => $eval($limit_active || $cerberus_protects || $aegis_protects, ($limit_active ? "[AKTIV (Geschuetzt)]" : "[GESCHUETZT (Sentinel Cerberus/Aegis)]"), "[VULNERABLE (Ungeschuetzt)]")
         ];
 
         // ==========================================
@@ -703,11 +765,11 @@ final class VGTSecurityCenter {
             }
         }
 
-        $x_content_type_safe = $has_nosniff || $titan_enabled;
-        $x_content_type_text = $has_nosniff ? "[AKTIV (nosniff)]" : ($titan_enabled ? "[GESCHÜTZT (Sentinel Titan)]" : "[WARNUNG (Fehlt)]");
+        $x_content_type_safe = $has_nosniff || $titan_protects;
+        $x_content_type_text = $has_nosniff ? "[AKTIV (nosniff)]" : ($titan_protects ? "[GESCHUETZT (Sentinel Titan)]" : "[WARNUNG (Fehlt)]");
 
-        $meta_generator_hidden = !$has_generator || ($titan_enabled && $hide_version);
-        $meta_generator_text = !$has_generator ? "[AKTIV (Versteckt)]" : (($titan_enabled && $hide_version) ? "[GESCHÜTZT (Sentinel Titan)]" : "[WARNUNG (Sichtbar)]");
+        $meta_generator_hidden = !$has_generator || ($titan_protects && $hide_version);
+        $meta_generator_text = !$has_generator ? "[AKTIV (Versteckt)]" : (($titan_protects && $hide_version) ? "[GESCHUETZT (Sentinel Titan)]" : "[WARNUNG (Sichtbar)]");
 
         $results['SystemVectors']['Phase5_Headers'] = [
             "ForceHttps" => $eval(is_ssl(), "[AKTIV]", "[GEFAHR (HTTP)]"),
@@ -842,11 +904,11 @@ final class VGTSecurityCenter {
             }
         }
 
-        $dir_listing_blocked = !$list_open || $titan_enabled;
-        $dir_listing_text = !$list_open ? "[AKTIV (Deaktiviert)]" : ($titan_enabled ? "[GESCHÜTZT (Sentinel Titan)]" : "[GEFAHR (Sichtbar)]");
+        $dir_listing_blocked = !$list_open || $titan_protects;
+        $dir_listing_text = !$list_open ? "[AKTIV (Deaktiviert)]" : ($titan_protects ? "[GESCHUETZT (Sentinel Titan)]" : "[GEFAHR (Sichtbar)]");
 
-        $uploads_php_blocked = $php_exec_blocked || $sentinel_active;
-        $uploads_php_text = $php_exec_blocked ? "[AKTIV (Blockiert)]" : ($sentinel_active ? "[GESCHÜTZT (Sentinel Airlock)]" : "[GEFAHR (Ausführbar)]");
+        $uploads_php_blocked = $php_exec_blocked || $airlock_protects || $titan_protects;
+        $uploads_php_text = $php_exec_blocked ? "[AKTIV (Blockiert)]" : (($airlock_protects || $titan_protects) ? "[GESCHUETZT (Sentinel Airlock/Titan)]" : "[GEFAHR (Ausfuehrbar)]");
 
         $results['SystemVectors']['Phase9_Runtime'] = [
             "PhpErrorDisplay" => $eval(!in_array(strtolower((string)$display_errors), ['1', 'on', 'true', 'yes'], true), "[AKTIV (Deaktiviert)]", "[GEFAHR (Aktiviert)]"),

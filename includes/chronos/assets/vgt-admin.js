@@ -6,6 +6,25 @@
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
 
+    function vgtSetFlipValue(node, value) {
+        const safeValue = String(value).substring(0, 8);
+        const hidden = document.createElement('span');
+        hidden.style.visibility = 'hidden';
+        hidden.textContent = safeValue;
+        const top = document.createElement('div');
+        top.className = 'vgt-flip-base vgt-flip-top';
+        const topText = document.createElement('div');
+        topText.className = 'vgt-flip-text';
+        topText.textContent = safeValue;
+        top.appendChild(topText);
+        const bottom = document.createElement('div');
+        bottom.className = 'vgt-flip-base vgt-flip-bottom';
+        const bottomText = document.createElement('div');
+        bottomText.className = 'vgt-flip-text';
+        bottomText.textContent = safeValue;
+        bottom.appendChild(bottomText);
+        node.replaceChildren(hidden, top, bottom);
+    }
     const typeSelect = document.getElementById('vgt-type-select');
     const fixedWrapper = document.getElementById('vgt-fixed-wrapper');
     const evergreenWrapper = document.getElementById('vgt-evergreen-wrapper');
@@ -75,14 +94,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // VGT Architectural Sync: Base Nodes für 3D Flip vorbereiten (Löst Unsichtbarkeits-Bug)
+            // VGT Architectural Sync: Base Nodes fÃƒÂ¼r 3D Flip vorbereiten (LÃƒÂ¶st Unsichtbarkeits-Bug)
             const staticNodes = previewContainer.querySelectorAll('.vgt-timer-value:not(.vgt-tick-sim)');
             staticNodes.forEach(node => {
                 const val = node.dataset.val || node.textContent.trim().substring(0, 2);
                 node.dataset.val = val;
                 if (inputs.anim.value === 'flip') {
                     if (!node.querySelector('.vgt-flip-base')) {
-                        node.innerHTML = `<span style="visibility: hidden;">${val}</span><div class="vgt-flip-base vgt-flip-top"><div class="vgt-flip-text">${val}</div></div><div class="vgt-flip-base vgt-flip-bottom"><div class="vgt-flip-text">${val}</div></div>`;
+                        vgtSetFlipValue(node, val);
                     }
                 } else {
                     if (node.querySelector('.vgt-flip-base')) {
@@ -97,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const simVal = localSimNode.dataset.val || localSimNode.textContent.trim().substring(0, 2);
                 localSimNode.dataset.val = simVal;
                 if (inputs.anim.value === 'flip' && !localSimNode.querySelector('.vgt-flip-base')) {
-                    localSimNode.innerHTML = `<span style="visibility: hidden;">${simVal}</span><div class="vgt-flip-base vgt-flip-top"><div class="vgt-flip-text">${simVal}</div></div><div class="vgt-flip-base vgt-flip-bottom"><div class="vgt-flip-text">${simVal}</div></div>`;
+                    vgtSetFlipValue(localSimNode, simVal);
                 } else if (inputs.anim.value !== 'flip' && localSimNode.querySelector('.vgt-flip-base')) {
                     localSimNode.textContent = simVal;
                 }
@@ -125,13 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // DOM Simulation Injection for Preview
             if (inputs.anim.value === 'flip') {
-                simNode.innerHTML = `
-                    <span style="visibility: hidden;">${formatted}</span>
-                    <div class="vgt-flip-base vgt-flip-top"><div class="vgt-flip-text">${formatted}</div></div>
-                    <div class="vgt-flip-base vgt-flip-bottom"><div class="vgt-flip-text">${current}</div></div>
-                    <div class="vgt-flip-flap vgt-flip-flap-top"><div class="vgt-flip-text">${current}</div></div>
-                    <div class="vgt-flip-flap vgt-flip-flap-bottom"><div class="vgt-flip-text">${formatted}</div></div>
-                `;
+                vgtSetFlipValue(simNode, formatted);
             } else {
                 simNode.textContent = formatted;
             }

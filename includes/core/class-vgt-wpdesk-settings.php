@@ -144,12 +144,6 @@ final class WPDeskSettings
         if ($font_size_val < 10 || $font_size_val > 24) {
             $font_size_val = 14;
         }
-        
-        file_put_contents(
-            VGT_WPDESK_PATH . 'vgt_debug.log',
-            sprintf("[%s] GET: folders=%s, db_settings_keys=%s\n", date('Y-m-d H:i:s'), var_export($settings['folders'] ?? null, true), implode(',', array_keys($db_settings))),
-            FILE_APPEND
-        );
 
         return [
             'wallpaper'        => esc_url_raw($settings['wallpaper']),

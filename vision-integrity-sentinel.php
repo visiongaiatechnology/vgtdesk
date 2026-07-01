@@ -17,6 +17,7 @@ if (!defined('ABSPATH')) {
 
 // Wenn Sentinel V7 (Proprietary / MU) aktiv ist, Sentinel CE nicht laden, um Konflikte zu vermeiden.
 if (defined('VIS_VERSION')) {
+    update_option('vgt_sentinel_enabled', 'false', false);
     return;
 }
 
@@ -257,6 +258,7 @@ add_filter('pre_update_option_vgts_config', function($new_value, $old_value, $op
 add_action('plugins_loaded', function() {
     // Wenn Sentinel V7 (Proprietary / MU) aktiv ist, Sentinel CE komplett deaktivieren
     if (defined('VIS_VERSION')) {
+        update_option('vgt_sentinel_enabled', 'false', false);
         return;
     }
     vgts_init_constants();

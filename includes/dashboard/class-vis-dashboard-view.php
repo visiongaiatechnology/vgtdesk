@@ -50,7 +50,7 @@ class VGTS_Dashboard_View {
                 $nonce = $_POST['_wpnonce'] ?? '';
                 if (wp_verify_nonce($nonce, 'vgt_activate_sentinel_action') && current_user_can('manage_options')) {
                     update_option('vgt_sentinel_enabled', 'true');
-                    wp_redirect(admin_url('admin.php?page=vgts-sentinel'));
+                    wp_safe_redirect(admin_url('admin.php?page=vgts-sentinel'));
                     exit;
                 }
             }

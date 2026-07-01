@@ -96,7 +96,7 @@ final class Admin
         $saved_id = Database::save_countdown($data);
         
         // VGT UX FIX: Wir halten den Nutzer in der Bearbeitungs-Session, anstatt ihn rauszuwerfen
-        wp_redirect(admin_url('admin.php?page=vgt-chronos-builder&edit_id=' . $saved_id . '&status=saved'));
+        wp_safe_redirect(admin_url('admin.php?page=vgt-chronos-builder&edit_id=' . $saved_id . '&status=saved'));
         exit;
     }
 
@@ -111,7 +111,7 @@ final class Admin
             Database::delete_countdown($id);
         }
 
-        wp_redirect(admin_url('admin.php?page=vgt-chronos&status=purged'));
+        wp_safe_redirect(admin_url('admin.php?page=vgt-chronos&status=purged'));
         exit;
     }
 

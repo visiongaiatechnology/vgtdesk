@@ -66,7 +66,11 @@ final class VGT_Omega_Scanner {
         $orig_name = $file_info['name'] ?? '';
 
         if (!is_string($temp_path) || $temp_path === '' || !file_exists($temp_path)) {
-            throw new \VGTOmegaVault\ValidationException(esc_html__('Ungültiger Datei-Pfad.', 'vgt-omega-vault'));
+            throw new \VGTOmegaVault\ValidationException(esc_html__('UngÃƒÆ’Ã‚Â¼ltiger Datei-Pfad.', 'vgt-omega-vault'));
+        }
+
+        if (!is_uploaded_file($temp_path)) {
+            throw new \VGTOmegaVault\SecurityException('Upload origin validation failed.');
         }
 
         if (!is_string($orig_name) || $orig_name === '') {
@@ -82,7 +86,7 @@ final class VGT_Omega_Scanner {
         // Size check
         $size = @filesize($temp_path);
         if ($size === false || $size === 0 || $size > self::SCAN_MAX_FILESIZE) {
-            throw new \VGTOmegaVault\ValidationException(esc_html__('Datei überschreitet das maximale Limit.', 'vgt-omega-vault'));
+            throw new \VGTOmegaVault\ValidationException(esc_html__('Datei ÃƒÆ’Ã‚Â¼berschreitet das maximale Limit.', 'vgt-omega-vault'));
         }
 
         // 2. Validate Echte Dateistruktur (Magic Bytes / MIME-Type Verification with fallback)
@@ -261,7 +265,7 @@ final class VGT_Omega_Scanner {
             }
 
             if ($estimated_memory > $max_mem) {
-                throw new \VGTOmegaVault\ValidationException(esc_html__('Bildauflösung überschreitet zulässigen Speicherbedarf (Decompressions-Bombe).', 'vgt-omega-vault'));
+                throw new \VGTOmegaVault\ValidationException(esc_html__('BildauflÃƒÆ’Ã‚Â¶sung ÃƒÆ’Ã‚Â¼berschreitet zulÃƒÆ’Ã‚Â¤ssigen Speicherbedarf (Decompressions-Bombe).', 'vgt-omega-vault'));
             }
         }
 
