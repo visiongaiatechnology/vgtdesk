@@ -246,6 +246,47 @@ trait WPDeskAJAXTrait
         }
     }
 
+    public function ajax_toggle_integrated_module(): void
+    {
+        try {
+            if (!check_ajax_referer('vgt_desktop_action', 'nonce', false)) {
+                throw new SecurityException('CSRF Token validation failed.');
+            }
+
+            if (!current_user_can('manage_options')) {
+                throw new SecurityException('Insufficient capabilities.');
+            }
+
+            $module = isset($_POST['module']) ? sanitize_key((string)wp_unslash($_POST['module'])) : '';
+            $enabled_raw = isset($_POST['enabled']) ? sanitize_key((string)wp_unslash($_POST['enabled'])) : '';
+
+            if ($module === '' || !in_array($enabled_raw, ['true', 'false', '1', '0'], true)) {
+                throw new ValidationException('Invalid module toggle payload.');
+            }
+
+            $enabled = $enabled_raw === 'true' || $enabled_raw === '1';
+            $result = self::set_integrated_module_enabled($module, $enabled);
+
+            wp_send_json_success([
+                'module' => $result['module'],
+                'label' => $result['label'],
+                'enabled' => $result['enabled'],
+                'reload' => $result['reload'],
+                'modules' => self::integrated_module_statuses(),
+                'message' => $result['label'] . ($result['enabled'] ? ' aktiviert.' : ' deaktiviert.'),
+            ]);
+
+        } catch (ValidationException $e) {
+            wp_send_json_error($e->getMessage());
+        } catch (SecurityException $e) {
+            error_log('[SEC] Module toggle failed: ' . $e->getMessage());
+            wp_send_json_error('Request rejected for security reasons.');
+        } catch (Throwable $e) {
+            error_log('[FATAL] Module toggle fault: ' . $e->getMessage());
+            wp_send_json_error('Critical system fault.');
+        }
+    }
+
     public function ajax_get_diagnostics(): void
     {
         try {
@@ -488,6 +529,7 @@ trait WPDeskAJAXTrait
                 'total_bans' => $total_bans,
                 'threats' => $threats,
                 'dattrack' => $dattrack_data,
+                'integrated_modules' => self::integrated_module_statuses(),
                 'transient_count' => $transient_count
             ]);
 

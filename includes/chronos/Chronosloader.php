@@ -1,10 +1,10 @@
 <?php
 /**
- * Plugin Name: VGT Chronos Engine
- * Plugin URI: https://visiongaiatechnology.de
- * Description: Diamant-Status Countdown Engine. Zero Dependencies. Strict Types. Uncompromising Performance.
- * Version: 1.1.0
- * Author: VISIONGAIATECHNOLOGY
+ * Module Name: VGT Chronos Engine
+ * Module URI: https://visiongaiatechnology.de
+ * Module Description: Diamant-Status Countdown Engine. Zero Dependencies. Strict Types. Uncompromising Performance.
+ * Module Version: 1.1.0
+ * Module Author: VISIONGAIATECHNOLOGY
  * Requires PHP: 8.1
  *LICENSE: AGPLv3 (OPEN SOURCE) - GLOBAL PROLIFERATION PROTOCOL
  * ==============================================================================
@@ -78,8 +78,6 @@ final class Bootstrapper
 
     private function init_hooks(): void
     {
-        register_activation_hook(__FILE__, [Database::class, 'activate']);
-        
         add_action('init', [self::class, 'maybe_create_db'], 5);
 
         add_action('plugins_loaded', function() {

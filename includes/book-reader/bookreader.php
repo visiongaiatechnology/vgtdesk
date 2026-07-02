@@ -2,12 +2,12 @@
 declare(strict_types=1);
 
 /**
- * Plugin Name: VGT Book Reader
- * Plugin URI: https://visiongaiatechnology.de
- * Description: State-of-the-Art PDF Reader Engine mit Dark-Mode Interface und kompromissloser Performance. (Strict Typed / Namespaced)
- * Version: 1.0.1
- * Author: VISIONGAIATECHNOLOGY
- * Text Domain: vgt-book-reader
+ * Module Name: VGT Book Reader
+ * Module URI: https://visiongaiatechnology.de
+ * Module Description: State-of-the-Art PDF Reader Engine mit Dark-Mode Interface und kompromissloser Performance. (Strict Typed / Namespaced)
+ * Module Version: 1.0.1
+ * Module Author: VISIONGAIATECHNOLOGY
+ * Module Domain: vgt-book-reader
  * LICENSE: AGPLv3 (OPEN SOURCE) - GLOBAL PROLIFERATION PROTOCOL
  * ==============================================================================
  * 

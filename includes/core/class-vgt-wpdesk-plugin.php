@@ -22,6 +22,58 @@ final class WPDeskPlugin
     // Erlaubte Konfigurations-Werte fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼r Strict-Whitelisting
     private const ALLOWED_ACCENT_COLORS = ['indigo', 'emerald', 'cyan', 'amber', 'rose', 'gold', 'purple', 'violet', 'neon'];
 
+    private const INTEGRATED_MODULES = [
+        'sentinel_ce' => [
+            'label' => 'Sentinel CE',
+            'description' => 'Open-Source Security Core mit WAF, Scanner und Hardening.',
+            'option' => 'vgt_sentinel_enabled',
+            'default' => true,
+            'reload' => true,
+        ],
+        'throne_guard' => [
+            'label' => 'Throne Guard',
+            'description' => 'Master-Rollen, Superkey und Backend-Hardening.',
+            'option' => 'vgt_module_throne_guard_enabled',
+            'default' => true,
+            'reload' => true,
+        ],
+        'dattrack' => [
+            'label' => 'Dattrack',
+            'description' => 'Privacy-fokussierte lokale Analytics und Rollups.',
+            'option' => 'vgt_dattrack_enabled',
+            'default' => false,
+            'reload' => true,
+        ],
+        'omega_vault' => [
+            'label' => 'Omega Vault',
+            'description' => 'Build Center, verschluesselte Formulare und Com-Link Vault.',
+            'option' => 'vgt_module_omega_vault_enabled',
+            'default' => true,
+            'reload' => true,
+        ],
+        'book_reader' => [
+            'label' => 'Book Reader',
+            'description' => 'PDF-/Book-Reader Engine als integriertes Modul.',
+            'option' => 'vgt_module_book_reader_enabled',
+            'default' => true,
+            'reload' => true,
+        ],
+        'chronos' => [
+            'label' => 'Chronos',
+            'description' => 'Countdown- und Timing-Engine fuer Kampagnen und Seiten.',
+            'option' => 'vgt_module_chronos_enabled',
+            'default' => true,
+            'reload' => true,
+        ],
+        'loginpager' => [
+            'label' => 'LoginPager',
+            'description' => 'Login-Oberflaechen und Admin-Zugangsanpassungen.',
+            'option' => 'vgt_module_loginpager_enabled',
+            'default' => true,
+            'reload' => true,
+        ],
+    ];
+
     public static function getInstance(): self
     {
         if (self::$instance === null) {
@@ -48,7 +100,9 @@ final class WPDeskPlugin
             return false;
         });
 
-        if (file_exists(VGT_WPDESK_PATH . 'vision-integrity-sentinel.php')) {
+        self::remove_legacy_integrated_plugins_from_registry();
+
+        if (self::is_integrated_module_enabled('sentinel_ce') && file_exists(VGT_WPDESK_PATH . 'vision-integrity-sentinel.php')) {
             require_once VGT_WPDESK_PATH . 'vision-integrity-sentinel.php';
         }
 
@@ -56,7 +110,7 @@ final class WPDeskPlugin
             require_once VGT_WPDESK_PATH . 'includes/class-iframe-transformer.php';
         }
 
-        if (file_exists(VGT_WPDESK_PATH . 'includes/class-vgt-throne-guard.php')) {
+        if (self::is_integrated_module_enabled('throne_guard') && file_exists(VGT_WPDESK_PATH . 'includes/class-vgt-throne-guard.php')) {
             require_once VGT_WPDESK_PATH . 'includes/class-vgt-throne-guard.php';
         }
 
@@ -65,24 +119,24 @@ final class WPDeskPlugin
             VGTSecurityCenter::get_instance();
         }
 
-        if (file_exists(VGT_WPDESK_PATH . 'includes/modules/loginpager/login-engine.php')) {
+        if (self::is_integrated_module_enabled('loginpager') && file_exists(VGT_WPDESK_PATH . 'includes/modules/loginpager/login-engine.php')) {
             require_once VGT_WPDESK_PATH . 'includes/modules/loginpager/login-engine.php';
         }
 
-        if (file_exists(VGT_WPDESK_PATH . 'includes/build-center/vault.php')) {
+        if (self::is_integrated_module_enabled('omega_vault') && file_exists(VGT_WPDESK_PATH . 'includes/build-center/vault.php')) {
             require_once VGT_WPDESK_PATH . 'includes/build-center/vault.php';
         }
 
-        if (file_exists(VGT_WPDESK_PATH . 'includes/book-reader/bookreader.php')) {
+        if (self::is_integrated_module_enabled('book_reader') && file_exists(VGT_WPDESK_PATH . 'includes/book-reader/bookreader.php')) {
             require_once VGT_WPDESK_PATH . 'includes/book-reader/bookreader.php';
         }
 
-        if (file_exists(VGT_WPDESK_PATH . 'includes/chronos/Chronosloader.php')) {
+        if (self::is_integrated_module_enabled('chronos') && file_exists(VGT_WPDESK_PATH . 'includes/chronos/Chronosloader.php')) {
             require_once VGT_WPDESK_PATH . 'includes/chronos/Chronosloader.php';
         }
 
         add_action('plugins_loaded', function() {
-            if (!WPDeskSecurity::is_sentinel_v7_active() && !class_exists('VisionGaia\\WPDesk\\VGT_Dattrack_Engine')) {
+            if (self::is_integrated_module_enabled('dattrack') && !WPDeskSecurity::is_sentinel_v7_active() && !class_exists('VisionGaia\\WPDesk\\VGT_Dattrack_Engine')) {
                 if (file_exists(VGT_WPDESK_PATH . 'includes/modules/dattrack/class-dattrack-engine.php')) {
                     require_once VGT_WPDESK_PATH . 'includes/modules/dattrack/class-dattrack-engine.php';
                     VGT_Dattrack_Engine::boot();
@@ -96,6 +150,127 @@ final class WPDeskPlugin
             IframeTransformer::getInstance();
         }
         $this->register_current_worker();
+    }
+
+    public static function integrated_module_definitions(): array
+    {
+        return self::INTEGRATED_MODULES;
+    }
+
+    public static function is_integrated_module_enabled(string $module): bool
+    {
+        $definitions = self::integrated_module_definitions();
+        if (!isset($definitions[$module])) {
+            return false;
+        }
+
+        $definition = $definitions[$module];
+        $default = !empty($definition['default']);
+        $raw = get_option($definition['option'], $default ? 'true' : 'false');
+        return $raw === true || $raw === 'true' || $raw === '1' || $raw === 1;
+    }
+
+    public static function integrated_module_statuses(): array
+    {
+        $modules = [];
+        $sentinel_v7_active = class_exists('VIS_Kernel') || defined('VIS_VERSION');
+
+        foreach (self::integrated_module_definitions() as $key => $definition) {
+            $available = true;
+            $locked = false;
+            $locked_reason = '';
+            $enabled = self::is_integrated_module_enabled($key);
+
+            if ($key === 'sentinel_ce' && $sentinel_v7_active) {
+                $enabled = false;
+                $locked = true;
+                $locked_reason = 'Sentinel V7 ist aktiv. Sentinel CE bleibt als Konfliktschutz deaktiviert.';
+            }
+
+            $modules[] = [
+                'key' => $key,
+                'label' => $definition['label'],
+                'description' => $definition['description'],
+                'enabled' => $enabled,
+                'available' => $available,
+                'locked' => $locked,
+                'lockedReason' => $locked_reason,
+                'reload' => !empty($definition['reload']),
+            ];
+        }
+
+        return $modules;
+    }
+
+    public static function set_integrated_module_enabled(string $module, bool $enabled): array
+    {
+        $definitions = self::integrated_module_definitions();
+        if (!isset($definitions[$module])) {
+            throw new ValidationException('Invalid module identifier.');
+        }
+
+        if ($module === 'sentinel_ce' && $enabled && (class_exists('VIS_Kernel') || defined('VIS_VERSION'))) {
+            throw new ValidationException('Sentinel CE kann nicht aktiviert werden, solange Sentinel V7 aktiv ist.');
+        }
+
+        $definition = $definitions[$module];
+        update_option($definition['option'], $enabled ? 'true' : 'false', false);
+
+        if ($module === 'dattrack' && class_exists('VisionGaia\WPDesk\VGT_Dattrack_Engine')) {
+            if ($enabled) {
+                VGT_Dattrack_Engine::system_genesis();
+            } else {
+                VGT_Dattrack_Engine::system_halt();
+            }
+        }
+
+        if ($module === 'sentinel_ce' && !$enabled && function_exists('vgts_deactivate_module')) {
+            vgts_deactivate_module();
+        }
+
+        if ($module === 'throne_guard' && !$enabled && class_exists('VisionGaia\ThroneGuard\MasterUserControlPlugin')) {
+            $instance = \VisionGaia\ThroneGuard\MasterUserControlPlugin::get_instance();
+            if ($instance && current_user_can('mcp_master_access')) {
+                $instance->deactivate();
+            }
+        }
+
+        return [
+            'module' => $module,
+            'label' => $definition['label'],
+            'enabled' => $enabled,
+            'reload' => !empty($definition['reload']),
+        ];
+    }
+
+    private static function remove_legacy_integrated_plugins_from_registry(): void
+    {
+        $legacy_plugins = [
+            plugin_basename(VGT_WPDESK_PATH . 'vision-integrity-sentinel.php'),
+            plugin_basename(VGT_WPDESK_PATH . 'includes/class-vgt-throne-guard.php'),
+            plugin_basename(VGT_WPDESK_PATH . 'includes/build-center/vault.php'),
+            plugin_basename(VGT_WPDESK_PATH . 'includes/book-reader/bookreader.php'),
+            plugin_basename(VGT_WPDESK_PATH . 'includes/chronos/Chronosloader.php'),
+            plugin_basename(VGT_WPDESK_PATH . 'includes/modules/dattrack/class-dattrack-engine.php'),
+        ];
+
+        $active_plugins = get_option('active_plugins', []);
+        if (is_array($active_plugins)) {
+            $filtered_plugins = array_values(array_diff($active_plugins, $legacy_plugins));
+            if ($filtered_plugins !== $active_plugins) {
+                update_option('active_plugins', $filtered_plugins, false);
+            }
+        }
+
+        if (is_multisite()) {
+            $network_plugins = get_site_option('active_sitewide_plugins', []);
+            if (is_array($network_plugins)) {
+                $filtered_network_plugins = array_diff_key($network_plugins, array_flip($legacy_plugins));
+                if ($filtered_network_plugins !== $network_plugins) {
+                    update_site_option('active_sitewide_plugins', $filtered_network_plugins);
+                }
+            }
+        }
     }
 
     public function register_current_worker(): void
@@ -152,6 +327,7 @@ final class WPDeskPlugin
         add_action('wp_ajax_vgt_save_user_settings', [$this, 'ajax_save_user_settings']);
         add_action('wp_ajax_vgt_toggle_sentinel', [$this, 'ajax_toggle_sentinel']);
         add_action('wp_ajax_vgt_toggle_dattrack', [$this, 'ajax_toggle_dattrack']);
+        add_action('wp_ajax_vgt_toggle_integrated_module', [$this, 'ajax_toggle_integrated_module']);
         add_action('wp_ajax_vgt_get_diagnostics', [$this, 'ajax_get_diagnostics']);
         add_action('wp_ajax_vgt_unban_ip', [$this, 'ajax_unban_ip']);
         add_action('wp_ajax_vgt_ban_ip', [$this, 'ajax_ban_ip']);
@@ -323,7 +499,8 @@ final class WPDeskPlugin
             'isSentinelV7'    => $sentinel_v7_active,
             'sentinelMode'    => $sentinel_state['mode'],
             'superkeyActive'  => WPDeskSecurity::throne_guard_active(),
-            'dattrackEnabled' => !$sentinel_v7_active && (get_option('vgt_dattrack_enabled') === 'true'),
+            'dattrackEnabled' => self::is_integrated_module_enabled('dattrack') && !$sentinel_v7_active && (get_option('vgt_dattrack_enabled') === 'true'),
+            'integratedModules' => self::integrated_module_statuses(),
             'apps'            => $this->apps
         ]);
     }

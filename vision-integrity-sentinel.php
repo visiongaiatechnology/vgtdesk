@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: VGT Sentinel CE
- * Description: A zero-trust Web Application Firewall (WAF) and security framework featuring robust brute-force protection, file integrity monitoring, and kernel-level system hardening.
- * Version: 1.7.1
- * Author: VisionGaiaTechnology
+ * Module Name: VGT Sentinel CE
+ * Module Description: A zero-trust Web Application Firewall (WAF) and security framework featuring robust brute-force protection, file integrity monitoring, and kernel-level system hardening.
+ * Module Version: 1.7.1
+ * Module Author: VisionGaiaTechnology
  * Author URI: https://visiongaiatechnology.de
  * License: AGPLv3
  * Requires PHP: 7.4
@@ -186,7 +186,6 @@ function vgts_activate_standalone(): void {
     update_option('vgts_db_version', VGTS_VERSION);
     flush_rewrite_rules();
 }
-register_activation_hook(__FILE__, 'vgts_activate_standalone');
 
 // Hook for dynamic toggle synchronization (triggers DB/vault creation when activated)
 add_action('update_option_vgt_sentinel_enabled', function($old_value, $value) {
@@ -201,10 +200,10 @@ add_action('add_option_vgt_sentinel_enabled', function($option, $value) {
     }
 }, 10, 2);
 
-register_deactivation_hook(__FILE__, function() {
+function vgts_deactivate_module(): void {
     wp_clear_scheduled_hook('vgts_hourly_scan_event');
     flush_rewrite_rules();
-});
+}
 
 // --- DEFENSE-IN-DEPTH: GLOBAL CONFIGURATION SAFEGUARD (CSRF SHIELD) ---
 /**

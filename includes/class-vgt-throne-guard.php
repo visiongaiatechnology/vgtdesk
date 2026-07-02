@@ -91,12 +91,6 @@ final class MasterUserControlPlugin {
         self::$instance = $this;
         // Pre-Flight WAF Interceptor (Uralt-Sicherung bei Uploads)
         $this->pre_flight_waf();
-
-        // Register hooks with the main WPDesk plugin path if VGT_WPDESK_PATH is available
-        $plugin_file = defined('VGT_WPDESK_PATH') ? VGT_WPDESK_PATH . 'desktop.php' : __FILE__;
-        register_activation_hook($plugin_file, [$this, 'activate']);
-        register_deactivation_hook($plugin_file, [$this, 'deactivate']);
-        
         // Auto-run activation checks if DB is not initialized yet (saves manual toggle cycles)
         if (get_option('mcp_db_version') !== self::DB_VERSION) {
             $this->activate();

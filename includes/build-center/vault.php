@@ -1,10 +1,10 @@
 <?php
 /**
- * Plugin Name: VGT OMEGA VAULT
- * Plugin URI: https://visiongaiatechnology.de
- * Description: Cryptographic Data Safe & Secure Com-Link Endpoint. Zero-Dependency, O(n) Optimized, AES-256-GCM, CSRF-Hardened.
- * Version: 6.0.0
- * Author: VisionGaia Technology Intelligence System
+ * Module Name: VGT OMEGA VAULT
+ * Module URI: https://visiongaiatechnology.de
+ * Module Description: Cryptographic Data Safe & Secure Com-Link Endpoint. Zero-Dependency, O(n) Optimized, AES-256-GCM, CSRF-Hardened.
+ * Module Version: 6.0.0
+ * Module Author: VisionGaia Technology Intelligence System
  * Requires PHP: 8.0
  * License: AGPL-3.0-or-later
  */
@@ -157,8 +157,6 @@ require_once VGT_BUILD_CENTER_PATH . 'includes/class-vgt-omega-ui.php';
 final class VGT_Omega_Bootstrapper {
     
     public static function ignite(): void {
-        register_activation_hook(VGT_BUILD_CENTER_PATH . 'vault.php', [\VGT_Omega_DB::class, 'install']);
-        
         // Auto-Migration & Integrity checks
         add_action('init', [self::class, 'maybe_upgrade_db'], 5);
         add_action('admin_init', [\VGT_Omega_Crypto::class, 'verify_vault_integrity']);
