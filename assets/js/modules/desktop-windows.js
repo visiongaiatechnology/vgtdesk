@@ -693,6 +693,8 @@ Object.assign(window.VGTDeskEngine, {
         const dattrackToggle = document.getElementById('vgt-cc-dattrack-toggle');
         if (dattrackToggle) dattrackToggle.checked = (typeof vgtConfig !== 'undefined' && vgtConfig.dattrackEnabled);
 
+        this.renderIntegratedModules();
+
         this.applyWidgetsVisibility();
         this.applyIconsVisibility();
         this.applySavedWindowSettings();
@@ -731,6 +733,105 @@ Object.assign(window.VGTDeskEngine, {
         this.saveUserSetting('blur', state);
         this.applyBlur(state);
         this.updateControlCenterToggles();
+    },
+
+
+    renderIntegratedModules() {
+        const list = document.getElementById('vgt-cc-module-list');
+        if (!list) return;
+
+        const modules = (typeof vgtConfig !== 'undefined' && Array.isArray(vgtConfig.integratedModules)) ? vgtConfig.integratedModules : [];
+        list.replaceChildren();
+
+        if (!modules.length) {
+            const empty = document.createElement('div');
+            empty.className = 'vgt-cc-card';
+            empty.textContent = 'Keine integrierten Module registriert.';
+            list.appendChild(empty);
+            return;
+        }
+
+        modules.forEach((moduleInfo) => {
+            const card = document.createElement('div');
+            card.className = 'vgt-cc-toggle-card vgt-cc-module-card';
+
+            const info = document.createElement('div');
+            info.className = 'vgt-cc-toggle-info';
+
+            const title = document.createElement('span');
+            title.className = 'vgt-cc-toggle-title';
+            title.textContent = moduleInfo.label || moduleInfo.key;
+
+            const desc = document.createElement('span');
+            desc.className = 'vgt-cc-toggle-desc';
+            desc.textContent = moduleInfo.locked && moduleInfo.lockedReason ? moduleInfo.lockedReason : (moduleInfo.description || '');
+
+            const state = document.createElement('span');
+            state.className = moduleInfo.enabled ? 'vgt-cc-module-state active' : 'vgt-cc-module-state inactive';
+            state.textContent = moduleInfo.enabled ? 'AKTIV' : 'INAKTIV';
+
+            info.append(title, desc, state);
+
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.className = 'vgt-toggle-switch vgt-integrated-module-toggle';
+            input.checked = Boolean(moduleInfo.enabled);
+            input.disabled = Boolean(moduleInfo.locked || !moduleInfo.available);
+            input.dataset.module = moduleInfo.key || '';
+            input.addEventListener('change', () => this.toggleIntegratedModule(input));
+
+            card.append(info, input);
+            list.appendChild(card);
+        });
+    },
+
+    toggleIntegratedModule(input) {
+        if (!input || typeof vgtConfig === 'undefined' || !vgtConfig.ajaxUrl) return;
+
+        const previousState = !input.checked;
+        const moduleKey = input.dataset.module || '';
+        input.disabled = true;
+
+        const formData = new FormData();
+        formData.append('action', 'vgt_toggle_integrated_module');
+        formData.append('nonce', vgtConfig.nonce);
+        formData.append('module', moduleKey);
+        formData.append('enabled', input.checked ? 'true' : 'false');
+
+        fetch(vgtConfig.ajaxUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                input.checked = previousState;
+                alert('Fehler: ' + data.data);
+                return;
+            }
+
+            if (Array.isArray(data.data.modules)) {
+                vgtConfig.integratedModules = data.data.modules;
+            }
+            if (data.data.module === 'dattrack') {
+                vgtConfig.dattrackEnabled = Boolean(data.data.enabled);
+            }
+
+            this.addLog(data.data.message || 'Modulstatus aktualisiert.');
+            this.renderIntegratedModules();
+            this.updateDiagnostics();
+
+            if (data.data.reload) {
+                setTimeout(() => location.reload(), 450);
+            }
+        })
+        .catch((err) => {
+            input.checked = previousState;
+            console.error('Module Sync-Fehler:', err);
+        })
+        .finally(() => {
+            input.disabled = false;
+        });
     },
 
     toggleDattrack() {
@@ -848,6 +949,9 @@ Object.assign(window.VGTDeskEngine, {
 
         if (tabName === 'status') {
             this.updateDiagnostics();
+        }
+        if (tabName === 'modules') {
+            this.renderIntegratedModules();
         }
     },
 
@@ -1020,6 +1124,11 @@ Object.assign(window.VGTDeskEngine, {
                 const wBansStatus = document.getElementById('vgt-widget-bans-status');
                 if (wBansStatus) {
                     wBansStatus.textContent = `${diag.total_bans} IPs`;
+                }
+
+                if (Array.isArray(diag.integrated_modules) && typeof vgtConfig !== 'undefined') {
+                    vgtConfig.integratedModules = diag.integrated_modules;
+                    this.renderIntegratedModules();
                 }
 
                 if (this.updateWidgetData) {

@@ -1462,3 +1462,45 @@ body.vgt-dragging *,
         flex-direction: column;
     }
 }
+
+
+/* Integrated Module Control */
+.vgt-cc-module-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.vgt-cc-module-card {
+    align-items: center;
+}
+
+.vgt-cc-module-state {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    margin-top: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.vgt-cc-module-state.active {
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.24);
+}
+
+.vgt-cc-module-state.inactive {
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.1);
+    border: 1px solid rgba(248, 113, 113, 0.22);
+}
+
+.vgt-integrated-module-toggle:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}

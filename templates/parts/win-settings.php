@@ -46,6 +46,10 @@ if (!defined('ABSPATH')) {
                                     <span class="vgt-cc-nav-icon">🎨</span>
                                     <span class="vgt-cc-nav-text">Display & Themes</span>
                                 </button>
+                                <button class="vgt-cc-nav-item" data-tab="modules" onclick="VGTDeskEngine.switchCCTab('modules')">
+                                    <span class="vgt-cc-nav-icon">MOD</span>
+                                    <span class="vgt-cc-nav-text">Module Control</span>
+                                </button>
                                 <button class="vgt-cc-nav-item" data-tab="shortcuts" onclick="VGTDeskEngine.switchCCTab('shortcuts')">
                                     <span class="vgt-cc-nav-icon">⌨️</span>
                                     <span class="vgt-cc-nav-text">Shortcuts Mapper</span>
@@ -210,6 +214,19 @@ if (!defined('ABSPATH')) {
                                 </div>
                             </div>
                             
+                            <!-- Tab: Integrated Modules -->
+                            <div id="vgt-cc-tab-modules" class="vgt-cc-tab-panel">
+                                <h3 class="vgt-cc-section-title">Integrierte Module</h3>
+                                <p class="vgt-cc-section-desc">Aktiviere oder deaktiviere einzelne VGT-Desk-Integrationen. Aenderungen an Loader-Modulen werden nach einem Reload vollstaendig wirksam.</p>
+                                <div class="vgt-cc-module-list" id="vgt-cc-module-list">
+                                    <div class="vgt-cc-card">
+                                        <div class="vgt-cc-card-header">
+                                            <span class="vgt-cc-card-title">Module werden geladen</span>
+                                            <span class="vgt-cc-card-value">...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                             
                             <!-- Tab: Shortcuts Mapper -->
