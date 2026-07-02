@@ -329,8 +329,8 @@ trait WPDeskAJAXTrait
             ];
             $db_size = 0;
             foreach ($vgt_tables as $table) {
-                if ($wpdb->get_var("SHOW TABLES LIKE '$table'") === $table) {
-                    $status = $wpdb->get_row("SHOW TABLE STATUS LIKE '$table'");
+                if (WPDeskSecurity::table_exists($table)) {
+                    $status = $wpdb->get_row($wpdb->prepare('SHOW TABLE STATUS LIKE %s', $wpdb->esc_like($table)));
                     if ($status) {
                         $db_size += ((int)($status->Data_length ?? 0) + (int)($status->Index_length ?? 0));
                     }
@@ -364,7 +364,7 @@ trait WPDeskAJAXTrait
 
             $bans = [];
             $table_bans_v5 = $wpdb->prefix . 'vgts_apex_bans';
-            if ($wpdb->get_var("SHOW TABLES LIKE '$table_bans_v5'") === $table_bans_v5) {
+            if (WPDeskSecurity::table_exists($table_bans_v5)) {
                 $rows_v5 = $wpdb->get_results("SELECT id, ip, reason, banned_at FROM $table_bans_v5 ORDER BY banned_at DESC LIMIT 50", ARRAY_A);
                 if ($rows_v5) {
                     foreach ($rows_v5 as $r) {
@@ -379,7 +379,7 @@ trait WPDeskAJAXTrait
                 }
             }
             $table_bans_v7 = $wpdb->prefix . 'vis_apex_bans';
-            if ($wpdb->get_var("SHOW TABLES LIKE '$table_bans_v7'") === $table_bans_v7) {
+            if (WPDeskSecurity::table_exists($table_bans_v7)) {
                 $rows_v7 = $wpdb->get_results("SELECT id, ip, reason, banned_at FROM $table_bans_v7 ORDER BY banned_at DESC LIMIT 50", ARRAY_A);
                 if ($rows_v7) {
                     foreach ($rows_v7 as $r) {
@@ -397,18 +397,18 @@ trait WPDeskAJAXTrait
             // Calculate total bans
             $total_bans = 0;
             $table_bans_v5 = $wpdb->prefix . 'vgts_apex_bans';
-            if ($wpdb->get_var("SHOW TABLES LIKE '$table_bans_v5'") === $table_bans_v5) {
+            if (WPDeskSecurity::table_exists($table_bans_v5)) {
                 $total_bans += (int) $wpdb->get_var("SELECT COUNT(*) FROM $table_bans_v5");
             }
             $table_bans_v7 = $wpdb->prefix . 'vis_apex_bans';
-            if ($wpdb->get_var("SHOW TABLES LIKE '$table_bans_v7'") === $table_bans_v7) {
+            if (WPDeskSecurity::table_exists($table_bans_v7)) {
                 $total_bans += (int) $wpdb->get_var("SELECT COUNT(*) FROM $table_bans_v7");
             }
 
             // Calculate threats
             $threats = [];
             $table_logs_v5 = $wpdb->prefix . 'vgts_omega_logs';
-            if ($wpdb->get_var("SHOW TABLES LIKE '$table_logs_v5'") === $table_logs_v5) {
+            if (WPDeskSecurity::table_exists($table_logs_v5)) {
                 $rows_v5 = $wpdb->get_results("SELECT id, timestamp, type, message, ip FROM $table_logs_v5 ORDER BY timestamp DESC LIMIT 5", ARRAY_A);
                 if ($rows_v5) {
                     foreach ($rows_v5 as $r) {
@@ -424,7 +424,7 @@ trait WPDeskAJAXTrait
                 }
             }
             $table_logs_v7 = $wpdb->prefix . 'vis_omega_logs';
-            if ($wpdb->get_var("SHOW TABLES LIKE '$table_logs_v7'") === $table_logs_v7) {
+            if (WPDeskSecurity::table_exists($table_logs_v7)) {
                 $rows_v7 = $wpdb->get_results("SELECT id, timestamp, type, message, ip FROM $table_logs_v7 ORDER BY timestamp DESC LIMIT 5", ARRAY_A);
                 if ($rows_v7) {
                     foreach ($rows_v7 as $r) {
@@ -446,38 +446,13 @@ trait WPDeskAJAXTrait
                 });
                 $threats = array_slice($threats, 0, 3);
             } else {
-                $threats = [
-                    [
-                        'id' => 101,
-                        'timestamp' => current_time('mysql'),
-                        'type' => 'SQLi',
-                        'message' => 'Union Select injection in GET parameter "id"',
-                        'ip' => '185.220.101.5',
-                        'version' => 'Sentinel V7'
-                    ],
-                    [
-                        'id' => 102,
-                        'timestamp' => date('Y-m-d H:i:s', strtotime('-1 minute')),
-                        'type' => 'RCE',
-                        'message' => 'LFI wrapper injection php://filter',
-                        'ip' => '45.146.164.22',
-                        'version' => 'Sentinel V7'
-                    ],
-                    [
-                        'id' => 103,
-                        'timestamp' => date('Y-m-d H:i:s', strtotime('-5 minutes')),
-                        'type' => 'Brute-Force',
-                        'message' => 'wp-login.php threshold exceeded',
-                        'ip' => '89.248.172.90',
-                        'version' => 'Sentinel CE'
-                    ]
-                ];
+                $threats = [];
             }
 
             // Calculate Dattrack data
             $dattrack_data = [];
             $table_stats = $wpdb->prefix . 'vgt_dattrack_stats';
-            if ($wpdb->get_var("SHOW TABLES LIKE '$table_stats'") === $table_stats) {
+            if (WPDeskSecurity::table_exists($table_stats)) {
                 $rows_dt = $wpdb->get_results("SELECT stat_date, events, unique_users FROM {$table_stats} ORDER BY stat_date DESC LIMIT 7", ARRAY_A);
                 if ($rows_dt) {
                     $rows_dt = array_reverse($rows_dt);
@@ -553,7 +528,7 @@ trait WPDeskAJAXTrait
                 throw new SecurityException('Insufficient capabilities.');
             }
 
-            $ip = isset($_POST['ip']) ? sanitize_text_field($_POST['ip']) : '';
+            $ip = isset($_POST['ip']) ? WPDeskSecurity::normalize_ip((string)$_POST['ip']) : '';
             $version = isset($_POST['version']) ? sanitize_text_field($_POST['version']) : '';
 
             if (empty($ip)) {
@@ -562,7 +537,7 @@ trait WPDeskAJAXTrait
 
             global $wpdb;
             $table = ($version === 'Sentinel V7') ? $wpdb->prefix . 'vis_apex_bans' : $wpdb->prefix . 'vgts_apex_bans';
-            if ($wpdb->get_var("SHOW TABLES LIKE '$table'") === $table) {
+            if (WPDeskSecurity::table_exists($table)) {
                 $wpdb->delete($table, ['ip' => $ip]);
                 wp_send_json_success('IP-Adresse ' . esc_html($ip) . ' erfolgreich entbannt.');
             } else {
@@ -643,7 +618,7 @@ trait WPDeskAJAXTrait
                 throw new SecurityException('Insufficient capabilities.');
             }
 
-            $ip = isset($_POST['ip']) ? sanitize_text_field($_POST['ip']) : '';
+            $ip = isset($_POST['ip']) ? WPDeskSecurity::normalize_ip((string)$_POST['ip']) : '';
             $reason = isset($_POST['reason']) ? sanitize_text_field($_POST['reason']) : 'Permanenter Bann über Live Attack Stream Widget';
 
             if (empty($ip)) {
@@ -655,7 +630,7 @@ trait WPDeskAJAXTrait
 
             // Insert into Sentinel CE
             $table_v5 = $wpdb->prefix . 'vgts_apex_bans';
-            if ($wpdb->get_var("SHOW TABLES LIKE '$table_v5'") === $table_v5) {
+            if (WPDeskSecurity::table_exists($table_v5)) {
                 $wpdb->replace($table_v5, [
                     'ip' => $ip,
                     'reason' => $reason,
@@ -666,7 +641,7 @@ trait WPDeskAJAXTrait
 
             // Insert into Sentinel V7
             $table_v7 = $wpdb->prefix . 'vis_apex_bans';
-            if ($wpdb->get_var("SHOW TABLES LIKE '$table_v7'") === $table_v7) {
+            if (WPDeskSecurity::table_exists($table_v7)) {
                 $wpdb->replace($table_v7, [
                     'ip' => $ip,
                     'reason' => $reason,
@@ -801,6 +776,7 @@ trait WPDeskAJAXTrait
             if (!current_user_can('manage_options')) {
                 throw new SecurityException('Insufficient capabilities.');
             }
+            WPDeskSecurity::require_operational_control('unschedule_cron');
             $hook = isset($_POST['hook']) ? sanitize_key($_POST['hook']) : '';
             $timestamp = isset($_POST['timestamp']) ? intval($_POST['timestamp']) : 0;
             if (empty($hook) || !$timestamp) {
@@ -808,6 +784,7 @@ trait WPDeskAJAXTrait
             }
             
             wp_unschedule_event($timestamp, $hook);
+            WPDeskSecurity::audit_control_action('unschedule_cron', ['hook' => $hook, 'timestamp' => $timestamp]);
             wp_send_json_success('Cron-Hook ' . esc_html($hook) . ' wurde erfolgreich beendet.');
         } catch (SecurityException $e) {
             error_log('[SEC] Unschedule cron failed: ' . $e->getMessage());
@@ -829,6 +806,7 @@ trait WPDeskAJAXTrait
             if (!current_user_can('manage_options')) {
                 throw new SecurityException('Insufficient capabilities.');
             }
+            WPDeskSecurity::require_operational_control('kill_transient');
             $name = isset($_POST['name']) ? sanitize_key($_POST['name']) : '';
             if (empty($name)) {
                 throw new ValidationException('Name des Transients fehlt.');
@@ -836,6 +814,7 @@ trait WPDeskAJAXTrait
             
             delete_transient($name);
             delete_site_transient($name);
+            WPDeskSecurity::audit_control_action('kill_transient', ['name' => $name]);
             wp_send_json_success('Transient ' . esc_html($name) . ' erfolgreich gelöscht.');
         } catch (SecurityException $e) {
             error_log('[SEC] Kill transient failed: ' . $e->getMessage());
@@ -857,16 +836,18 @@ trait WPDeskAJAXTrait
             if (!current_user_can('manage_options')) {
                 throw new SecurityException('Insufficient capabilities.');
             }
+            WPDeskSecurity::require_operational_control('optimize_database');
             
             global $wpdb;
             $tables = $wpdb->get_col("SHOW TABLES");
             foreach ($tables as $table) {
-                $safe_table = '`' . str_replace('`', '``', $table) . '`';
+                $safe_table = WPDeskSecurity::quote_identifier((string)$table);
                 $wpdb->query("OPTIMIZE TABLE {$safe_table}");
             }
             
             $wpdb->query("DELETE pm FROM {$wpdb->postmeta} pm LEFT JOIN {$wpdb->posts} p ON pm.post_id = p.ID WHERE p.ID IS NULL");
-            $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_timeout\_%' AND option_value < " . time());
+            $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d", $wpdb->esc_like('_transient_timeout_') . '%', time()));
+            WPDeskSecurity::audit_control_action('optimize_database', ['tables' => count($tables)]);
             
             wp_send_json_success('Datenbank erfolgreich optimiert und bereinigt.');
         } catch (SecurityException $e) {

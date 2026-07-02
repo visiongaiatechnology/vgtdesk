@@ -59,7 +59,7 @@ class VGTS_Titan {
         header('Referrer-Policy: strict-origin-when-cross-origin', true);
         header('Permissions-Policy: geolocation=(), camera=(), microphone=()', true);
         if (!empty($this->options['titan_csp_baseline'])) {
-            header("Content-Security-Policy: default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; frame-ancestors 'self'; object-src 'none'; base-uri 'self'", true);
+            header('Content-Security-Policy: ' . (class_exists('\\VisionGaia\\WPDesk\\WPDeskSecurity') ? \VisionGaia\WPDesk\WPDeskSecurity::csp_policy(is_admin() ? 'admin' : 'frontend') : "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; frame-ancestors 'self'; object-src 'none'; base-uri 'self'"), true);
         }
         
         if (function_exists('header_remove')) {
@@ -90,7 +90,7 @@ class VGTS_Titan {
         $headers['Referrer-Policy']        = 'strict-origin-when-cross-origin';
         $headers['Permissions-Policy']     = 'geolocation=(), camera=(), microphone=()';
         if (!empty($this->options['titan_csp_baseline'])) {
-            $headers['Content-Security-Policy'] = "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; frame-ancestors 'self'; object-src 'none'; base-uri 'self'";
+            $headers['Content-Security-Policy'] = class_exists('\\VisionGaia\\WPDesk\\WPDeskSecurity') ? \VisionGaia\WPDesk\WPDeskSecurity::csp_policy(is_admin() ? 'admin' : 'frontend') : "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; frame-ancestors 'self'; object-src 'none'; base-uri 'self'";
         }
         
         $fake_tech = $this->options['titan_camouflage_mode'] ?? 'none';
@@ -256,7 +256,8 @@ class VGTS_Titan {
         $rules .= "Header set Referrer-Policy \"strict-origin-when-cross-origin\"\n";
         $rules .= "Header set Permissions-Policy \"geolocation=(), camera=(), microphone=()\"\n";
         if (!empty($this->options['titan_csp_baseline'])) {
-            $rules .= "Header set Content-Security-Policy \"default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; frame-ancestors 'self'; object-src 'none'; base-uri 'self'\"\n";
+            $policy = class_exists('\\VisionGaia\\WPDesk\\WPDeskSecurity') ? \VisionGaia\WPDesk\WPDeskSecurity::csp_policy('frontend') : "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; frame-ancestors 'self'; object-src 'none'; base-uri 'self'";
+            $rules .= "Header set Content-Security-Policy \"" . str_replace('"', '\\"', $policy) . "\"\n";
         }
         
         $rules .= "Header unset X-Powered-By\n";

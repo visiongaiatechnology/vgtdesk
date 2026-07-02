@@ -1,0 +1,191 @@
+/* STATUS: DIAMANT VGT SUPREME */
+
+.vgta-diff-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(10px);
+}
+
+.vgta-diff-modal {
+    width: min(1500px, 96vw);
+    max-height: 92vh;
+    display: grid;
+    grid-template-rows: auto minmax(220px, 34vh) minmax(220px, 1fr) auto;
+    overflow: hidden;
+    border: 1px solid rgba(0, 210, 255, 0.34);
+    border-radius: 14px;
+    background: #06090e;
+    color: var(--text-main);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.72);
+}
+
+.vgta-diff-header,
+.vgta-diff-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(18, 24, 35, 0.92);
+}
+
+.vgta-diff-actions {
+    justify-content: flex-end;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 0;
+}
+
+.vgta-diff-title,
+.vgta-diff-path,
+.vgta-diff-pane-title {
+    font-family: var(--font-mono);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+
+.vgta-diff-path {
+    color: var(--accent-cyan);
+    font-size: 0.75rem;
+}
+
+.vgta-diff-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1px;
+    overflow: hidden;
+    background: var(--border-color);
+}
+
+.vgta-diff-pane {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: #070b11;
+}
+
+.vgta-diff-pane-title {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-dim);
+    font-size: 0.66rem;
+}
+
+.vgta-diff-code {
+    flex: 1;
+    margin: 0;
+    padding: 12px;
+    overflow: auto;
+    color: #dce6f3;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.55;
+}
+
+.vgta-diff-table {
+    overflow: auto;
+    background: #05080c;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+}
+
+.vgta-diff-row {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr) 58px minmax(0, 1fr);
+    min-height: 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.035);
+}
+
+.vgta-diff-row.added {
+    background: rgba(0, 245, 155, 0.08);
+}
+
+.vgta-diff-row.removed {
+    background: rgba(255, 59, 48, 0.08);
+}
+
+.vgta-diff-row.changed {
+    background: rgba(255, 159, 28, 0.08);
+}
+
+.vgta-diff-row .line-num {
+    padding: 5px 8px;
+    color: var(--text-dim);
+    text-align: right;
+    user-select: none;
+}
+
+.vgta-diff-row .line-code {
+    min-width: 0;
+    padding: 5px 8px;
+    overflow: hidden;
+    border-left: 1px solid rgba(255, 255, 255, 0.035);
+    white-space: pre;
+    text-overflow: ellipsis;
+}
+
+.vgta-placeholder-text {
+    padding: 24px 10px;
+    color: var(--text-dim);
+    font-style: italic;
+    text-align: center;
+    font-size: 0.8rem;
+}
+
+.is-hidden {
+    display: none !important;
+}
+
+@media (max-width: 1440px) {
+    .vgta-shell {
+        grid-template-columns: minmax(290px, 340px) minmax(500px, 1fr);
+    }
+
+    .vgta-orchestrator-panel {
+        grid-column: 1 / -1;
+        min-height: auto;
+    }
+}
+
+@media (max-width: 960px) {
+    .vgta-root {
+        margin-left: -10px;
+        padding: 14px;
+    }
+
+    .vgta-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .vgta-shell {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .vgta-context-panel,
+    .vgta-chat-panel,
+    .vgta-orchestrator-panel {
+        min-height: auto;
+    }
+
+    .vgta-chat-toolbar,
+    .vgta-chat-composer,
+    .vgta-loop-grid,
+    .vgta-step-grid,
+    .vgta-terminal-metrics {
+        grid-template-columns: minmax(0, 1fr);
+        flex-direction: column;
+    }
+
+    .vgta-chat-log {
+        min-height: 400px;
+        max-height: 540px;
+    }
+}
+

@@ -1,0 +1,425 @@
+/* STATUS: DIAMANT VGT SUPREME */
+
+.vgta-root {
+    --bg-main: #020408;
+    --bg-panel: rgba(7, 11, 18, 0.84);
+    --bg-panel-strong: rgba(12, 18, 29, 0.92);
+    --bg-input: rgba(3, 7, 12, 0.86);
+    --bg-rail: rgba(4, 8, 14, 0.88);
+    --border-color: rgba(65, 84, 112, 0.28);
+    --border-glow: rgba(0, 245, 155, 0.34);
+    --border-hot: rgba(0, 210, 255, 0.52);
+    --accent-blue: #458cff;
+    --accent-cyan: #24dcff;
+    --accent-green: #18f6a4;
+    --accent-red: #ff5c66;
+    --accent-amber: #ffbd59;
+    --text-main: #f6f9fc;
+    --text-dim: #91a5bd;
+    --shadow-panel: 0 30px 90px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(36, 220, 255, 0.04) inset;
+    padding: 26px;
+    background:
+        linear-gradient(180deg, rgba(36, 220, 255, 0.08), transparent 310px),
+        linear-gradient(90deg, rgba(24, 246, 164, 0.04), transparent 38%, rgba(255, 189, 89, 0.035)),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.024) 0 1px, transparent 1px 54px),
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 54px),
+        var(--bg-main);
+    letter-spacing: 0;
+}
+
+.vgta-header {
+    position: relative;
+    min-height: 92px;
+    padding: 22px 26px;
+    border-color: rgba(36, 220, 255, 0.16);
+    border-radius: 14px;
+    background:
+        linear-gradient(135deg, rgba(24, 246, 164, 0.11), transparent 34%),
+        linear-gradient(90deg, rgba(36, 220, 255, 0.08), rgba(255, 189, 89, 0.025)),
+        rgba(5, 9, 15, 0.88);
+    box-shadow: var(--shadow-panel);
+}
+
+.vgta-header::after,
+.vgta-panel::after,
+.vgta-patch-vault::after {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(110deg, rgba(255, 255, 255, 0.12), transparent 18%, transparent 82%, rgba(36, 220, 255, 0.1));
+    content: "";
+    opacity: 0.42;
+}
+
+.vgta-branding h1 {
+    font-size: 2rem;
+    letter-spacing: 0;
+    text-shadow: 0 0 26px rgba(36, 220, 255, 0.24);
+}
+
+.vgta-subtitle {
+    margin-top: 8px;
+    color: #b7c7d9;
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+}
+
+.vgta-status-container {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vgta-version,
+.vgta-badge,
+.vgta-powered-link {
+    border-radius: 999px;
+}
+
+.vgta-shell {
+    grid-template-columns: minmax(310px, 382px) minmax(560px, 1fr) minmax(340px, 420px);
+    gap: 18px;
+}
+
+.vgta-panel,
+.vgta-patch-vault {
+    position: relative;
+    border-color: rgba(36, 220, 255, 0.14);
+    border-radius: 14px;
+    background:
+        linear-gradient(145deg, rgba(13, 20, 32, 0.92), rgba(4, 8, 14, 0.86)),
+        var(--bg-panel);
+    box-shadow: var(--shadow-panel);
+}
+
+.vgta-panel:hover,
+.vgta-patch-vault:hover {
+    border-color: rgba(24, 246, 164, 0.32);
+    box-shadow: 0 34px 100px rgba(0, 0, 0, 0.78), 0 0 32px rgba(24, 246, 164, 0.06);
+}
+
+.vgta-panel-header {
+    min-height: 52px;
+    border-bottom-color: rgba(36, 220, 255, 0.16);
+    background:
+        linear-gradient(90deg, rgba(24, 246, 164, 0.11), rgba(36, 220, 255, 0.05), rgba(255, 189, 89, 0.035)),
+        rgba(8, 13, 22, 0.94);
+    color: #ffffff;
+    font-size: 0.73rem;
+    letter-spacing: 0.09em;
+}
+
+.vgta-panel-content {
+    gap: 18px;
+    padding: 18px;
+}
+
+.vgta-vault-state,
+.vgta-map-summary,
+.vgta-thinking-loader,
+.vgta-memory-item,
+.vgta-agent-step-item,
+.vgta-patch-item {
+    border-radius: 10px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.035), transparent),
+        rgba(6, 10, 17, 0.72);
+}
+
+.vgta-input,
+.vgta-textarea,
+.vgta-chat-input {
+    min-height: 42px;
+    border-color: rgba(145, 165, 189, 0.22) !important;
+    border-radius: 10px !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent),
+        var(--bg-input) !important;
+}
+
+.vgta-input:focus,
+.vgta-textarea:focus,
+.vgta-chat-input:focus {
+    border-color: rgba(36, 220, 255, 0.78) !important;
+    box-shadow: 0 0 0 1px rgba(36, 220, 255, 0.22), 0 0 24px rgba(36, 220, 255, 0.12) !important;
+}
+
+.vgta-btn {
+    min-height: 40px;
+    border-color: rgba(145, 165, 189, 0.18);
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent),
+        rgba(12, 18, 29, 0.86);
+    letter-spacing: 0.03em;
+}
+
+.vgta-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: rgba(36, 220, 255, 0.7);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.34), 0 0 22px rgba(36, 220, 255, 0.13);
+}
+
+.vgta-btn.primary,
+.vgta-btn.success {
+    background:
+        linear-gradient(135deg, rgba(24, 246, 164, 0.2), rgba(36, 220, 255, 0.12)),
+        rgba(7, 12, 20, 0.9);
+}
+
+.vgta-btn.danger {
+    background:
+        linear-gradient(135deg, rgba(255, 92, 102, 0.2), rgba(255, 189, 89, 0.08)),
+        rgba(7, 12, 20, 0.9);
+}
+
+.vgta-tree,
+.vgta-chat-log,
+.vgta-agent-stack,
+.vgta-memory-list {
+    scrollbar-color: rgba(36, 220, 255, 0.38) rgba(3, 7, 12, 0.8);
+}
+
+.vgta-tree {
+    border-color: rgba(36, 220, 255, 0.14);
+    border-radius: 12px;
+    background:
+        linear-gradient(180deg, rgba(36, 220, 255, 0.035), transparent 44%),
+        rgba(3, 7, 12, 0.8);
+}
+
+.vgta-tree-item,
+.vgta-tree-item-details {
+    border-color: rgba(145, 165, 189, 0.16);
+    border-radius: 10px;
+    background: rgba(8, 13, 22, 0.72);
+}
+
+.vgta-tree-item-header::before {
+    content: ">";
+    color: var(--accent-green);
+}
+
+.vgta-chat-toolbar,
+.vgta-chat-composer,
+.vgta-terminal-metrics,
+.vgta-patch-vault-head,
+.vgta-memory-dock {
+    border-color: rgba(36, 220, 255, 0.13);
+    background:
+        linear-gradient(90deg, rgba(36, 220, 255, 0.045), rgba(24, 246, 164, 0.035)),
+        rgba(4, 8, 14, 0.84);
+}
+
+.vgta-chat-toolbar {
+    grid-template-columns: minmax(0, 1fr) 180px auto;
+}
+
+.vgta-chat-log {
+    background:
+        linear-gradient(180deg, rgba(36, 220, 255, 0.035), transparent 35%),
+        linear-gradient(90deg, rgba(24, 246, 164, 0.025), transparent 42%, rgba(255, 189, 89, 0.018)),
+        rgba(3, 7, 12, 0.88);
+}
+
+.vgta-message {
+    border-radius: 14px;
+    border-color: rgba(36, 220, 255, 0.14);
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.045), transparent),
+        rgba(8, 13, 22, 0.88);
+}
+
+.vgta-message.assistant {
+    border-color: rgba(36, 220, 255, 0.24);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.36), -1px 0 0 rgba(36, 220, 255, 0.4);
+}
+
+.vgta-message.user {
+    border-color: rgba(24, 246, 164, 0.28);
+    background:
+        linear-gradient(145deg, rgba(24, 246, 164, 0.09), transparent),
+        rgba(8, 13, 22, 0.9);
+}
+
+.vgta-message.system {
+    border-color: rgba(255, 189, 89, 0.24);
+}
+
+.vgta-message-meta,
+.vgta-section-sub-title,
+.vgta-form-group label {
+    letter-spacing: 0.06em;
+}
+
+.vgta-thinking-collapse,
+.vgta-code-container,
+.vgta-table-container {
+    border-color: rgba(36, 220, 255, 0.14);
+    border-radius: 12px;
+    background: rgba(2, 5, 10, 0.88);
+}
+
+.vgta-code-container code {
+    color: #7fffcf;
+}
+
+.vgta-memory-dock {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+
+.vgta-memory-item:hover,
+.vgta-memory-item:focus,
+.vgta-patch-item:hover,
+.vgta-agent-step-item:focus-within {
+    border-color: rgba(24, 246, 164, 0.46);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32), 0 0 20px rgba(24, 246, 164, 0.08);
+}
+
+.vgta-step-num,
+.vgta-file-badge,
+.vgta-inline-code {
+    border-radius: 999px;
+    background: rgba(3, 7, 12, 0.72);
+}
+
+.vgta-patch-list {
+    background:
+        linear-gradient(180deg, rgba(24, 246, 164, 0.035), transparent),
+        rgba(3, 7, 12, 0.3);
+}
+
+.vgta-patch-item {
+    border-color: rgba(24, 246, 164, 0.22);
+}
+
+.vgta-diff-modal,
+.vgta-diff-dialog {
+    color: var(--text-main);
+}
+
+.vgta-grounding-bar,
+.vgta-forge-grid,
+.vgta-forge-actions {
+    display: grid;
+    gap: 10px;
+}
+
+.vgta-grounding-bar {
+    grid-template-columns: minmax(150px, 1.2fr) minmax(120px, .8fr) 82px minmax(160px, 1fr) auto;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+    background: rgba(0, 0, 0, .24);
+}
+
+.vgta-toggle-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.vgta-agent-forge {
+    margin-top: 18px;
+}
+
+.vgta-forge-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, .55fr);
+    padding: 16px;
+}
+
+.vgta-agent-blueprint-preview,
+.vgta-custom-agent-list {
+    min-height: 140px;
+    border: 1px solid rgba(255, 255, 255, .1);
+    background: rgba(5, 9, 22, .74);
+    padding: 14px;
+}
+
+.vgta-forge-title {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 900;
+    margin-bottom: 6px;
+}
+
+.vgta-forge-meta,
+.vgta-forge-prompt {
+    color: #ffffff;
+    font-size: 12px;
+}
+
+.vgta-forge-prompt {
+    max-height: 180px;
+    overflow: auto;
+    white-space: pre-wrap;
+    border: 1px solid rgba(255, 255, 255, .08);
+    padding: 10px;
+    background: rgba(0, 0, 0, .32);
+}
+
+.vgta-risk {
+    display: inline-flex;
+    margin: 8px 0;
+    padding: 4px 8px;
+    border: 1px solid rgba(255, 255, 255, .18);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.vgta-risk.low { background: rgba(34, 197, 94, .18); }
+.vgta-risk.medium { background: rgba(250, 204, 21, .2); }
+.vgta-risk.high { background: rgba(249, 115, 22, .22); }
+.vgta-risk.critical { background: rgba(239, 68, 68, .28); }
+
+.vgta-custom-agent-row {
+    display: grid;
+    gap: 8px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+
+@media (max-width: 1380px) {
+    .vgta-shell {
+        grid-template-columns: minmax(280px, 360px) minmax(520px, 1fr);
+    }
+
+    .vgta-orchestrator-panel {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 980px) {
+    .vgta-root {
+        padding: 18px;
+    }
+
+    .vgta-header,
+    .vgta-shell,
+    .vgta-chat-toolbar,
+    .vgta-chat-composer {
+        grid-template-columns: 1fr;
+    }
+
+    .vgta-grounding-bar,
+    .vgta-forge-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vgta-header,
+    .vgta-shell {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .vgta-status-container {
+        align-items: flex-start;
+    }
+}

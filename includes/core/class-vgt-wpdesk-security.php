@@ -92,6 +92,106 @@ final class WPDeskSecurity
         return $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $like)) === $table;
     }
 
+    public static function quote_identifier(string $identifier): string
+    {
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $identifier)) {
+            throw new SecurityException('SQL identifier validation failed.');
+        }
+
+        return '`' . str_replace('`', '``', $identifier) . '`';
+    }
+
+    public static function require_operational_control(string $action): void
+    {
+        if (current_user_can('mcp_master_access')) {
+            return;
+        }
+
+        if (!self::throne_guard_active() && current_user_can('manage_options')) {
+            return;
+        }
+
+        throw new SecurityException('Operational control gate rejected action token.');
+    }
+
+    public static function audit_control_action(string $action, array $context = []): void
+    {
+        $entry = [
+            'timestamp' => current_time('mysql'),
+            'user_id' => get_current_user_id(),
+            'action' => sanitize_key($action),
+            'ip' => self::client_ip(),
+            'context' => array_map(static fn($value) => is_scalar($value) ? sanitize_text_field((string)$value) : '[structured]', $context),
+        ];
+
+        $log = get_option('vgt_operational_audit_log', []);
+        if (!is_array($log)) {
+            $log = [];
+        }
+        $log[] = $entry;
+        $log = array_slice($log, -200);
+        update_option('vgt_operational_audit_log', $log, false);
+        error_log('[VGT OP-AUDIT] ' . wp_json_encode($entry, JSON_UNESCAPED_SLASHES));
+    }
+
+    public static function normalize_ip(string $ip): string
+    {
+        $ip = trim(sanitize_text_field(wp_unslash($ip)));
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            throw new ValidationException('Ungueltige IP-Adresse.');
+        }
+
+        return $ip;
+    }
+
+    public static function is_safe_wallpaper_url(string $value): bool
+    {
+        if ($value === '') {
+            return true;
+        }
+
+        if (preg_match('#^data:image/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$#i', $value) === 1) {
+            return true;
+        }
+
+        if (str_starts_with($value, 'data:')) {
+            return false;
+        }
+
+        $site_host = parse_url(site_url(), PHP_URL_HOST);
+        $value_host = parse_url($value, PHP_URL_HOST);
+        $upload_dir = wp_upload_dir();
+        $upload_host = parse_url($upload_dir['baseurl'] ?? '', PHP_URL_HOST);
+
+        return empty($value_host)
+            || $value_host === $site_host
+            || $value_host === $upload_host
+            || str_starts_with($value, '/')
+            || str_contains($value, '/wp-content/uploads/');
+    }
+
+    public static function csp_policy(string $surface, string $nonce = ''): string
+    {
+        $mode = sanitize_key((string)get_option('vgt_csp_mode', 'compatibility'));
+        $mode = in_array($mode, ['compatibility', 'hardened', 'strict', 'report_only'], true) ? $mode : 'compatibility';
+        $nonceSource = $nonce !== '' ? " 'nonce-" . $nonce . "'" : '';
+        $isAdmin = $surface === 'admin';
+
+        if ($mode === 'strict') {
+            return "default-src 'self'; script-src 'self'" . $nonceSource . "; style-src 'self'" . $nonceSource . "; img-src 'self' data:; font-src 'self' data:; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self';";
+        }
+
+        if ($mode === 'hardened') {
+            return $isAdmin
+                ? "default-src 'self' data: https:; script-src 'self' 'unsafe-inline'" . $nonceSource . "; style-src 'self' 'unsafe-inline'" . $nonceSource . "; img-src 'self' data: https: blob:; font-src 'self' data:; frame-ancestors 'self'; object-src 'none'; base-uri 'self';"
+                : "default-src 'self' data: https:; script-src 'self' 'unsafe-inline'" . $nonceSource . "; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; frame-ancestors 'self'; object-src 'none'; base-uri 'self';";
+        }
+
+        return $isAdmin
+            ? "default-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self';"
+            : "default-src 'self' data: https: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; frame-ancestors 'self'; object-src 'none'; base-uri 'self';";
+    }
+
     public static function jailed_path(string $base_dir, string $relative): string
     {
         $base = realpath($base_dir);

@@ -23,7 +23,7 @@ final class WPDeskSettings
         $table_name = $wpdb->prefix . 'vgt_desk_settings';
         $db_version = '1.0.0';
         
-        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
+        $table_exists = WPDeskSecurity::table_exists($table_name);
         
         if (get_option('vgt_desk_db_version') !== $db_version || !$table_exists) {
             $charset_collate = $wpdb->get_charset_collate();
@@ -43,22 +43,22 @@ final class WPDeskSettings
         }
 
         // Bereinige Duplikate falls vorhanden
-        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
+        if (WPDeskSecurity::table_exists($table_name)) {
             $duplicates = $wpdb->get_results("
                 SELECT user_id, setting_key, COUNT(*) as cnt 
-                FROM $table_name 
+                FROM {$table_sql} 
                 GROUP BY user_id, setting_key 
                 HAVING cnt > 1
             ");
             if (!empty($duplicates)) {
                 foreach ($duplicates as $dup) {
                     $max_id = $wpdb->get_var($wpdb->prepare(
-                        "SELECT MAX(id) FROM $table_name WHERE user_id = %d AND setting_key = %s",
+                        "SELECT MAX(id) FROM {$table_sql} WHERE user_id = %d AND setting_key = %s",
                         $dup->user_id, $dup->setting_key
                     ));
                     if ($max_id) {
                         $wpdb->query($wpdb->prepare(
-                            "DELETE FROM $table_name WHERE user_id = %d AND setting_key = %s AND id != %d",
+                            "DELETE FROM {$table_sql} WHERE user_id = %d AND setting_key = %s AND id != %d",
                             $dup->user_id, $dup->setting_key, $max_id
                         ));
                     }
@@ -66,9 +66,9 @@ final class WPDeskSettings
             }
             
             // Einzigartigen Schlüssel nachträglich hinzufügen falls er fehlt
-            $index_exists = $wpdb->get_results("SHOW INDEX FROM $table_name WHERE Key_name = 'user_setting'");
+            $index_exists = $wpdb->get_results("SHOW INDEX FROM {$table_sql} WHERE Key_name = 'user_setting'");
             if (empty($index_exists)) {
-                $wpdb->query("ALTER TABLE $table_name ADD UNIQUE KEY user_setting (user_id, setting_key)");
+                $wpdb->query("ALTER TABLE {$table_sql} ADD UNIQUE KEY user_setting (user_id, setting_key)");
             }
         }
     }
@@ -84,9 +84,9 @@ final class WPDeskSettings
         self::maybe_create_table();
         
         $db_settings = [];
-        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
+        if (WPDeskSecurity::table_exists($table_name)) {
             $rows = $wpdb->get_results(
-                $wpdb->prepare("SELECT setting_key, setting_value FROM $table_name WHERE user_id = %d ORDER BY id ASC", $user_id),
+                $wpdb->prepare("SELECT setting_key, setting_value FROM {$table_sql} WHERE user_id = %d ORDER BY id ASC", $user_id),
                 ARRAY_A
             );
             if ($rows) {

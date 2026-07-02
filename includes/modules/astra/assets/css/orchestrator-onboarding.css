@@ -1,0 +1,178 @@
+/* STATUS: DIAMANT VGT SUPREME */
+
+.vgta-powered-link,
+.vgta-beta-brand {
+    color: var(--accent-cyan);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.vgta-powered-link:hover,
+.vgta-powered-link:focus,
+.vgta-beta-brand:hover,
+.vgta-beta-brand:focus {
+    color: var(--accent-green);
+    outline: none;
+}
+
+.vgta-beta-gate,
+.vgta-guide-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+        radial-gradient(circle at 50% 18%, rgba(0, 210, 255, 0.14), transparent 34%),
+        rgba(1, 3, 7, 0.88);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.vgta-beta-gate.is-hidden,
+.vgta-guide-overlay.is-hidden {
+    display: none;
+}
+
+.vgta-beta-card,
+.vgta-guide-card {
+    width: min(760px, 100%);
+    max-height: min(780px, calc(100vh - 48px));
+    overflow-y: auto;
+    border: 1px solid rgba(0, 245, 155, 0.24);
+    border-radius: 14px;
+    background: linear-gradient(145deg, rgba(10, 14, 20, 0.98), rgba(3, 5, 8, 0.98));
+    box-shadow: 0 28px 90px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(0, 210, 255, 0.08) inset;
+}
+
+.vgta-beta-card {
+    padding: 28px;
+}
+
+.vgta-beta-kicker,
+.vgta-guide-kicker {
+    color: var(--accent-green);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.vgta-beta-card h2,
+.vgta-guide-title {
+    margin: 12px 0 14px;
+    color: #ffffff;
+    font-family: var(--font-mono);
+    font-size: 1.7rem;
+    letter-spacing: 0;
+}
+
+.vgta-beta-card p,
+.vgta-guide-copy {
+    margin: 0 0 12px;
+    color: #ffffff;
+    font-size: 0.94rem;
+    line-height: 1.65;
+}
+
+.vgta-beta-list {
+    display: grid;
+    gap: 8px;
+    margin: 18px 0;
+    padding-left: 20px;
+    color: #ffffff;
+    line-height: 1.55;
+}
+
+.vgta-beta-actions,
+.vgta-guide-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.vgta-guide-card {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    min-height: 520px;
+}
+
+.vgta-guide-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px;
+    border-right: 1px solid var(--border-color);
+    background: rgba(5, 8, 12, 0.72);
+}
+
+.vgta-guide-step {
+    padding: 10px 11px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: rgba(12, 17, 26, 0.74);
+    color: #ffffff;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-align: left;
+    cursor: pointer;
+}
+
+.vgta-guide-step.is-active {
+    border-color: rgba(0, 245, 155, 0.5);
+    color: #ffffff;
+    background: rgba(0, 245, 155, 0.08);
+}
+
+.vgta-guide-main {
+    display: flex;
+    flex-direction: column;
+    padding: 26px;
+}
+
+.vgta-guide-panel {
+    flex: 1;
+}
+
+.vgta-guide-benefit {
+    margin-top: 18px;
+    padding: 14px;
+    border: 1px solid rgba(0, 210, 255, 0.18);
+    border-radius: 8px;
+    background: rgba(0, 210, 255, 0.05);
+    color: #ffffff;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.55;
+}
+
+@media (max-width: 760px) {
+    .vgta-beta-actions,
+    .vgta-guide-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .vgta-guide-card {
+        grid-template-columns: 1fr;
+    }
+
+    .vgta-guide-rail {
+        border-right: 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .vgta-beta-card h2,
+    .vgta-guide-title {
+        font-size: 1.35rem;
+    }
+}

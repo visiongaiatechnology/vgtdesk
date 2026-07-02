@@ -182,15 +182,14 @@ final class MasterUserControlPlugin {
         $headers['Referrer-Policy'] = 'strict-origin-when-cross-origin';
         $headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()';
         
-        // CSP so konfiguriert, dass sie im Admin-Bereich kompatibel bleibt.
-        // Auf dem Frontend standardmäßig kompatibel mit Page Buildern und Dynamic Form Shortcodes (wie dem VGT Sentinel V7 Builder).
-        if (is_admin()) {
+        if (class_exists('\\VisionGaia\\WPDesk\\WPDeskSecurity')) {
+            $csp = \VisionGaia\WPDesk\WPDeskSecurity::csp_policy(is_admin() ? 'admin' : 'frontend', $nonce);
+        } elseif (is_admin()) {
             $csp = "default-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self';";
         } else {
-            // Highly compatible frontend CSP allowing inline styles/scripts and external HTTPS resources
             $csp = "default-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; object-src 'none'; base-uri 'self';";
         }
-        
+
         $headers['Content-Security-Policy'] = apply_filters('vgt_throne_guard_csp', $csp, is_admin(), $nonce);
         
         return $headers;

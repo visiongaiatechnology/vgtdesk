@@ -1,0 +1,447 @@
+/* STATUS: DIAMANT VGT SUPREME */
+}
+.vgta-tree-item-body .security-alert {
+    border: 1px solid rgba(255, 59, 48, 0.2);
+    background: rgba(255, 59, 48, 0.05);
+    color: #ff9f9a;
+}
+.vgta-map-summary {
+    padding: 12px 16px;
+    border: 1px solid rgba(0, 210, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(0, 210, 255, 0.02);
+    margin-bottom: 12px;
+}
+.vgta-map-summary .summary-title {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    margin-bottom: 6px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.vgta-map-summary .summary-body {
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text-main);
+}
+.vgta-file-badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #111827;
+    color: var(--text-dim);
+    font-size: 0.58rem;
+    font-family: var(--font-mono);
+}
+.vgta-file-badge.hook {
+    border: 1px solid rgba(0, 210, 255, 0.2);
+    color: var(--accent-cyan);
+}
+.vgta-file-badge.class {
+    border: 1px solid rgba(0, 245, 155, 0.2);
+    color: var(--accent-green);
+}
+.vgta-file-badge.warning {
+    border: 1px solid rgba(255, 159, 28, 0.2);
+    color: var(--accent-amber);
+}
+.vgta-file-badge.danger {
+    border: 1px solid rgba(255, 59, 48, 0.2);
+    color: var(--accent-red);
+}
+.vgta-chat-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 180px;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-rail);
+    align-items: center;
+}
+.vgta-chat-log {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 18px;
+    min-height: 540px;
+    max-height: calc(100vh - 355px);
+    padding: 20px;
+    overflow-y: auto;
+    background:
+        radial-gradient(circle at 100% 100%, rgba(0, 245, 155, 0.02), transparent 40%),
+        var(--bg-input);
+}
+/* modern fluorescent command message design */
+.vgta-message {
+    width: min(94%, 1020px);
+    padding: 16px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: rgba(10, 14, 20, 0.9);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    animation: messageIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes messageIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.vgta-message.user {
+    align-self: flex-end;
+    border-color: rgba(0, 122, 255, 0.3);
+    background: rgba(0, 122, 255, 0.04);
+}
+.vgta-message.assistant {
+    align-self: flex-start;
+    border-color: rgba(0, 210, 255, 0.2);
+}
+.vgta-message.system {
+    width: 100%;
+    border-color: rgba(255, 159, 28, 0.18);
+    background: rgba(255, 159, 28, 0.02);
+}
+/* Beautiful Collapsible Terminal Style Thinking Process */
+.vgta-thinking-collapse {
+    border: 1px solid rgba(255, 159, 28, 0.25);
+    border-radius: 8px;
+    background: #06080c;
+    overflow: hidden;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+.vgta-thinking-collapse summary {
+    padding: 10px 16px;
+    background: rgba(255, 159, 28, 0.06);
+    color: var(--accent-amber);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.vgta-thinking-collapse summary::after {
+    content: "▼";
+    font-size: 0.55rem;
+    transition: transform 0.2s ease;
+}
+.vgta-thinking-collapse[open] summary::after {
+    transform: rotate(180deg);
+}
+.vgta-thinking-content {
+    padding: 14px 18px;
+    max-height: 280px;
+    overflow-y: auto;
+    border-top: 1px solid rgba(255, 159, 28, 0.15);
+    color: #e2ccb2;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    background: rgba(0, 0, 0, 0.4);
+}
+/* Real-time reasoning active live loader */
+.vgta-thinking-loader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--accent-amber);
+    padding: 10px 14px;
+    border: 1px solid rgba(255, 159, 28, 0.25);
+    border-radius: 8px;
+    background: rgba(255, 159, 28, 0.02);
+    margin-bottom: 12px;
+}
+.vgta-thinking-pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-amber);
+    animation: pulse 1.2s infinite alternate;
+}
+@keyframes pulse {
+    0% { transform: scale(0.8); opacity: 0.4; box-shadow: 0 0 0 0 rgba(255, 159, 28, 0.4); }
+    100% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 8px 3px rgba(255, 159, 28, 0.6); }
+}
+.vgta-message.error,
+.vgta-message.system.error {
+    border-color: rgba(255, 59, 48, 0.35);
+    background: rgba(255, 59, 48, 0.04);
+}
+.vgta-message-meta {
+    margin-bottom: 8px;
+    color: var(--accent-cyan);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.vgta-response-content {
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+/* Premium Markdown elements */
+.vgta-response-content p {
+    margin: 0 0 12px;
+}
+.vgta-response-content strong {
+    color: #ffffff;
+    font-weight: 700;
+}
+.vgta-md-link {
+    color: var(--accent-cyan);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0, 210, 255, 0.3);
+    transition: border-color 0.15s ease;
+}
+.vgta-md-link:hover {
+    border-color: var(--accent-cyan);
+}
+.vgta-inline-code {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    background: #111827;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #ff9f9a;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.vgta-md-h1, .vgta-md-h2, .vgta-md-h3 {
+    font-family: var(--font-mono);
+    color: #ffffff;
+    margin: 20px 0 10px;
+    font-weight: 700;
+}
+.vgta-md-h1 { font-size: 1.35rem; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; }
+.vgta-md-h2 { font-size: 1.15rem; }
+.vgta-md-h3 { font-size: 1rem; }
+.vgta-md-ul, .vgta-md-ol {
+    margin: 0 0 14px;
+    padding-left: 20px;
+}
+.vgta-md-ul li, .vgta-md-ol li {
+    margin-bottom: 4px;
+}
+/* Fluorescent responsive command tables */
+.vgta-table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 16px 0;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+}
+.vgta-command-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    text-align: left;
+}
+.vgta-command-table th {
+    background: var(--bg-panel-strong);
+    padding: 12px 14px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--accent-cyan);
+    border-bottom: 1px solid var(--border-color);
+}
+.vgta-command-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(26, 36, 54, 0.4);
+    color: var(--text-main);
+}
+.vgta-command-table tr:hover {
+    background: rgba(0, 210, 255, 0.02);
+}
+.vgta-code-container {
+    margin: 14px 0;
+    padding: 14px;
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: #030509;
+}
+.vgta-code-container code {
+    color: var(--accent-green);
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    line-height: 1.5;
+}
+.vgta-chat-composer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 90px;
+    gap: 12px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-rail);
+}
+.vgta-chat-input {
+    min-height: 60px;
+    max-height: 160px;
+}
+.vgta-terminal-metrics {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 20px;
+    border-top: 1px solid var(--border-color);
+    background: #020305;
+    color: var(--accent-cyan);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.02em;
+}
+.vgta-loop-grid,
+.vgta-step-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+}
+.vgta-step-grid {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr) minmax(0, 0.8fr);
+}
+.vgta-loop-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-color);
+}
+.vgta-agent-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: calc(100vh - 485px);
+    overflow-y: auto;
+}
+.vgta-agent-step-item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: rgba(18, 24, 35, 0.5);
+}
+.vgta-step-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.vgta-step-num {
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--bg-input);
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+}
+.vgta-btn-remove-step {
+    border: 0;
+    background: transparent;
+    color: var(--accent-red);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+.vgta-btn-remove-step:disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+}
+.vgta-execution-control-block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+.vgta-patch-vault {
+    margin-top: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-panel);
+    overflow: hidden;
+}
+.vgta-patch-vault-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-panel-strong);
+}
+.vgta-patch-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 12px;
+    padding: 16px;
+}
+.vgta-patch-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 66px;
+    padding: 12px;
+    border: 1px solid rgba(0, 245, 155, 0.2);
+    border-radius: 8px;
+    background: rgba(0, 245, 155, 0.04);
+    transition: all 0.2s ease;
+}
+.vgta-patch-item:hover {
+    border-color: rgba(0, 245, 155, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 245, 155, 0.1);
+}
+.vgta-patch-item.committed {
+    opacity: 0.5;
+    border-color: var(--border-color);
+    background: rgba(0, 0, 0, 0.1);
+}
+.vgta-patch-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 4px;
+}
+.vgta-patch-info .path {
+    overflow: hidden;
+    color: #ffffff;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.vgta-patch-info .meta {
+    overflow: hidden;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.vgta-patch-info .meta.workspace {
+    max-width: 100%;
+    color: var(--accent-amber);
+}

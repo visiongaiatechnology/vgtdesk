@@ -1,0 +1,110 @@
+/* STATUS: DIAMANT VGT SUPREME */
+
+.vgta-memory-dock {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(5, 8, 12, 0.42);
+}
+
+.vgta-memory-column {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 8px;
+}
+
+.vgta-memory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    max-height: 142px;
+    overflow-y: auto;
+}
+
+.vgta-memory-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid rgba(0, 210, 255, 0.14);
+    border-radius: 8px;
+    background: rgba(12, 17, 26, 0.82);
+    color: var(--text-main);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.vgta-memory-item:hover,
+.vgta-memory-item:focus {
+    border-color: rgba(0, 245, 155, 0.46);
+    background: rgba(0, 245, 155, 0.07);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.vgta-memory-item .title {
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vgta-memory-item .meta {
+    overflow: hidden;
+    margin-top: 3px;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vgta-memory-item.artifact {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.vgta-memory-open {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.vgta-memory-include {
+    min-height: 28px;
+    padding: 0 8px;
+    border: 1px solid rgba(0, 245, 155, 0.28);
+    border-radius: 6px;
+    background: rgba(0, 245, 155, 0.08);
+    color: var(--accent-green);
+    font-family: var(--font-mono);
+    font-size: 0.56rem;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.vgta-memory-include:hover,
+.vgta-memory-include:focus {
+    border-color: var(--accent-green);
+    outline: none;
+}
+
+@media (max-width: 1100px) {
+    .vgta-memory-dock {
+        grid-template-columns: 1fr;
+    }
+}

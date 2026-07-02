@@ -49,8 +49,8 @@ final class WPDeskAppBuilder
                 continue;
             }
 
-            if (preg_match('/^https?:\/\//', $slug)) {
-                $url = $slug;
+            if (preg_match('/^https?:\/\//', (string)$slug)) {
+                continue;
             } elseif (stripos($slug, '.php') !== false) {
                 $url = admin_url($slug);
             } else {
@@ -100,8 +100,8 @@ final class WPDeskAppBuilder
 
                     $sub_title = wp_strip_all_tags($sub_item[0]);
 
-                    if (preg_match('/^https?:\/\//', $sub_item[2])) {
-                        $sub_url = $sub_item[2];
+                    if (preg_match('/^https?:\/\//', (string)$sub_item[2])) {
+                        continue;
                     } elseif (strpos($sub_item[2], '.php') !== false) {
                         $sub_url = admin_url($sub_item[2]);
                     } else {

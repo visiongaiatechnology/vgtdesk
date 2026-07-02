@@ -72,6 +72,13 @@ final class WPDeskPlugin
             'default' => true,
             'reload' => true,
         ],
+        'astra' => [
+            'label' => 'VGTAstra',
+            'description' => 'Zero-dependency WordPress AI assistant system with Groq reasoning pipelines.',
+            'option' => 'vgt_module_astra_enabled',
+            'default' => false,
+            'reload' => true,
+        ],
     ];
 
     public static function getInstance(): self
@@ -133,6 +140,10 @@ final class WPDeskPlugin
 
         if (self::is_integrated_module_enabled('chronos') && file_exists(VGT_WPDESK_PATH . 'includes/chronos/Chronosloader.php')) {
             require_once VGT_WPDESK_PATH . 'includes/chronos/Chronosloader.php';
+        }
+
+        if (self::is_integrated_module_enabled('astra') && file_exists(VGT_WPDESK_PATH . 'includes/modules/astra/ki.php')) {
+            require_once VGT_WPDESK_PATH . 'includes/modules/astra/ki.php';
         }
 
         add_action('plugins_loaded', function() {
@@ -252,8 +263,10 @@ final class WPDeskPlugin
             plugin_basename(VGT_WPDESK_PATH . 'includes/book-reader/bookreader.php'),
             plugin_basename(VGT_WPDESK_PATH . 'includes/chronos/Chronosloader.php'),
             plugin_basename(VGT_WPDESK_PATH . 'includes/modules/dattrack/class-dattrack-engine.php'),
+            plugin_basename(VGT_WPDESK_PATH . 'includes/modules/astra/ki.php'),
+            'vgtastra/ki.php',
+            'vgtastra-main/ki.php',
         ];
-
         $active_plugins = get_option('active_plugins', []);
         if (is_array($active_plugins)) {
             $filtered_plugins = array_values(array_diff($active_plugins, $legacy_plugins));
@@ -908,6 +921,7 @@ final class WPDeskPlugin
         }
         
         global $wpdb;
+        $redacted = empty($_POST['diagnostics_redacted']) || sanitize_key((string)wp_unslash($_POST['diagnostics_redacted'])) !== '0';
         $active_plugins = get_option('active_plugins', []);
         $theme = wp_get_theme();
         $user_id = get_current_user_id();
@@ -919,15 +933,17 @@ final class WPDeskPlugin
         $sentinel_v7_active = $sentinel_state['v7_active'];
 
         $diagnostics = [
+            'sensitivity' => 'confidential-security-diagnostics',
+            'redacted' => $redacted,
             'timestamp' => current_time('mysql'),
-            'wp_version' => get_bloginfo('version'),
-            'php_version' => PHP_VERSION,
-            'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
+            'wp_version' => $redacted ? 'redacted' : get_bloginfo('version'),
+            'php_version' => $redacted ? 'redacted' : PHP_VERSION,
+            'server_software' => $redacted ? 'redacted' : sanitize_text_field((string)($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown')),
             'theme' => [
                 'name' => $theme->get('Name'),
-                'version' => $theme->get('Version')
+                'version' => $redacted ? 'redacted' : $theme->get('Version')
             ],
-            'plugins' => $active_plugins,
+            'plugins' => $redacted ? ['count' => is_array($active_plugins) ? count($active_plugins) : 0] : $active_plugins,
             'throne_guard' => [
                 'active' => WPDeskSecurity::throne_guard_active(),
             ],
@@ -942,9 +958,11 @@ final class WPDeskPlugin
             ]
         ];
         
-        header('Content-Type: application/json');
+        nocache_headers();
+        header('Content-Type: application/json; charset=utf-8');
+        header('X-Content-Type-Options: nosniff');
         header('Content-Disposition: attachment; filename="vgt-diagnostics-' . date('Y-m-d-His') . '.json"');
-        echo wp_json_encode($diagnostics, JSON_PRETTY_PRINT);
+        echo wp_json_encode($diagnostics, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         exit;
     }
 
