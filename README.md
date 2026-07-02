@@ -6,12 +6,12 @@
 ---
 
 [![License](https://img.shields.io/badge/License-AGPLv3-green?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.0.0--Beta__v4-brightgreen?style=for-the-badge)](#)
+[![Version](https://img.shields.io/badge/Version-1.0.0--Beta__v4.1-brightgreen?style=for-the-badge)](#)
 [![Platform](https://img.shields.io/badge/Platform-WordPress-21759B?style=for-the-badge&logo=wordpress)](#)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php)](#)
 [![Architecture](https://img.shields.io/badge/Architecture-Zero--Overheat_OS--Layer-blue?style=for-the-badge)](#)
 [![Engine](https://img.shields.io/badge/Engine-Vanilla_JS_%2F_CSS3-orange?style=for-the-badge)](#)
-[![Status](https://img.shields.io/badge/Status-BETA__V4-yellow?style=for-the-badge)](#)
+[![Status](https://img.shields.io/badge/Status-BETA__V4.1-yellow?style=for-the-badge)](#)
 [![VGT](https://img.shields.io/badge/VGT-VisionGaiaTechnology-red?style=for-the-badge)](https://visiongaiatechnology.de)
 [![Security Review](https://img.shields.io/badge/Security_Posture-v4_Internal_Review-brightgreen?style=for-the-badge)](#security-posture--vgt-wp-desk-v4-stable)
 
@@ -37,8 +37,7 @@ See: [SECURITY_POSTURE.md](SECURITY_POSTURE.md)
 
 ---
 
-<img width="2558" height="1230" alt="image" src="https://github.com/user-attachments/assets/dad7dc14-ce7f-43cd-ac6c-3412cc7d2b6d" />
-
+<img width="2560" height="1232" alt="image" src="https://github.com/user-attachments/assets/336383e1-653c-4353-aaea-7414d909b3bf" />
 
 ---
 
@@ -77,12 +76,10 @@ VGT WP-Desk Operator Workspace:
 → CSP-aware asset loading and DOM XSS hardening
 → Zero-CDN, zero-build, zero-framework runtime
 ```
+
 ### Security Center
 
 The WP-Desk Security Center brings the core VGT security components into one operator interface:
-
-<img width="2557" height="1232" alt="image" src="https://github.com/user-attachments/assets/212845ab-96e0-4845-9827-fded10cf5465" />
-
 
 ```text
 VGT WP-Desk Security Center
@@ -108,9 +105,6 @@ VGT WP-Desk Security Center
 ### VGT Build Center
 
 Beta v4 consolidates the builder toolchain under a single unified app icon (`dashicons-hammer`), replacing three separate menu entries:
-
-<img width="2558" height="1236" alt="image" src="https://github.com/user-attachments/assets/dcfeca29-6686-400c-bd58-e6d32648a67a" />
-
 
 ```text
 VGT Build Center
@@ -183,6 +177,8 @@ Persistent Settings (Relational DB)
 → Migration: wp_usermeta data imported on first load
 ```
 
+<img width="1870" height="1142" alt="image" src="https://github.com/user-attachments/assets/fbbb1b7f-cfce-45b7-86f3-28878a32cc09" />
+
 ---
 
 ## 🧩 Feature Matrix
@@ -199,16 +195,11 @@ Persistent Settings (Relational DB)
 | **Dark Theme Injection** | Media, Themes, Menus pages receive consistent dark-mode overrides |
 | **SVG Branding** | Native SVG colors preserved — `filter: invert()` removed |
 
-<img width="2560" height="1234" alt="image" src="https://github.com/user-attachments/assets/f59207e3-9276-415f-8868-db81439cb602" />
-
+<img width="1914" height="914" alt="Tile Engine Layout" src="https://github.com/user-attachments/assets/3f3df87a-45ef-4666-a879-8831f791a0e2" />
 
 ---
 
 ### 🖱️ 2.2 Multi-Window Workspace
-
-<img width="2559" height="1231" alt="image" src="https://github.com/user-attachments/assets/46a011c7-912d-49bb-ac82-0397a700b0be" />
-
-
 
 | Feature | Detail |
 |---|---|
@@ -222,16 +213,13 @@ Persistent Settings (Relational DB)
 | **Hades Continuity** | Plugin redirect breakouts from iframe workspace structurally prevented |
 | **Custom Scrollbars** | Global slim translucent scrollbars matching glassmorphic style |
 
+<img width="1917" height="908" alt="Multi-Window Workspace" src="https://github.com/user-attachments/assets/1b9b8656-5866-4443-a9a8-ed2c7f7a724b" />
 
 ---
 
 ### 📁 2.3 Desktop Folder Mode
 
 App grouping directly on the desktop workspace — no page reload required.
-
-
-<img width="2561" height="1231" alt="image" src="https://github.com/user-attachments/assets/a88bf4f5-ecfd-41c7-aa98-4be4704bc7f1" />
-
 
 **Creating & Managing Folders:**
 - Right-click empty desktop area → context menu → **📁 New Folder** → glassmorphic name prompt
@@ -276,18 +264,6 @@ Native WordPress submenus surfaced as glassmorphic dropdown popups — no naviga
 
 Three complete OS aesthetic styles, switchable at runtime via Control Center or Spotlight CLI.
 
-## Linux 
-<img width="2558" height="1236" alt="image" src="https://github.com/user-attachments/assets/af0510c9-424b-4dc5-bd4c-5f81798cc6d2" />
-
-
-## MACOS
-<img width="2560" height="1233" alt="image" src="https://github.com/user-attachments/assets/9df359d3-bbb8-4b89-b633-abba9e491fa1" />
-
-
-## Windows
-<img width="2558" height="1235" alt="image" src="https://github.com/user-attachments/assets/b32d350f-0cd6-4096-8f3f-b7d6d3835768" />
-
-
 | Layout | Style | Dock Position | Maximize Behavior |
 |---|---|---|---|
 | **macOS Cupertino** | Menu bar top, floating centered dock | Bottom | Full workspace bounds |
@@ -308,9 +284,6 @@ Three-column layout: left sidebar strip (user profile, settings, power), center 
 ### ⚙️ 2.6 Command Center
 
 Unified administration panel replacing the previous settings window — split glassmorphic layout with left navigation tabs and scrollable right content.
-
-<img width="2559" height="1173" alt="image" src="https://github.com/user-attachments/assets/8f7784f2-d537-4819-abc6-b87e10714b09" />
-
 
 **Real-Time Diagnostics:**
 - CPU load + RAM usage with live progress bars (red highlight above 80%)
@@ -341,9 +314,6 @@ Unified administration panel replacing the previous settings window — split gl
 
 The WordPress security audit system is now deeply integrated into the VGT Security Center, replacing the previous standalone view.
 
-<img width="2560" height="1171" alt="image" src="https://github.com/user-attachments/assets/57fa67cb-d57e-4e6c-b703-903be8104441" />
-
-
 **Sentinel Auto-Awareness:**
 Automatically detects whether Sentinel CE or Enterprise V7 is active, checks which defense modules are running (Airlock, Cerberus, Titan) and reflects their state positively in the security index — no manual configuration.
 
@@ -362,12 +332,9 @@ Automatically detects whether Sentinel CE or Enterprise V7 is active, checks whi
 
 ### 🔒 2.8 Security Architecture — Defense in Depth
 
-**Integrated Sentinel CE (v1.7.0):**
+**Integrated Sentinel CE (v1.7.1):**
 
 AEGIS, CERBERUS, AIRLOCK, HADES, CHRONOS, and GHOST TRAP integrated into boot sequence. See [Sentinel CE README](https://github.com/visiongaiatechnology/sentinelcom) for full module documentation.
-
-<img width="2559" height="1231" alt="image" src="https://github.com/user-attachments/assets/1100dacf-2e32-4f65-ae45-6f3737194b0e" />
-
 
 **AEGIS WAF Exceptions:**
 - `edit_posts` / `manage_options` users: all pattern weights zeroed on `post.php`, `edit.php`, `/wp-json/wp/v2/` — administrators can save posts containing technical terms without 403 blocks
@@ -494,7 +461,72 @@ AEGIS, CERBERUS, AIRLOCK, HADES, CHRONOS, and GHOST TRAP integrated into boot se
 
 ## 📜 Changelog
 
-### v1.0.0-Beta v4 — Stability, Scaling & Security Update *(Current)*
+### v1.0.0-Beta v4.1 — Patch Release *(Current)*
+
+#### Sentinel CE → v1.7.1
+
+Sentinel CE updated to v1.7.1 to ensure schema and activation updates re-run cleanly on existing installations.
+
+#### Stability & Rendering Fixes
+
+- **Black screen after Quarantine/Genesis accept** — resolved; workspace now renders correctly after operator actions
+- **Dashboard/DOM rendering hardened** — broken partial renders no longer block the entire admin UI
+- **Security Center / Build Center rendering stabilized** — edge-case load failures caught and recovered gracefully
+- **Widget positioning corrected** — widgets no longer drift off-screen to the right; positioning adapts cleanly to resolution and viewport changes
+- **Throne Guard detection after reinstall stabilized** — role and capability state correctly re-evaluated on fresh activations
+
+#### Sentinel Fallback Logic
+
+- Sentinel V7 and Sentinel CE now detect each other more reliably
+- CE automatically stands down when V7 is present and active
+- Encoding damage in UI text and symbols handled without triggering global re-encoding passes
+
+#### Sentinel CE Ban System
+
+- Temporary bans now support `expires_at` timestamps
+- Expired bans are automatically purged on evaluation
+- Database index added for ban expiry dates — performant at scale
+
+#### Vault & Scanner Hardening
+
+- **Vault protection hardened:** directories set to `0700`, protection files and manifest set to `0600`, all writes use `LOCK_EX`
+- **Scanner manifest hardening:** both temporary and final manifest files written with restrictive permissions
+
+#### Airlock Upload Protection
+
+Airlock's file upload inspection significantly expanded:
+
+- Real file size validation via `filesize()` — client-supplied size claims no longer trusted
+- MIME type detection via `finfo` — extension-based detection replaced
+- Image type cross-check via `IMAGETYPE_*` constants
+- SVG files blocked at upload stage
+- Archive path validation: ZIP and Office files inspected for traversal paths and executable content
+- SVG vector scan: files checked against script tags, event handlers, `javascript:` URIs, `foreignObject`, iframe/object/embed elements and external/data href vectors
+
+#### Network & IP Hardening
+
+- Cloudflare IPv4/IPv6 CIDR ranges added to IP resolution
+- Configurable trusted proxy CIDRs supported
+- `X-Forwarded-For`, `X-Real-IP` and `CF-Connecting-IP` evaluated only in trusted proxy context — no header spoofing surface in default mode
+
+#### Titan Security Headers
+
+- Deprecated `X-XSS-Protection` header removed
+- Optional CSP baseline added to Titan configuration
+
+#### Styx Lite
+
+- Optional outbound allowlist and denylist for external requests added
+- Dashboard configuration extended for CSP baseline, Styx outbound policy and trusted proxy CIDRs
+
+#### Compatibility
+
+- **PHP 7.4 compatibility restored:** PHP 8-only constructs (`match`, `str_contains`, `str_starts_with`, `str_ends_with`) removed — codebase now runs cleanly on PHP 7.4+
+- **Fatal in `class-vis-network.php` fixed:** invisible UTF-8 BOM before `<?php` removed — `declare(strict_types=1)` now parses correctly
+
+---
+
+### v1.0.0-Beta v4 — Stability, Scaling & Security Update
 
 #### Modular PHP Kernel Architecture
 
@@ -560,7 +592,7 @@ All files standardized with `// STATUS: 💠 DIAMANT VGT SUPREME` verification h
 | **PHP Architecture** | Modular service classes (Settings / AppBuilder / Plugin) + lightweight bootstrapper |
 | **Database Footprint** | `{prefix}vgt_desk_settings` (relational, delta-merge) + `{prefix}mcp_user_roles` |
 | **Runtime External Calls** | Zero |
-| **WAF Engine** | AEGIS Anomaly Scoring — Sentinel CE v1.7.0 / Sentinel V7 |
+| **WAF Engine** | AEGIS Anomaly Scoring — Sentinel CE v1.7.1 / Sentinel V7 |
 | **Session Hardening** | Throne Guard v2.6.0 |
 | **Bypass Mechanism** | `?vgt_bypass=1` — classic view for session |
 | **Default Mode** | Off — explicit per-user opt-in required |
@@ -643,4 +675,4 @@ VisionGaia Technology builds enterprise-grade infrastructure — engineered to t
 
 ---
 
-*Version 1.0.0-Beta v4 — VGT WP-Desk // Modular PHP Kernel // 9-Engine Desktop // Multi-Layout (macOS/Windows/Linux) // Command Center // VGT Build Center // Sentinel Hardening Auditor // Folder Mode // Submenus // Aero Snap // RAM Hibernation // Dattrack Telemetry // Relational DB // Sentinel CE v1.7.0 // Throne Guard v2.6.0 // Zero-Overheat Architecture // AGPLv3*
+*Version 1.0.0-Beta v4.1 — VGT WP-Desk // Modular PHP Kernel // 9-Engine Desktop // Multi-Layout (macOS/Windows/Linux) // Command Center // VGT Build Center // Sentinel Hardening Auditor // Folder Mode // Submenus // Aero Snap // RAM Hibernation // Dattrack Telemetry // Relational DB // Sentinel CE v1.7.1 // Throne Guard v2.6.0 // Airlock Upload Hardening // PHP 7.4 Compatible // Zero-Overheat Architecture // AGPLv3*
