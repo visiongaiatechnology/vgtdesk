@@ -525,7 +525,7 @@ Object.assign(window.VGTDeskEngine, {
         }
 
         const wall = document.getElementById('vgt-wallpaper');
-        if (wall) wall.style.backgroundImage = `url('${clean}')`;
+        if (wall) wall.style.backgroundImage = `url("${clean.replace(/"/g, '%22')}")`;
         if (doSync) {
             this.saveUserSetting('wallpaper', clean);
         }

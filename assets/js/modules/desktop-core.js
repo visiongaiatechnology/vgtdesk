@@ -43,6 +43,9 @@ window.VGTDeskEngine = {
      */
     cleanUrl(urlStr) {
         try {
+            if (typeof urlStr === 'string' && /^data:image\/(png|jpe?g|webp|gif);base64,/i.test(urlStr.trim())) {
+                return urlStr.trim();
+            }
             const url = new URL(urlStr, window.location.origin);
             if (url.protocol !== 'http:' && url.protocol !== 'https:') {
                 return 'about:blank';
