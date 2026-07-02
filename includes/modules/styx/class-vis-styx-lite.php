@@ -7,64 +7,54 @@ if (!defined('ABSPATH')) {
 
 /**
  * MODULE: STYX LITE (Outbound Telemetry Control)
- * STATUS: DIAMANT VGT SUPREME (WP.ORG COMPLIANT)
- * Logic: Kappt native WordPress-Telemetrie auf Netzwerkebene durch struktur-perfekte Phantom-Responses.
- * Fix: Eliminierung von Core-Warnings und Fatal Errors (array_walk) durch exaktes Payload-Matching.
+ * STATUS: PLATIN VGT STATUS (WP.ORG COMPLIANT)
+ * Logic: WP telemetry phantom responses plus optional local allow/deny egress policy.
  */
 class VGTS_Styx_Lite {
 
-    /**
-     * @var bool Status der Telemetrie-Unterdrückung
-     */
     private bool $kill_telemetry;
+    private array $deny_domains = [];
+    private array $allow_domains = [];
 
-    /**
-     * @param array $options Zentrale VGT Konfigurations-Matrix
-     */
     public function __construct(array $options) {
         $this->kill_telemetry = !empty($options['styx_kill_telemetry']);
+        $this->deny_domains = $this->parse_domain_list((string)($options['styx_deny_domains'] ?? ''));
+        $this->allow_domains = $this->parse_domain_list((string)($options['styx_allow_domains'] ?? ''));
 
-        if ($this->kill_telemetry) {
-            // Priorität 999: STYX hat das absolute letzte Wort vor dem tatsächlichen Netzwerk-Call.
+        if ($this->kill_telemetry || !empty($this->deny_domains) || !empty($this->allow_domains)) {
             add_filter('pre_http_request', [$this, 'intercept_outbound_traffic'], 999, 3);
         }
     }
 
-    /**
-     * Interzeptiert ausgehenden Traffic und injiziert Phantom-Daten für WP-Core Domains.
-     * * @param false|array|WP_Error $preempt Ob der Request vorzeitig abgebrochen werden soll.
-     * @param array                $parsed_args Die Argumente des Requests.
-     * @param string               $url Die Ziel-URL.
-     * @return array|bool|WP_Error
-     */
     public function intercept_outbound_traffic($preempt, array $parsed_args, string $url) {
         $host = parse_url($url, PHP_URL_HOST);
-        
         if (!is_string($host)) {
             return $preempt;
         }
+        $host = strtolower($host);
 
-        // VGT Zero-Trust Blacklist (Telemetrie & Update-Server)
+        if (!empty($this->allow_domains) && !$this->domain_matches($host, $this->allow_domains)) {
+            return new WP_Error('vgts_styx_denied', esc_html__('STYX LITE: Outbound host not in allowlist.', 'vgt-sentinel-ce'));
+        }
+
+        if ($this->domain_matches($host, $this->deny_domains)) {
+            return new WP_Error('vgts_styx_denied', esc_html__('STYX LITE: Outbound host blocked by policy.', 'vgt-sentinel-ce'));
+        }
+
         $blocked_domains = [
             'api.wordpress.org',
             'downloads.wordpress.org',
-            's.w.org' // WP Stats & Telemetry
+            's.w.org',
         ];
 
-        if (in_array($host, $blocked_domains, true)) {
-            
-            // VGT OMEGA FIX: PHANTOM RESPONSE MATRIX 2.0 (APEX STATE)
-            // Der WP Core erwartet bei API Calls strikt definierte JSON-Strukturen. 
-            // Fehlen die Keys 'plugins' oder 'themes', wirft der Core Fatal Errors bei array_walk().
-            // Wir injizieren ein perfektes, leeres Datenmodell. Der Core interpretiert dies als "System ist aktuell".
-            
+        if ($this->kill_telemetry && in_array($host, $blocked_domains, true)) {
             $mock_data = [
-                'plugins'      => [], // Zwingend erforderlich für /plugins/update-check/
-                'themes'       => [], // Zwingend erforderlich für /themes/update-check/
-                'translations' => [], // Zwingend für Translations-Updates
-                'update'       => [], // Legacy / Fallback
-                'no_update'    => [], // Legacy / Fallback
-                'offers'       => []  // Zwingend erforderlich für /core/version-check/
+                'plugins'      => [],
+                'themes'       => [],
+                'translations' => [],
+                'update'       => [],
+                'no_update'    => [],
+                'offers'       => [],
             ];
 
             try {
@@ -78,14 +68,40 @@ class VGTS_Styx_Lite {
                 'body'     => $mock_body,
                 'response' => [
                     'code'    => 200,
-                    'message' => 'OK'
+                    'message' => 'OK',
                 ],
                 'cookies'  => [],
-                'filename' => null
+                'filename' => null,
             ];
         }
 
-        // Nicht-Telemetrie-Traffic ungehindert passieren lassen
-        return $preempt; 
+        return $preempt;
+    }
+
+    private function parse_domain_list(string $raw): array {
+        $domains = [];
+        foreach (preg_split('/\r\n|\r|\n|,/', $raw) ?: [] as $domain) {
+            $domain = strtolower(trim($domain));
+            if ($domain !== '' && preg_match('/^(?:\*\.)?[a-z0-9.-]+$/', $domain) === 1) {
+                $domains[] = $domain;
+            }
+        }
+        return array_values(array_unique($domains));
+    }
+
+    private function domain_matches(string $host, array $domains): bool {
+        foreach ($domains as $domain) {
+            if (strpos($domain, '*.') === 0) {
+                $suffix = substr($domain, 1);
+                if (substr($host, -strlen($suffix)) === $suffix) {
+                    return true;
+                }
+                continue;
+            }
+            if (hash_equals($host, $domain)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

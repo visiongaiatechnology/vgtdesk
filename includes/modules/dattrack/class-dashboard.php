@@ -223,7 +223,7 @@ final class VGT_Dashboard_Desk {
                     <div class="data-section">
                         <div class="data-date">
                             <?php echo date('d.m.Y', strtotime($row['stat_date'])); ?>
-                            <span>Events: <?php echo $row['events']; ?> | Users: <?php echo $row['unique_users']; ?></span>
+                            <span>Events: <?php echo (int) $row['events']; ?> | Users: <?php echo (int) $row['unique_users']; ?></span>
                         </div>
                         <table>
                             <thead>

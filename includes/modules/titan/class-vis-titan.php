@@ -54,11 +54,13 @@ class VGTS_Titan {
     public function inject_global_headers(): void {
         if (headers_sent()) return;
 
-        header('X-XSS-Protection: 1; mode=block', true);
         header('X-Frame-Options: SAMEORIGIN', true);
         header('X-Content-Type-Options: nosniff', true);
         header('Referrer-Policy: strict-origin-when-cross-origin', true);
         header('Permissions-Policy: geolocation=(), camera=(), microphone=()', true);
+        if (!empty($this->options['titan_csp_baseline'])) {
+            header("Content-Security-Policy: default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; frame-ancestors 'self'; object-src 'none'; base-uri 'self'", true);
+        }
         
         if (function_exists('header_remove')) {
             header_remove('X-Powered-By'); 
@@ -83,11 +85,13 @@ class VGTS_Titan {
         if (isset($headers['X-Pingback'])) unset($headers['X-Pingback']);
         if (isset($headers['X-Powered-By'])) unset($headers['X-Powered-By']);
         
-        $headers['X-XSS-Protection']       = '1; mode=block';
         $headers['X-Frame-Options']        = 'SAMEORIGIN';
         $headers['X-Content-Type-Options'] = 'nosniff';
         $headers['Referrer-Policy']        = 'strict-origin-when-cross-origin';
         $headers['Permissions-Policy']     = 'geolocation=(), camera=(), microphone=()';
+        if (!empty($this->options['titan_csp_baseline'])) {
+            $headers['Content-Security-Policy'] = "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; frame-ancestors 'self'; object-src 'none'; base-uri 'self'";
+        }
         
         $fake_tech = $this->options['titan_camouflage_mode'] ?? 'none';
         if ($fake_tech !== 'none') {
@@ -247,11 +251,13 @@ class VGTS_Titan {
         $rules = "";
         
         $rules .= "<IfModule mod_headers.c>\n";
-        $rules .= "Header set X-XSS-Protection \"1; mode=block\"\n";
         $rules .= "Header set X-Frame-Options \"SAMEORIGIN\"\n";
         $rules .= "Header set X-Content-Type-Options \"nosniff\"\n";
         $rules .= "Header set Referrer-Policy \"strict-origin-when-cross-origin\"\n";
         $rules .= "Header set Permissions-Policy \"geolocation=(), camera=(), microphone=()\"\n";
+        if (!empty($this->options['titan_csp_baseline'])) {
+            $rules .= "Header set Content-Security-Policy \"default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; frame-ancestors 'self'; object-src 'none'; base-uri 'self'\"\n";
+        }
         
         $rules .= "Header unset X-Powered-By\n";
         $rules .= "Header unset X-Pingback\n";

@@ -120,7 +120,7 @@ class VGTS_Dashboard_Core {
 
             $scope_map = [
                 'aegis'   => ['aegis_enabled'],
-                'titan'   => ['titan_enabled', 'titan_disallow_file_edit', 'titan_block_xmlrpc', 'titan_block_rest', 'titan_disable_feeds', 'titan_cleanup_emojis', 'titan_cleanup_embeds'],
+                'titan'   => ['titan_enabled', 'titan_disallow_file_edit', 'titan_block_xmlrpc', 'titan_block_rest', 'titan_disable_feeds', 'titan_cleanup_emojis', 'titan_cleanup_embeds', 'titan_csp_baseline'],
                 'hades'   => ['hades_enabled'],
                 'styx'    => ['styx_kill_telemetry'],
                 'airlock' => ['airlock_enabled'],
@@ -139,6 +139,11 @@ class VGTS_Dashboard_Core {
             if (isset($new['aegis_mode'])) $new['aegis_mode'] = sanitize_key($new['aegis_mode']); 
             if (isset($new['aegis_whitelist_ips'])) $new['aegis_whitelist_ips'] = sanitize_textarea_field($new['aegis_whitelist_ips']);
             if (isset($new['aegis_whitelist_uas'])) $new['aegis_whitelist_uas'] = sanitize_textarea_field($new['aegis_whitelist_uas']);
+            if (isset($new['styx_deny_domains'])) $new['styx_deny_domains'] = sanitize_textarea_field($new['styx_deny_domains']);
+            if (isset($new['styx_allow_domains'])) $new['styx_allow_domains'] = sanitize_textarea_field($new['styx_allow_domains']);
+            if (isset($new['vgts_trusted_proxy_cidrs'])) {
+                update_option('vgts_trusted_proxy_cidrs', sanitize_textarea_field($new['vgts_trusted_proxy_cidrs']), false);
+            }
 
             update_option('vgts_config', array_merge($current, $new));
             

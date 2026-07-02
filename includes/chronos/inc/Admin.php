@@ -129,22 +129,22 @@ final class Admin
         $settings = $edit_data ? json_decode($edit_data['design_settings'], true) : [];
         if (!is_array($settings)) $settings = []; // JSON Crash-Protection
 
-        $title = $edit_data ? esc_attr($edit_data['title']) : '';
-        $type = $edit_data ? esc_attr($edit_data['type']) : 'fixed';
-        $end_datetime = $edit_data ? esc_attr($edit_data['end_datetime'] ?? '') : '';
+        $title = $edit_data ? (string)$edit_data['title'] : '';
+        $type = $edit_data ? (string)$edit_data['type'] : 'fixed';
+        $end_datetime = $edit_data ? (string)($edit_data['end_datetime'] ?? '') : '';
         
         // VGT FIX: Vermeidung der HTML5 `min="1"` Blockade durch explizite Null-Wert Löschung
         $duration_minutes = ($edit_data && !empty($edit_data['duration_seconds'])) ? absint($edit_data['duration_seconds'] / 60) : '';
         
-        $action_on_expire = $edit_data ? esc_attr($edit_data['action_on_expire']) : 'hide';
-        $redirect_url = $edit_data ? esc_url($edit_data['redirect_url']) : '';
+        $action_on_expire = $edit_data ? (string)$edit_data['action_on_expire'] : 'hide';
+        $redirect_url = $edit_data ? (string)($edit_data['redirect_url'] ?? '') : '';
         
         $color_primary = sanitize_hex_color($settings['color_primary'] ?? '') ?: '#00ffcc';
         $color_bg = sanitize_hex_color($settings['color_bg'] ?? '') ?: '#111111';
         $color_label = sanitize_hex_color($settings['color_label'] ?? '') ?: '#888888';
-        $theme = esc_attr($settings['theme'] ?? 'blocks');
-        $animation = esc_attr($settings['animation'] ?? 'none');
-        $language = esc_attr($settings['language'] ?? 'de');
+        $theme = (string)($settings['theme'] ?? 'blocks');
+        $animation = (string)($settings['animation'] ?? 'none');
+        $language = sanitize_key($settings['language'] ?? 'de');
         
         $preview_labels = $language === 'en' 
             ? ['days' => 'Days', 'hours' => 'Hours', 'minutes' => 'Minutes', 'seconds' => 'Seconds'] 
@@ -192,7 +192,7 @@ final class Admin
                                 <h3>1. Core Data</h3>
                                 <div class="vgt-form-group">
                                     <label>Designation (Title)</label>
-                                    <input type="text" name="title" value="<?php echo $title; ?>" required placeholder="e.g. Cyber Monday Matrix">
+                                    <input type="text" name="title" value="<?php echo esc_attr($title); ?>" required placeholder="e.g. Cyber Monday Matrix">
                                 </div>
 
                                 <div class="vgt-form-row">
@@ -205,7 +205,7 @@ final class Admin
                                     </div>
                                     <div class="vgt-form-group" id="vgt-fixed-wrapper" style="display: <?php echo $type === 'fixed' ? 'block' : 'none'; ?>;">
                                         <label>Termination Date</label>
-                                        <input type="datetime-local" name="end_datetime" value="<?php echo $end_datetime; ?>">
+                                        <input type="datetime-local" name="end_datetime" value="<?php echo esc_attr($end_datetime); ?>">
                                     </div>
                                     <div class="vgt-form-group" id="vgt-evergreen-wrapper" style="display: <?php echo $type === 'evergreen' ? 'block' : 'none'; ?>;">
                                         <label>Duration (Minutes)</label>
@@ -283,7 +283,7 @@ final class Admin
                                 <div class="vgt-form-group" id="vgt-redirect-wrapper" style="display: <?php echo $action_on_expire === 'redirect' ? 'block' : 'none'; ?>;">
                                     <label>Target URL (Redirect)</label>
                                     <!-- VGT FIX: type="url" zu type="text" geändert, um Silent HTML5 Aborts bei unsichtbaren Feldern zu verhindern -->
-                                    <input type="text" name="redirect_url" id="vgt-redirect-url" value="<?php echo $redirect_url; ?>" placeholder="https://visiongaiatechnology.com/offer">
+                                    <input type="text" name="redirect_url" id="vgt-redirect-url" value="<?php echo esc_url($redirect_url); ?>" placeholder="https://visiongaiatechnology.com/offer">
                                 </div>
                             </div>
 
@@ -300,7 +300,7 @@ final class Admin
                         <h2>Live Rendering Canvas</h2>
                         <div class="vgt-canvas-area" id="vgt-preview-container">
                             <!-- Live Preview DOM inject -->
-                            <div class="vgt-timer-wrapper" id="vgt-live-preview" data-theme="<?php echo $theme; ?>" data-animation="<?php echo $animation; ?>" style="--vgt-color: <?php echo esc_attr($color_primary); ?>; --vgt-bg: <?php echo esc_attr($color_bg); ?>; --vgt-label: <?php echo esc_attr($color_label); ?>;">
+                            <div class="vgt-timer-wrapper" id="vgt-live-preview" data-theme="<?php echo esc_attr($theme); ?>" data-animation="<?php echo esc_attr($animation); ?>" style="--vgt-color: <?php echo esc_attr($color_primary); ?>; --vgt-bg: <?php echo esc_attr($color_bg); ?>; --vgt-label: <?php echo esc_attr($color_label); ?>;">
                                 <div class="vgt-timer-block"><div class="vgt-timer-value" data-unit="days" data-val="14">14</div><div class="vgt-timer-label"><?php echo esc_html($preview_labels['days']); ?></div></div>
                                 <div class="vgt-timer-block"><div class="vgt-timer-value" data-unit="hours" data-val="09">09</div><div class="vgt-timer-label"><?php echo esc_html($preview_labels['hours']); ?></div></div>
                                 <div class="vgt-timer-block"><div class="vgt-timer-value" data-unit="minutes" data-val="42">42</div><div class="vgt-timer-label"><?php echo esc_html($preview_labels['minutes']); ?></div></div>

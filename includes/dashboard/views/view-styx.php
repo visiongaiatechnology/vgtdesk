@@ -74,6 +74,14 @@ $styx_kill = isset($opt['styx_kill_telemetry']) ? (bool) $opt['styx_kill_telemet
             </div>
         </div>
 
+        <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--vgts-border); border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+            <h4 style="margin: 0 0 12px 0; color: #fff; font-size: 14px;"><?php esc_html_e('Outbound Policy Lite', 'vgt-sentinel-ce'); ?></h4>
+            <label style="display:block; color:var(--vgts-text-secondary); font-size:12px; margin-bottom:8px;"><?php esc_html_e('Deny domains, one per line. Wildcards: *.example.com', 'vgt-sentinel-ce'); ?></label>
+            <textarea name="vgts_config[styx_deny_domains]" class="vgts-input-whitelist" rows="4" placeholder="telemetry.example.com&#10;*.tracker.example"><?php echo esc_textarea((string)($opt['styx_deny_domains'] ?? '')); ?></textarea>
+            <label style="display:block; color:var(--vgts-text-secondary); font-size:12px; margin:14px 0 8px;"><?php esc_html_e('Optional allowlist. If set, every other outbound host is blocked.', 'vgt-sentinel-ce'); ?></label>
+            <textarea name="vgts_config[styx_allow_domains]" class="vgts-input-whitelist" rows="4" placeholder="api.wordpress.org&#10;*.wordpress.org"><?php echo esc_textarea((string)($opt['styx_allow_domains'] ?? '')); ?></textarea>
+        </div>
+
         <!-- ARCHITECTURE INFO -->
         <div style="padding: 15px; background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.1); border-radius: 6px;">
             <h5 style="margin: 0 0 10px 0; color: #6366f1; font-size: 12px; font-weight: 700; letter-spacing: 0.5px;"><?php esc_html_e('STYX ARCHITECTURE:', 'vgt-sentinel-ce'); ?></h5>

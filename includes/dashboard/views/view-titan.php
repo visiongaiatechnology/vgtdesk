@@ -122,13 +122,26 @@ $opt = (array) get_option('vgts_config', []);
             </label>
         </div>
 
+        <div class="vgts-switch-row">
+            <div class="vgts-label-group">
+                <strong class="vgts-lang-de"><?php esc_html_e('CSP BASELINE AKTIVIEREN', 'vgt-sentinel-ce'); ?></strong>
+                <strong class="vgts-lang-en"><?php esc_html_e('ENABLE CSP BASELINE', 'vgt-sentinel-ce'); ?></strong>
+                <p class="vgts-lang-de"><?php esc_html_e('Aktiviert eine kompatible Content-Security-Policy gegen Clickjacking, Object Injection und Basis-XSS-Vektoren.', 'vgt-sentinel-ce'); ?></p>
+                <p class="vgts-lang-en"><?php esc_html_e('Enables a compatible Content-Security-Policy against clickjacking, object injection and baseline XSS vectors.', 'vgt-sentinel-ce'); ?></p>
+            </div>
+            <label class="vgts-switch">
+                <input type="checkbox" name="vgts_config[titan_csp_baseline]" value="1" <?php checked(!empty($opt['titan_csp_baseline'])); ?>>
+                <span class="vgts-slider"></span>
+            </label>
+        </div>
+
         <!-- SECTION 3: BASE PROTECTION -->
         <div class="vgts-switch-row">
             <div class="vgts-label-group">
                 <strong class="vgts-lang-de"><?php esc_html_e('SECURITY HEADERS INJECTION', 'vgt-sentinel-ce'); ?></strong>
                 <strong class="vgts-lang-en"><?php esc_html_e('SECURITY HEADERS INJECTION', 'vgt-sentinel-ce'); ?></strong>
-                <p class="vgts-lang-de"><?php esc_html_e('Erzwingt HSTS, X-Frame-Options und XSS-Protection.', 'vgt-sentinel-ce'); ?></p>
-                <p class="vgts-lang-en"><?php esc_html_e('Enforces strict HSTS, X-Frame-Options, and XSS-Protection.', 'vgt-sentinel-ce'); ?></p>
+                <p class="vgts-lang-de"><?php esc_html_e('Erzwingt X-Frame-Options, nosniff, Referrer-Policy und Permissions-Policy.', 'vgt-sentinel-ce'); ?></p>
+                <p class="vgts-lang-en"><?php esc_html_e('Enforces X-Frame-Options, nosniff, Referrer-Policy, and Permissions-Policy.', 'vgt-sentinel-ce'); ?></p>
             </div>
             <label class="vgts-switch">
                 <input type="checkbox" name="vgts_config[titan_enabled]" value="1" <?php checked(!empty($opt['titan_enabled'])); ?>>

@@ -515,7 +515,9 @@ class VGTS_Scanner_Engine {
             $temp_file = $this->manifest_file . '_tmp.php';
             
             if (file_put_contents($temp_file, $content, LOCK_EX) !== false) {
+                chmod($temp_file, 0600);
                 rename($temp_file, $this->manifest_file);
+                chmod($this->manifest_file, 0600);
             }
         } catch (\JsonException) {
             // Suppress encoding failures to maintain stability
@@ -530,8 +532,11 @@ class VGTS_Scanner_Engine {
                 return false;
             }
             // Fallback Security (trotz PHP Storage)
-            file_put_contents($dir . '/index.php', '<?php // SILENCE IS GOLDEN ?>');
-            file_put_contents($dir . '/.htaccess', "Order Deny,Allow\nDeny from all");
+            chmod($dir, 0700);
+            file_put_contents($dir . '/index.php', '<?php // SILENCE IS GOLDEN ?>', LOCK_EX);
+            chmod($dir . '/index.php', 0600);
+            file_put_contents($dir . '/.htaccess', "Order Deny,Allow\nDeny from all", LOCK_EX);
+            chmod($dir . '/.htaccess', 0600);
         }
         return is_writable($dir);
     }

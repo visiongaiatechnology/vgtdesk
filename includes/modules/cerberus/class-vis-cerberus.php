@@ -61,7 +61,9 @@ class VGTS_Cerberus {
 
         // O(1) Lookup: Existiert die IP in der Ban-Liste?
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-        $is_banned = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$table} WHERE ip = %s LIMIT 1", $ip));
+        $now = current_time('mysql');
+        $wpdb->query($wpdb->prepare("DELETE FROM {$table} WHERE expires_at IS NOT NULL AND expires_at <= %s", $now));
+        $is_banned = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$table} WHERE ip = %s AND (expires_at IS NULL OR expires_at > %s) LIMIT 1", $ip, $now));
 
         if ($is_banned) {
             // [WP.ORG COMPLIANCE]: Translable, escaped abort sequence instead of hard die()
@@ -88,7 +90,8 @@ class VGTS_Cerberus {
         $table = $wpdb->prefix . (defined('VGTS_TABLE_BANS') ? VGTS_TABLE_BANS : 'vgts_apex_bans');
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-        $is_banned = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$table} WHERE ip = %s LIMIT 1", $ip));
+        $now = current_time('mysql');
+        $is_banned = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$table} WHERE ip = %s AND (expires_at IS NULL OR expires_at > %s) LIMIT 1", $ip, $now));
 
         if ($is_banned) {
             // TARPITTING: Asymmetrische Verzögerung bindet Threads des Angreifers.
@@ -168,7 +171,7 @@ class VGTS_Cerberus {
      * ATOMIC DB INSERT (Nur bei tatsächlichem Ban)
      * Public API für andere Module (z.B. AEGIS)
      */
-    public function ban_ip(string $ip, string $reason): void {
+    public function ban_ip(string $ip, string $reason, ?int $ttl_seconds = null): void {
         global $wpdb;
         $table = $wpdb->prefix . (defined('VGTS_TABLE_BANS') ? VGTS_TABLE_BANS : 'vgts_apex_bans');
 
@@ -176,14 +179,17 @@ class VGTS_Cerberus {
         $uri = substr(esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'] ?? '/wp-login.php')), 0, 255);
         $safe_ip = sanitize_text_field($ip);
         $safe_reason = sanitize_text_field($reason);
+        $ttl = $ttl_seconds ?? DAY_IN_SECONDS;
+        $expires_at = gmdate('Y-m-d H:i:s', time() + max(300, $ttl));
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $wpdb->query($wpdb->prepare(
-            "INSERT IGNORE INTO {$table} (ip, reason, banned_at, request_uri) VALUES (%s, %s, %s, %s)",
-            $safe_ip, 
-            $safe_reason, 
-            current_time('mysql'), 
-            $uri
+            "INSERT INTO {$table} (ip, reason, banned_at, request_uri, expires_at) VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE reason = VALUES(reason), banned_at = VALUES(banned_at), request_uri = VALUES(request_uri), expires_at = VALUES(expires_at)",
+            $safe_ip,
+            $safe_reason,
+            current_time('mysql'),
+            $uri,
+            $expires_at
         ));
     }
 }

@@ -79,6 +79,15 @@ $opt = (array) get_option('vgts_config', []);
                   class="vgts-input-whitelist"><?php echo esc_textarea($opt['aegis_whitelist_uas'] ?? ''); ?></textarea>
         <span style="font-size: 11px; color: #64748b; margin-top: 6px; display: block;"><?php esc_html_e('One phrase per line. If the User-Agent contains this phrase, it bypasses the WAF.', 'vgt-sentinel-ce'); ?></span>
     </div>
+
+    <div class="vgts-form-group" style="margin-top: 18px;">
+        <label style="display: block; font-size: 12px; font-weight: 700; color: #10b981; margin-bottom: 8px; letter-spacing: 0.5px;"><?php esc_html_e('TRUSTED PROXY CIDRS', 'vgt-sentinel-ce'); ?></label>
+        <textarea name="vgts_config[vgts_trusted_proxy_cidrs]"
+                  placeholder="<?php echo esc_attr__("203.0.113.0/24\n2001:db8::/32", 'vgt-sentinel-ce'); ?>"
+                  rows="3"
+                  class="vgts-input-whitelist"><?php echo esc_textarea((string)get_option('vgts_trusted_proxy_cidrs', '')); ?></textarea>
+        <span style="font-size: 11px; color: #64748b; margin-top: 6px; display: block;"><?php esc_html_e('Only these reverse proxies may provide X-Forwarded-For/X-Real-IP. Cloudflare IPv4/IPv6 is trusted automatically.', 'vgt-sentinel-ce'); ?></span>
+    </div>
 </div>
 
 <div class="vgts-card">

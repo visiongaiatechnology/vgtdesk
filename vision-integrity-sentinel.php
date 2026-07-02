@@ -2,7 +2,7 @@
 /**
  * Plugin Name: VGT Sentinel CE
  * Description: A zero-trust Web Application Firewall (WAF) and security framework featuring robust brute-force protection, file integrity monitoring, and kernel-level system hardening.
- * Version: 1.7.0
+ * Version: 1.7.1
  * Author: VisionGaiaTechnology
  * Author URI: https://visiongaiatechnology.de
  * License: AGPLv3
@@ -22,7 +22,7 @@ if (defined('VIS_VERSION')) {
 }
 
 // --- SYSTEM KONSTANTEN ---
-define('VGTS_VERSION', '1.7.0');
+define('VGTS_VERSION', '1.7.1');
 define('VGTS_PATH', plugin_dir_path(__FILE__));
 define('VGTS_URL', plugin_dir_url(__FILE__));
 define('VGTS_SENTINEL_ICON', VGTS_URL . 'Sentinel.png');
@@ -117,11 +117,15 @@ function vgts_activate_standalone(): void {
 
     // Erstellung und Härtung des Sicherheits-Tresors
     if (!file_exists(VGTS_VAULT_DIR)) {
-        mkdir(VGTS_VAULT_DIR, 0755, true);
+        wp_mkdir_p(VGTS_VAULT_DIR);
+    }
+    if (is_dir(VGTS_VAULT_DIR)) {
+        chmod(VGTS_VAULT_DIR, 0700);
     }
 
     // 1. Silent Guard (Index-Verzeichnisschutz)
-    file_put_contents(VGTS_VAULT_DIR . '/index.php', '<?php // SILENCE IS GOLDEN ?>');
+    file_put_contents(VGTS_VAULT_DIR . '/index.php', '<?php // SILENCE IS GOLDEN ?>', LOCK_EX);
+    chmod(VGTS_VAULT_DIR . '/index.php', 0600);
 
     // 2. Apache Hardening (.htaccess mit Cross-Version Support)
     $htaccess_rules = "<Files *>\n" .
@@ -133,7 +137,8 @@ function vgts_activate_standalone(): void {
                       "        Deny from all\n" .
                       "    </IfModule>\n" .
                       "</Files>";
-    file_put_contents(VGTS_VAULT_DIR . '/.htaccess', $htaccess_rules);
+    file_put_contents(VGTS_VAULT_DIR . '/.htaccess', $htaccess_rules, LOCK_EX);
+    chmod(VGTS_VAULT_DIR . '/.htaccess', 0600);
 
     // 3. IIS Hardening (web.config Schutz gegen Datei-Auslesung auf Windows-Servern)
     $iis_config = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
@@ -144,7 +149,8 @@ function vgts_activate_standalone(): void {
                   '    </authorization>' . "\n" .
                   '  </system.webServer>' . "\n" .
                   '</configuration>';
-    file_put_contents(VGTS_VAULT_DIR . '/web.config', $iis_config);
+    file_put_contents(VGTS_VAULT_DIR . '/web.config', $iis_config, LOCK_EX);
+    chmod(VGTS_VAULT_DIR . '/web.config', 0600);
 
     // Datenbanktabellen initialisieren
     $charset_collate = $wpdb->get_charset_collate();
@@ -155,9 +161,11 @@ function vgts_activate_standalone(): void {
         reason text NOT NULL,
         banned_at datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
         request_uri varchar(255) DEFAULT '' NOT NULL,
+        expires_at datetime DEFAULT NULL,
         PRIMARY KEY  (id),
         UNIQUE KEY ip (ip),
-        KEY banned_at (banned_at)
+        KEY banned_at (banned_at),
+        KEY expires_at (expires_at)
     ) $charset_collate;";
 
     $sql_logs = "CREATE TABLE " . $wpdb->prefix . VGTS_TABLE_LOGS . " (
