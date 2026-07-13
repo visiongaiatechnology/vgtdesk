@@ -54,7 +54,10 @@ class VGTS_Titan {
     public function inject_global_headers(): void {
         if (headers_sent()) return;
 
-        header('X-Frame-Options: SAMEORIGIN', true);
+        // Defer to consolidated late policy when present (avoids DENY+SAMEORIGIN stacks).
+        if (!class_exists('\\VisionGaia\\WPDesk\\WPDeskFramePolicy')) {
+            header('X-Frame-Options: SAMEORIGIN', true);
+        }
         header('X-Content-Type-Options: nosniff', true);
         header('Referrer-Policy: strict-origin-when-cross-origin', true);
         header('Permissions-Policy: geolocation=(), camera=(), microphone=()', true);
@@ -85,7 +88,20 @@ class VGTS_Titan {
         if (isset($headers['X-Pingback'])) unset($headers['X-Pingback']);
         if (isset($headers['X-Powered-By'])) unset($headers['X-Powered-By']);
         
-        $headers['X-Frame-Options']        = 'SAMEORIGIN';
+        if (class_exists('\\VisionGaia\\WPDesk\\WPDeskFramePolicy')) {
+            $is_admin = function_exists('is_admin') && is_admin();
+            $embed = !empty($_GET['vgt_iframe']) && (string) $_GET['vgt_iframe'] === 'true';
+            if (!$embed && !empty($_SERVER['HTTP_SEC_FETCH_DEST'])) {
+                $embed = strtolower((string) $_SERVER['HTTP_SEC_FETCH_DEST']) === 'iframe';
+            }
+            $headers['X-Frame-Options'] = \VisionGaia\WPDesk\WPDeskFramePolicy::x_frame_options_value(
+                $is_admin,
+                $embed,
+                !$is_admin && !$embed
+            );
+        } else {
+            $headers['X-Frame-Options'] = 'SAMEORIGIN';
+        }
         $headers['X-Content-Type-Options'] = 'nosniff';
         $headers['Referrer-Policy']        = 'strict-origin-when-cross-origin';
         $headers['Permissions-Policy']     = 'geolocation=(), camera=(), microphone=()';
@@ -251,7 +267,11 @@ class VGTS_Titan {
         $rules = "";
         
         $rules .= "<IfModule mod_headers.c>\n";
-        $rules .= "Header set X-Frame-Options \"SAMEORIGIN\"\n";
+        // X-Frame-Options is owned exclusively by WPDeskFramePolicy (PHP).
+        // Emitting it here stacks with PHP headers → browser falls back to DENY
+        // and breaks same-origin desk portals ("DENY, DENY, SAMEORIGIN").
+        $rules .= "# X-Frame-Options: managed by VisionGaia WPDeskFramePolicy (do not Header set here)\n";
+        $rules .= "Header unset X-Frame-Options\n";
         $rules .= "Header set X-Content-Type-Options \"nosniff\"\n";
         $rules .= "Header set Referrer-Policy \"strict-origin-when-cross-origin\"\n";
         $rules .= "Header set Permissions-Policy \"geolocation=(), camera=(), microphone=()\"\n";

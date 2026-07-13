@@ -12,7 +12,22 @@ if (!defined('ABSPATH')) {
 
 final class AgenticOrchestrator
 {
+    public const OPTION_KEYS = [
+        'groq' => 'vgta_groq_api_key_vault',
+        'gemini' => 'vgta_gemini_api_key_vault',
+        'claude' => 'vgta_claude_api_key_vault',
+        'chatgpt' => 'vgta_chatgpt_api_key_vault',
+    ];
+    public const CONTEXT_KEYS = [
+        'groq' => 'groq:primary-api-key:v1',
+        'gemini' => 'gemini:primary-api-key:v1',
+        'claude' => 'claude:primary-api-key:v1',
+        'chatgpt' => 'chatgpt:primary-api-key:v1',
+    ];
+
     private const OPTION_KEY_API_KEY = 'vgta_groq_api_key_vault';
+    private const OPTION_KEY_LAST_GATEWAY_ERROR = 'vgta_last_gateway_error';
+    private const OPTION_KEY_LAST_GATEWAY_STATUS = 'vgta_last_gateway_status';
     private const NONCE_ACTION = 'vgta_agentic_nonce';
     private const MENU_SLUG = 'vgta-agent-system';
     private const API_KEY_CONTEXT = 'groq:primary-api-key:v1';
@@ -36,7 +51,7 @@ final class AgenticOrchestrator
     private const MEMORY_CONTEXT = 'vgta-memory-store:v1';
     private const ERROR_EVENT_DIR_NAME = 'feed_cafe_2222_eeee';
     private const ERROR_EVENT_CONTEXT = 'vgta-error-event-buffer:v1';
-    private const REPAIR_AGENT_MODEL = 'openai/gpt-oss-20b';
+    private const REPAIR_AGENT_MODEL_ALIAS = 'repair_default';
     private const MAX_REPAIR_ATTEMPTS_PER_STEP = 1;
     private const MAX_REPAIR_ATTEMPTS_PER_PIPELINE = 3;
     private const MAX_ERROR_EVENTS = 50;
@@ -56,39 +71,173 @@ final class AgenticOrchestrator
     private const MAX_GROUNDING_SOURCE_BYTES = 50000;
     private const MAX_GROUNDING_PACK_BYTES = 120000;
     private const MAX_GROUNDING_SOURCES = 5;
+    private const MODEL_ID_ARCHITECT = 'openai/gpt-oss-120b';
+    private const MODEL_ID_COMPACT = 'openai/gpt-oss-20b';
+    private const MODEL_ID_AUDIT = 'qwen/qwen3.6-27b';
+    private const MODEL_ID_MULTIMODAL = 'meta-llama/llama-4-scout-17b-16e-instruct';
 
     /**
-     * @var array<string, array{label:string,max_output:int,multimodal:bool,reasoning_values:list<string>,reasoning_default:string}>
+     * @var array<string, array{label:string,provider:string,max_output:int,context_window:int,multimodal:bool,reasoning_transport:string,reasoning_values:list<string>,reasoning_default:string}>
      */
-    private const GROQ_MODELS = [
-        'openai/gpt-oss-120b' => [
-            'label' => 'GPT OSS 120B',
+    private const ALL_MODELS = [
+        // Original Groq Models
+        self::MODEL_ID_ARCHITECT => [
+            'label' => 'GPT OSS 120B (Groq)',
+            'provider' => 'groq',
             'max_output' => 65536,
+            'context_window' => 131072,
             'multimodal' => false,
+            'reasoning_transport' => 'openai_reasoning',
             'reasoning_values' => ['low', 'medium', 'high'],
             'reasoning_default' => 'high',
+            'input_cost_1m' => 0.15,
+            'output_cost_1m' => 0.60,
         ],
-        'qwen/qwen3-32b' => [
-            'label' => 'Qwen 3 32B',
+        self::MODEL_ID_AUDIT => [
+            'label' => 'Qwen 3.6 27B (Groq)',
+            'provider' => 'groq',
             'max_output' => 40960,
+            'context_window' => 131072,
             'multimodal' => false,
+            'reasoning_transport' => 'qwen_reasoning',
             'reasoning_values' => ['default', 'none'],
             'reasoning_default' => 'default',
+            'input_cost_1m' => 0.60,
+            'output_cost_1m' => 3.00,
         ],
-        'meta-llama/llama-4-scout-17b-16e-instruct' => [
-            'label' => 'Llama 4 Scout 17B 16E',
+        self::MODEL_ID_MULTIMODAL => [
+            'label' => 'Llama 4 Scout 17B 16E (Groq)',
+            'provider' => 'groq',
             'max_output' => 8192,
+            'context_window' => 1048576,
             'multimodal' => true,
+            'reasoning_transport' => 'none',
             'reasoning_values' => [],
             'reasoning_default' => 'none',
+            'input_cost_1m' => 0.11,
+            'output_cost_1m' => 0.34,
         ],
-        'openai/gpt-oss-20b' => [
-            'label' => 'GPT OSS 20B',
+        self::MODEL_ID_COMPACT => [
+            'label' => 'GPT OSS 20B (Groq)',
+            'provider' => 'groq',
             'max_output' => 65536,
+            'context_window' => 131072,
             'multimodal' => false,
+            'reasoning_transport' => 'openai_reasoning',
             'reasoning_values' => ['low', 'medium', 'high'],
             'reasoning_default' => 'high',
+            'input_cost_1m' => 0.075,
+            'output_cost_1m' => 0.30,
         ],
+        'openai/gpt-oss-safeguard-20b' => [
+            'label' => 'Safety GPT OSS 20B (Groq)',
+            'provider' => 'groq',
+            'max_output' => 65536,
+            'context_window' => 131072,
+            'multimodal' => false,
+            'reasoning_transport' => 'openai_reasoning',
+            'reasoning_values' => ['low', 'medium', 'high'],
+            'reasoning_default' => 'high',
+            'input_cost_1m' => 0.075,
+            'output_cost_1m' => 0.30,
+        ],
+        // Latest Gemini Models (2026)
+        'gemini/gemini-3.5-flash' => [
+            'label' => 'Gemini 3.5 Flash',
+            'provider' => 'gemini',
+            'max_output' => 8192,
+            'context_window' => 1048576,
+            'multimodal' => true,
+            'reasoning_transport' => 'gemini_thinking',
+            'reasoning_values' => ['low', 'medium', 'high'],
+            'reasoning_default' => 'medium',
+            'input_cost_1m' => 1.50,
+            'output_cost_1m' => 9.00,
+        ],
+        'gemini/gemini-3.1-pro' => [
+            'label' => 'Gemini 3.1 Pro',
+            'provider' => 'gemini',
+            'max_output' => 8192,
+            'context_window' => 1048576,
+            'multimodal' => true,
+            'reasoning_transport' => 'gemini_thinking',
+            'reasoning_values' => ['low', 'medium', 'high'],
+            'reasoning_default' => 'medium',
+            'input_cost_1m' => 2.00,
+            'output_cost_1m' => 12.00,
+        ],
+        // Latest Claude Models (2026)
+        'claude/claude-sonnet-5' => [
+            'label' => 'Claude Sonnet 5',
+            'provider' => 'claude',
+            'max_output' => 8192,
+            'context_window' => 200000,
+            'multimodal' => true,
+            'reasoning_transport' => 'claude_thinking',
+            'reasoning_values' => ['low', 'medium', 'high'],
+            'reasoning_default' => 'medium',
+            'input_cost_1m' => 2.00,
+            'output_cost_1m' => 10.00,
+        ],
+        'claude/claude-fable-5' => [
+            'label' => 'Claude Fable 5',
+            'provider' => 'claude',
+            'max_output' => 8192,
+            'context_window' => 200000,
+            'multimodal' => true,
+            'reasoning_transport' => 'claude_thinking',
+            'reasoning_values' => ['low', 'medium', 'high'],
+            'reasoning_default' => 'medium',
+            'input_cost_1m' => 10.00,
+            'output_cost_1m' => 50.00,
+        ],
+        'claude/claude-opus-4-8' => [
+            'label' => 'Claude Opus 4.8',
+            'provider' => 'claude',
+            'max_output' => 8192,
+            'context_window' => 200000,
+            'multimodal' => true,
+            'reasoning_transport' => 'claude_thinking',
+            'reasoning_values' => ['low', 'medium', 'high'],
+            'reasoning_default' => 'medium',
+            'input_cost_1m' => 5.00,
+            'output_cost_1m' => 25.00,
+        ],
+        // Latest ChatGPT / OpenAI Models (2026)
+        'openai/gpt-5.5' => [
+            'label' => 'ChatGPT - GPT-5.5',
+            'provider' => 'chatgpt',
+            'max_output' => 8192,
+            'context_window' => 128000,
+            'multimodal' => true,
+            'reasoning_transport' => 'none',
+            'reasoning_values' => [],
+            'reasoning_default' => 'none',
+            'input_cost_1m' => 5.00,
+            'output_cost_1m' => 30.00,
+        ],
+        'openai/gpt-5.4-mini' => [
+            'label' => 'ChatGPT - GPT-5.4 Mini',
+            'provider' => 'chatgpt',
+            'max_output' => 16384,
+            'context_window' => 128000,
+            'multimodal' => true,
+            'reasoning_transport' => 'none',
+            'reasoning_values' => [],
+            'reasoning_default' => 'none',
+            'input_cost_1m' => 2.50,
+            'output_cost_1m' => 15.00,
+        ],
+    ];
+
+    /**
+     * @var array<string, string>
+     */
+    private const MODEL_ALIASES = [
+        'architect_default' => self::MODEL_ID_ARCHITECT,
+        'compact_default' => self::MODEL_ID_COMPACT,
+        'audit_default' => self::MODEL_ID_AUDIT,
+        'repair_default' => self::MODEL_ID_COMPACT,
     ];
 
     /**
@@ -110,6 +259,45 @@ final class AgenticOrchestrator
 
     private string $lastMemoryWarning = '';
 
+    /**
+     * @return array<string, mixed>
+     */
+    public static function healthSnapshot(): array
+    {
+        $hasKey = false;
+        foreach (self::OPTION_KEYS as $optionKey) {
+            $encrypted = \get_option($optionKey, '');
+            if (\is_string($encrypted) && $encrypted !== '') {
+                $hasKey = true;
+                break;
+            }
+        }
+
+        $lastError = \get_option(self::OPTION_KEY_LAST_GATEWAY_ERROR, '');
+        $lastStatus = \get_option(self::OPTION_KEY_LAST_GATEWAY_STATUS, 'unknown');
+
+        $models = [];
+        foreach (self::ALL_MODELS as $id => $meta) {
+            $provider = $meta['provider'];
+            $opt = self::OPTION_KEYS[$provider] ?? '';
+            $enc = \get_option($opt, '');
+            if (\is_string($enc) && $enc !== '') {
+                $models[] = $id;
+            }
+        }
+
+        return [
+            'apiKeyPresent' => $hasKey,
+            'groqReachable' => $lastStatus === 'ok',
+            'lastGatewayStatus' => \is_string($lastStatus) ? $lastStatus : 'unknown',
+            'lastGatewayError' => \is_string($lastError) ? $lastError : '',
+            'modelCount' => \count($models),
+            'models' => $models,
+            'aliases' => self::MODEL_ALIASES,
+            'memoryMode' => 'server_session_recall',
+        ];
+    }
+
     use RuntimeTrait;
     use AjaxActionsTrait;
     use PluginContextTrait;
@@ -122,4 +310,7 @@ final class AgenticOrchestrator
     use GroundingBrokerTrait;
     use ValidationTrait;
     use GroqGatewayTrait;
+    use GeminiGatewayTrait;
+    use ClaudeGatewayTrait;
+    use OpenAiGatewayTrait;
 }

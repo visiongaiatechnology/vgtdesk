@@ -145,8 +145,12 @@ final class VGT_Dattrack_Engine {
         $is_dt_page = ($hook === 'toplevel_page_vgt-dattrack') || 
                       ($hook === 'toplevel_page_vgt-security-center' && isset($_GET['view']) && $_GET['view'] === 'dattrack');
         if (!$is_dt_page) return;
+
+        if (class_exists('\\VisionGaia\\WPDesk\\WPDeskDesignSystem')) {
+            \VisionGaia\WPDesk\WPDeskDesignSystem::enqueue('dattrack');
+        }
         
-        wp_enqueue_style('vgt-dt-dashboard-css', VGT_WPDESK_URL . 'assets/css/dattrack-dashboard.css', [], '1.4.0');
+        wp_enqueue_style('vgt-dt-dashboard-css', VGT_WPDESK_URL . 'assets/css/dattrack-dashboard.css', ['vgt-ds-compat'], '1.4.0');
         wp_enqueue_script('vgt-dt-dashboard-js', VGT_WPDESK_URL . 'assets/js/dattrack-dashboard.js', [], '1.4.0', true);
         
         $metrics = [

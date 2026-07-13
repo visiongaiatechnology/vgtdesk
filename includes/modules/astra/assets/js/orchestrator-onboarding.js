@@ -3,27 +3,32 @@
  * VGTAstra beta security gate and first-run guide.
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+window.VGTAstraOnboarding = (() => {
     'use strict';
 
-    const guideStorageKey = 'vgta_beta_guide_hidden_v1';
-    const gate = document.getElementById('vgta-beta-security-gate');
-    const confirm = document.getElementById('vgta-beta-security-confirm');
-    const root = document.querySelector('.vgta-root');
+    const guideStorageKey = 'vgta_beta_guide_hidden_v2';
 
-    if (root) {
-        root.classList.add('vgta-dashboard-locked');
-    }
+    document.addEventListener('DOMContentLoaded', init);
 
-    if (confirm && gate) {
-        confirm.focus();
-        confirm.addEventListener('click', () => {
-            gate.classList.add('is-hidden');
-            if (root) {
-                root.classList.remove('vgta-dashboard-locked');
-            }
-            maybeOpenGuide();
-        });
+    function init() {
+        const gate = document.getElementById('vgta-beta-security-gate');
+        const confirm = document.getElementById('vgta-beta-security-confirm');
+        const root = document.querySelector('.vgta-root');
+
+        if (root) {
+            root.classList.add('vgta-dashboard-locked');
+        }
+
+        if (confirm && gate) {
+            confirm.focus();
+            confirm.addEventListener('click', () => {
+                gate.classList.add('is-hidden');
+                if (root) {
+                    root.classList.remove('vgta-dashboard-locked');
+                }
+                maybeOpenGuide();
+            });
+        }
     }
 
     function maybeOpenGuide() {
@@ -35,13 +40,29 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        openGuide();
+        openGuide(false);
     }
 
-    function openGuide() {
-        const steps = getGuideSteps();
+    function openGuide(force) {
+        if (!force) {
+            try {
+                if (window.localStorage.getItem(guideStorageKey) === '1') {
+                    return;
+                }
+            } catch (error) {
+                return;
+            }
+        }
+
+        const existing = document.getElementById('vgta-guide-overlay');
+        if (existing) {
+            existing.remove();
+        }
+
+        const steps = getGuideSteps(getActiveLanguage());
         let activeIndex = 0;
         const overlay = document.createElement('div');
+        overlay.id = 'vgta-guide-overlay';
         overlay.className = 'vgta-guide-overlay';
         overlay.setAttribute('role', 'dialog');
         overlay.setAttribute('aria-modal', 'true');
@@ -61,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const skip = document.createElement('button');
         skip.type = 'button';
         skip.className = 'vgta-btn secondary';
-        skip.textContent = 'NICHT MEHR ANZEIGEN';
+        skip.textContent = getActiveLanguage() === 'en' ? 'DO NOT SHOW AGAIN' : 'NICHT MEHR ANZEIGEN';
         skip.addEventListener('click', () => {
             persistGuideHidden();
             overlay.remove();
@@ -70,13 +91,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const next = document.createElement('button');
         next.type = 'button';
         next.className = 'vgta-btn success';
-        next.textContent = 'WEITER';
+        next.textContent = getActiveLanguage() === 'en' ? 'NEXT' : 'WEITER';
         next.addEventListener('click', () => {
             if (activeIndex >= steps.length - 1) {
                 overlay.remove();
                 return;
             }
-            activeIndex++;
+            activeIndex += 1;
             render();
         });
 
@@ -108,7 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
             panel.appendChild(title);
             panel.appendChild(createText('p', 'vgta-guide-copy', step.copy));
             panel.appendChild(createText('div', 'vgta-guide-benefit', step.benefit));
-            next.textContent = activeIndex >= steps.length - 1 ? 'GUIDE SCHLIESSEN' : 'WEITER';
+            const lang = getActiveLanguage();
+            next.textContent = activeIndex >= steps.length - 1 ? (lang === 'en' ? 'CLOSE GUIDE' : 'GUIDE SCHLIESSEN') : (lang === 'en' ? 'NEXT' : 'WEITER');
         }
 
         render();
@@ -129,38 +151,80 @@ document.addEventListener('DOMContentLoaded', () => {
         return element;
     }
 
-    function getGuideSteps() {
+    function getActiveLanguage() {
+        const root = document.querySelector('.vgta-root');
+        return root && root.dataset.vgtaLang === 'en' ? 'en' : 'de';
+    }
+
+    function getGuideSteps(language) {
+        if (language === 'en') {
+            return [
+            {
+                label: 'Vault',
+                title: 'Seal the API key',
+                copy: 'Enter the Groq API key. VGTAstra stores it encrypted and decrypts it only for concrete gateway requests.',
+                benefit: 'Benefit: The key is not stored in plaintext and remains bound to the VGTAstra context.',
+            },
+            {
+                label: 'Context',
+                title: 'Analyze an inactive plugin',
+                copy: 'Select a deactivated target plugin and build the structure map. VGTAstra uses it later to create compact file context packs.',
+                benefit: 'Benefit: The AI receives relevant files without blindly loading the whole plugin every time.',
+            },
+            {
+                label: 'Chat',
+                title: 'Work with the agent',
+                copy: 'Open the chat configuration when you need model selection, Thinking Mode, Web Grounding, Memory, or Artifacts. Collapsed mode leaves more room for the chat.',
+                benefit: 'Benefit: The workspace stays large without hiding model and memory controls.',
+            },
+            {
+                label: 'Pipeline',
+                title: 'Orchestrate roles',
+                copy: 'Architect, Developer, Auditor, and Integrator work in loops. Collapse the Role Pipeline on the right when you only want to chat.',
+                benefit: 'Benefit: Architecture, implementation, and audit remain separated while the chat can use the full width when needed.',
+            },
+            {
+                label: 'Review',
+                title: 'Commit patches only after diff review',
+                copy: 'AI patches land in the Safe Patch Vault first. Before writing, VGTAstra shows a diff screen with review token and guard validation.',
+                benefit: 'Benefit: No blind commit. The operator remains the final authority before every file change.',
+            },
+        ];
+        }
+
         return [
             {
                 label: 'Vault',
                 title: 'API Key versiegeln',
-                copy: 'Trage den Groq API Key ein. VGTAstra speichert ihn verschluesselt und entschluesselt ihn nur fuer konkrete Gateway-Requests.',
-                benefit: 'Nutzen: Der Schluessel liegt nicht im Klartext in der Datenbank und bleibt an den VGTAstra-Kontext gebunden.',
+                copy: 'Trage den Groq API Key ein. VGTAstra speichert ihn verschlüsselt und entschlüsselt ihn nur für konkrete Gateway-Requests.',
+                benefit: 'Nutzen: Der Schlüssel liegt nicht im Klartext in der Datenbank und bleibt an den VGTAstra-Kontext gebunden.',
             },
             {
                 label: 'Context',
                 title: 'Inaktives Plugin analysieren',
-                copy: 'Waehle ein deaktiviertes Zielplugin und erstelle die Strukturkarte. Daraus baut VGTAstra spaeter kompakte File-Context-Packs.',
+                copy: 'Wähle ein deaktiviertes Zielplugin und erstelle die Strukturkarte. Daraus baut VGTAstra später kompakte File-Context-Packs.',
                 benefit: 'Nutzen: Die KI bekommt relevante Dateien, ohne jedes Mal das gesamte Plugin blind zu laden.',
             },
             {
                 label: 'Chat',
                 title: 'Mit dem Agenten arbeiten',
-                copy: 'Nutze den Live-Chat fuer Anforderungen, Korrekturen und Rueckfragen. Alte Chats und Artefakte bleiben im Sandbox-Speicher erhalten.',
-                benefit: 'Nutzen: Du kannst spaeter weitermachen und wichtige KI-Ausgaben gezielt wieder einbinden.',
+                copy: 'Öffne die Chat-Konfiguration, wenn du Modell, Thinking Mode, Web Grounding, Memory oder Artifacts brauchst. Eingeklappt bleibt mehr Platz für den Chat.',
+                benefit: 'Nutzen: Der Arbeitsbereich bleibt groß, ohne Modell- und Memory-Funktionen zu verstecken.',
             },
             {
                 label: 'Pipeline',
                 title: 'Rollen orchestrieren',
-                copy: 'Architect, Developer, Auditor und Integrator arbeiten in Schleifen. Die festen Rollenprompts liegen ueber deinem Operator-Prompt.',
-                benefit: 'Nutzen: Architektur, Umsetzung und Audit werden getrennt, statt alles in einem unkontrollierten Prompt zu vermischen.',
+                copy: 'Architect, Developer, Auditor und Integrator arbeiten in Schleifen. Die Role Pipeline lässt sich rechts einklappen, wenn du nur chatten möchtest.',
+                benefit: 'Nutzen: Architektur, Umsetzung und Audit bleiben getrennt, aber der Chat kann bei Bedarf die volle Breite nutzen.',
             },
             {
                 label: 'Review',
                 title: 'Patch erst nach Diff-Review committen',
-                copy: 'KI-Patches landen zuerst im Safe Patch Vault. Vor dem Schreiben zeigt VGTAstra einen Diff-Screen mit Review-Token und Guard-Pruefung.',
-                benefit: 'Nutzen: Kein direkter Blind-Commit. Der Operator bleibt die letzte Instanz vor jeder Dateiaenderung.',
+                copy: 'KI-Patches landen zuerst im Safe Patch Vault. Vor dem Schreiben zeigt VGTAstra einen Diff-Screen mit Review-Token und Guard-Prüfung.',
+                benefit: 'Nutzen: Kein direkter Blind-Commit. Der Operator bleibt die letzte Instanz vor jeder Dateiänderung.',
             },
         ];
     }
-});
+
+    return { openGuide };
+})();

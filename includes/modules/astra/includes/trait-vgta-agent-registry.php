@@ -76,7 +76,7 @@ trait AgentRegistryTrait
             $this->throwTypedException('Agent role type validation failed.', 'security');
         }
 
-        $model = $this->sanitizeModel((string) ($raw['model'] ?? 'openai/gpt-oss-20b'));
+        $model = $this->sanitizeModel((string) ($raw['model'] ?? 'compact_default'));
         $reasoningEffort = $this->sanitizeReasoningEffort($model, (string) ($raw['reasoning_effort'] ?? ''));
         $systemPrompt = $this->sanitizeBoundedText((string) ($raw['system_prompt'] ?? ''), self::MAX_AGENT_PROMPT_BYTES);
         if (\strlen($systemPrompt) < 20 || $this->containsForbiddenAgentPrompt($systemPrompt)) {
@@ -171,7 +171,7 @@ trait AgentRegistryTrait
                     'id' => (string) $id,
                     'label' => (string) ($agent['label'] ?? $id),
                     'role_type' => (string) ($agent['role_type'] ?? 'Assistant'),
-                    'model' => (string) ($agent['model'] ?? 'openai/gpt-oss-20b'),
+                    'model' => (string) ($agent['model'] ?? 'compact_default'),
                     'risk_level' => (string) ($agent['risk_level'] ?? 'LOW'),
                     'status' => (string) ($agent['status'] ?? 'draft'),
                     'can_write_files' => !empty($agent['can_write_files']),

@@ -3,16 +3,16 @@
 */
 
 :root {
-    --vgt-bg-base: #030305;
-    --vgt-bg-gradient: radial-gradient(circle at top right, #0a0a12, #030305);
-    --vgt-panel-bg: rgba(15, 15, 20, 0.6);
-    --vgt-border: rgba(255, 255, 255, 0.06);
-    --vgt-border-hover: rgba(255, 255, 255, 0.15);
-    --vgt-text: #e0e0e0;
-    --vgt-text-muted: #78788a;
-    --vgt-primary: #00ffcc;
-    --vgt-primary-glow: rgba(0, 255, 204, 0.25);
-    --vgt-surface: #0a0a0e;
+    --vgt-bg-base: var(--vgt-ds-bg, #070b14);
+    --vgt-bg-gradient: radial-gradient(circle at top right, var(--vgt-ds-accent-soft, rgba(99,102,241,0.12)), var(--vgt-ds-bg, #070b14));
+    --vgt-panel-bg: var(--vgt-ds-surface, rgba(15, 23, 42, 0.78));
+    --vgt-border: var(--vgt-ds-border, rgba(148, 163, 184, 0.14));
+    --vgt-border-hover: var(--vgt-ds-border-strong, rgba(148, 163, 184, 0.28));
+    --vgt-text: var(--vgt-ds-text, #e0e0e0);
+    --vgt-text-muted: var(--vgt-ds-muted, #94a3b8);
+    --vgt-primary: var(--vgt-ds-accent, #6366f1);
+    --vgt-primary-glow: var(--vgt-ds-accent-glow, rgba(99, 102, 241, 0.35));
+    --vgt-surface: var(--vgt-ds-surface-solid, #0f172a);
 }
 
 #wpcontent { padding-left: 0; background: var(--vgt-bg-base); }

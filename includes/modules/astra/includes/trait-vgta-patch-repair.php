@@ -29,6 +29,19 @@ trait PatchRepairTrait
             $normalized = \substr($normalized, 2);
         }
 
+        $marker = 'wp-content/plugins/';
+        $markerPos = \stripos($normalized, $marker);
+        if ($markerPos !== false) {
+            $normalized = \substr($normalized, $markerPos + \strlen($marker));
+        }
+
+        if ($pluginSlug === '') {
+            if (\str_starts_with($normalized, 'plugins/')) {
+                $normalized = \substr($normalized, 8);
+            }
+            return \trim($normalized, '/');
+        }
+
         $pluginDir = \dirname(\trim($pluginSlug, '/'));
         if ($pluginDir === '.' || $pluginDir === '') {
             $pluginDir = '';
@@ -36,15 +49,6 @@ trait PatchRepairTrait
 
         if ($pluginDir !== '' && \str_starts_with($normalized, $pluginDir . '/')) {
             $normalized = \substr($normalized, \strlen($pluginDir) + 1);
-        }
-
-        $marker = 'wp-content/plugins/';
-        $markerPos = \stripos($normalized, $marker);
-        if ($markerPos !== false) {
-            $afterPlugins = \substr($normalized, $markerPos + \strlen($marker));
-            if ($pluginDir !== '' && \str_starts_with($afterPlugins, $pluginDir . '/')) {
-                $normalized = \substr($afterPlugins, \strlen($pluginDir) + 1);
-            }
         }
 
         return \trim($normalized, '/');

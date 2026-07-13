@@ -528,7 +528,7 @@ VGTAstra routes through the Groq OpenAI-compatible Chat Completions API.
 |---|---|
 | `openai/gpt-oss-120b` | Architecture, complex planning, large reasoning tasks |
 | `openai/gpt-oss-20b` | Fast iteration, Developer patches |
-| `qwen/qwen3-32b` | Audit and review tasks |
+| `qwen/qwen3.6-27b` | Audit and review tasks |
 | `meta-llama/llama-4-scout-17b-16e-instruct` | Multimodal — visual context extensions |
 
 **Groq Gateway:**
@@ -754,6 +754,6 @@ VGTAstra is not open-source. The repository is provided as a reference architect
 [![VGT](https://img.shields.io/badge/VisionGaia-Technology-gold?style=for-the-badge)](https://visiongaiatechnology.de)
 [![VGT Desk](https://img.shields.io/badge/Integrated_into-VGT_WP--Desk-blue?style=for-the-badge)](https://github.com/visiongaiatechnology/vgtdesk)
 
-*VGTAstra v1.3.0-beta.4 — Agentic WordPress Engineering Console // Rollenased Agent Pipeline // AES-256-GCM Crypto Vault // Encrypted Patch Staging // Side-by-Side Diff Review // Commit Guard // Prompt Injection Boundary // Groq Reasoning Gateway // Zero-CDN Runtime // LTS Security Patches // DIAMANT VGT SUPREME*
+*VGTAstra v1.4.0-beta.5 — Agentic WordPress Engineering Console // Rollenased Agent Pipeline // AES-256-GCM Crypto Vault // Encrypted Patch Staging // Side-by-Side Diff Review // Commit Guard // Prompt Injection Boundary // Groq Reasoning Gateway // Zero-CDN Runtime // LTS Security Patches // DIAMANT VGT SUPREME*
 
 </div>

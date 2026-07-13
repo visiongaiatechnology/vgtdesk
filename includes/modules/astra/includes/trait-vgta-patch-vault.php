@@ -321,10 +321,6 @@ trait PatchVaultTrait
     private function stageFileWritesFromContent(string $pluginSlug, string $actor, string $model, string $content): array
     {
         $this->lastRejectedWrites = [];
-        if ($pluginSlug === '') {
-            return [];
-        }
-
         $vault = $this->getPatchVault($pluginSlug);
         $pattern = '/FILE_WRITE:\s*(?:\[([^\]\r\n]+)\]|([^\r\n]+))\s*(`{3,}|~{3,})([A-Za-z0-9_+\-]*)\s*\R([\s\S]*?)\R\3/m';
         if (\preg_match_all($pattern, $content, $matches, \PREG_SET_ORDER) <= 0) {
@@ -337,6 +333,9 @@ trait PatchVaultTrait
 
             try {
                 $relativePath = $this->sanitizeRelativePath($normalizedPath);
+                if ($pluginSlug === '') {
+                    $this->assertDraftWritePath($relativePath);
+                }
                 $code = \trim((string) $match[5]);
                 if ($code === '' || \strlen($code) > self::MAX_WRITE_BYTES) {
                     throw new ValidationException('Write payload size rejected.');
@@ -371,6 +370,15 @@ trait PatchVaultTrait
 
         $this->savePatchVault($pluginSlug, $vault);
         return $this->summarizePatchVault($pluginSlug);
+    }
+
+    private function assertDraftWritePath(string $relativePath): void
+    {
+        $segments = \explode('/', $relativePath);
+        $top = $segments[0] ?? '';
+        if (\count($segments) < 2 || \preg_match('/\Avgta-[a-z0-9][a-z0-9._-]{2,79}\z/i', $top) !== 1) {
+            $this->throwTypedException('Path validation failed.', 'security');
+        }
     }
 
     /**

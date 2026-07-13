@@ -423,3 +423,14 @@
         align-items: flex-start;
     }
 }
+
+.vgta-typing-cursor {
+    color: var(--accent-cyan, #24dcff);
+    font-weight: bold;
+    margin-left: 4px;
+    animation: vgta-blink 0.8s infinite;
+}
+@keyframes vgta-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}

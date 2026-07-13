@@ -28,7 +28,11 @@ final class VGTLoginSettings {
             return;
         }
 
-        wp_enqueue_style('vgt-login-admin', VGT_LOGIN_MODULE_URL . 'assets/css/vgt-login-admin.css', [], '1.0.0');
+        if (class_exists('\\VisionGaia\\WPDesk\\WPDeskDesignSystem')) {
+            \VisionGaia\WPDesk\WPDeskDesignSystem::enqueue('loginpager');
+        }
+
+        wp_enqueue_style('vgt-login-admin', VGT_LOGIN_MODULE_URL . 'assets/css/vgt-login-admin.css', ['vgt-ds-compat'], '1.0.0');
         wp_enqueue_script('vgt-login-admin-js', VGT_LOGIN_MODULE_URL . 'assets/js/vgt-login-admin.js', [], '1.0.0', true);
     }
 

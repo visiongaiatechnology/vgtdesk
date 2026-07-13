@@ -19,18 +19,27 @@ trait AjaxActionsTrait
             $this->assertAjaxAccess();
 
             $apiKey = isset($_POST['api_key']) ? \sanitize_text_field((string) \wp_unslash($_POST['api_key'])) : '';
-            if (\preg_match('/\Agsk_[A-Za-z0-9_\-]{20,}\z/', $apiKey) !== 1) {
-                $this->throwTypedException('Groq API key format rejected.', 'validation');
+            $provider = isset($_POST['provider']) ? \sanitize_key((string) \wp_unslash($_POST['provider'])) : 'groq';
+
+            if (!isset(self::OPTION_KEYS[$provider])) {
+                $this->throwTypedException('Unsupported key provider requested.', 'validation');
             }
 
-            $encrypted = CryptoVault::encrypt($apiKey, self::API_KEY_CONTEXT);
-            $status = \update_option(self::OPTION_KEY_API_KEY, $encrypted, false);
-            if ($status === false && \get_option(self::OPTION_KEY_API_KEY, '') !== $encrypted) {
+            if (\preg_match('/\A[A-Za-z0-9_\-\:\.]{20,256}\z/', $apiKey) !== 1) {
+                $this->throwTypedException('API key format rejected.', 'validation');
+            }
+
+            $optionKey = self::OPTION_KEYS[$provider];
+            $contextKey = self::CONTEXT_KEYS[$provider];
+
+            $encrypted = CryptoVault::encrypt($apiKey, $contextKey);
+            $status = \update_option($optionKey, $encrypted, false);
+            if ($status === false && \get_option($optionKey, '') !== $encrypted) {
                 $this->throwTypedException('Credential vault storage failed.', 'storage');
             }
 
-            VaultRegistry::addToIndex(self::OPTION_KEY_API_KEY);
-            return ['message' => 'Groq credential sealed in VGTAstra encrypted vault.'];
+            VaultRegistry::addToIndex($optionKey);
+            return ['message' => \ucfirst($provider) . ' credential sealed in VGTAstra encrypted vault.'];
         });
     }
 
@@ -41,7 +50,11 @@ trait AjaxActionsTrait
         $this->sendJsonFromOperation(function (): array {
             $this->assertAjaxAccess();
 
-            $pluginSlug = isset($_POST['plugin_slug']) ? \sanitize_text_field((string) \wp_unslash($_POST['plugin_slug'])) : '';
+            $pluginSlugRaw = isset($_POST['plugin_slug']) ? (string) \wp_unslash($_POST['plugin_slug']) : '';
+            if ($pluginSlugRaw === '') {
+                $this->throwTypedException('Target plugin required for map build.', 'validation');
+            }
+            $pluginSlug = $this->sanitizePluginSlug($pluginSlugRaw);
             $scope = $this->resolveInactivePluginScope($pluginSlug);
             $manifest = $this->buildPluginManifest($scope['root'], $pluginSlug, $scope['single_file']);
 
@@ -66,13 +79,15 @@ trait AjaxActionsTrait
         $this->sendJsonFromOperation(function (): array {
             $this->assertAjaxAccess();
 
-            $pluginSlug = isset($_POST['plugin_slug']) ? \sanitize_text_field((string) \wp_unslash($_POST['plugin_slug'])) : '';
-            $model = $this->sanitizeModel(isset($_POST['model']) ? (string) \wp_unslash($_POST['model']) : 'openai/gpt-oss-20b');
+            $pluginSlugRaw = isset($_POST['plugin_slug']) ? (string) \wp_unslash($_POST['plugin_slug']) : '';
+            $pluginSlug = $pluginSlugRaw !== '' ? $this->sanitizePluginSlug($pluginSlugRaw) : '';
+            $model = $this->sanitizeModel(isset($_POST['model']) ? (string) \wp_unslash($_POST['model']) : 'compact_default');
             $reasoningEffort = $this->sanitizeReasoningEffort($model, isset($_POST['reasoning_effort']) ? (string) \wp_unslash($_POST['reasoning_effort']) : '');
             $message = $this->sanitizeBoundedText(isset($_POST['message']) ? (string) \wp_unslash($_POST['message']) : '', self::MAX_CHAT_BYTES);
             $history = $this->sanitizeHistory($this->decodeJsonArray(isset($_POST['history']) ? (string) \wp_unslash($_POST['history']) : '[]'));
             $pipelineLedger = $this->sanitizePipelineLedger($this->decodeJsonArray(isset($_POST['pipeline_ledger']) ? (string) \wp_unslash($_POST['pipeline_ledger']) : '[]'));
             $sessionId = isset($_POST['session_id']) ? $this->sanitizeMemoryId((string) \wp_unslash($_POST['session_id'])) : '';
+            $history = $this->mergePersistedSessionMemory($pluginSlug, $sessionId, $history, self::MAX_HISTORY_MESSAGES, 24000);
             $groundingMode = !empty($_POST['use_grounding']) ? $this->sanitizeGroundingMode(isset($_POST['grounding_mode']) ? (string) \wp_unslash($_POST['grounding_mode']) : 'cited') : 'off';
             $groundingSources = isset($_POST['grounding_sources']) ? \max(1, \min(self::MAX_GROUNDING_SOURCES, \absint(\wp_unslash($_POST['grounding_sources'])))) : 3;
             $groundingDomains = isset($_POST['grounding_domains']) ? $this->sanitizeBoundedText((string) \wp_unslash($_POST['grounding_domains']), 600) : '';
@@ -84,9 +99,15 @@ trait AjaxActionsTrait
             $pluginMap = [];
             $fileContext = '';
             if ($pluginSlug !== '') {
-                $scope = $this->resolveInactivePluginScope($pluginSlug);
+                $scope = $pluginSlug === '' ? $this->resolveDraftPluginScope() : $this->resolveInactivePluginScope($pluginSlug);
+                
+                $modelMeta = self::ALL_MODELS[$model] ?? null;
+                $contextWindow = $modelMeta['context_window'] ?? 131072;
+                $maxContextPackBytes = (int) ($contextWindow * 3.5 * 0.6);
+                $maxContextPackBytes = \min(5000000, \max(150000, $maxContextPackBytes));
+
                 $pluginMap = $this->getOrBuildPluginMap($pluginSlug, $scope);
-                $fileContext = $this->buildPluginFileContext($pluginSlug, $scope, $pluginMap, self::MAX_CONTEXT_PACK_BYTES);
+                $fileContext = $this->buildPluginFileContext($pluginSlug, $scope, $pluginMap, $maxContextPackBytes);
             }
 
             $groundingPack = $this->buildGroundingPack($message, $groundingMode, $groundingSources, $groundingDomains);
@@ -116,6 +137,7 @@ trait AjaxActionsTrait
                 'content' => $apiResponse['content'],
                 'reasoning' => $apiResponse['reasoning'],
                 'usage' => $apiResponse['usage'],
+                'context_usage' => $apiResponse['context_usage'],
                 'proposals' => $proposals,
                 'rejected_writes' => $rejectedWrites,
                 'session_id' => $memory['session_id'],
@@ -135,7 +157,11 @@ trait AjaxActionsTrait
         $this->sendJsonFromOperation(function (): array {
             $this->assertAjaxAccess();
 
-            $pluginSlug = isset($_POST['plugin_slug']) ? \sanitize_text_field((string) \wp_unslash($_POST['plugin_slug'])) : '';
+            $pluginSlugRaw = isset($_POST['plugin_slug']) ? (string) \wp_unslash($_POST['plugin_slug']) : '';
+            if ($pluginSlugRaw === '') {
+                $this->throwTypedException('Target plugin required for pipeline execution.', 'validation');
+            }
+            $pluginSlug = $this->sanitizePluginSlug($pluginSlugRaw);
             $scope = $this->resolveInactivePluginScope($pluginSlug);
 
             $stepIndex = isset($_POST['step_index']) ? \absint(\wp_unslash($_POST['step_index'])) : 0;
@@ -144,16 +170,22 @@ trait AjaxActionsTrait
             $pipelineLedger = \array_slice($this->sanitizePipelineLedger($this->decodeJsonArray(isset($_POST['pipeline_ledger']) ? (string) \wp_unslash($_POST['pipeline_ledger']) : '[]')), -self::MAX_PIPELINE_LEDGER_FOR_CONTEXT);
             $globalPrompt = isset($_POST['global_prompt']) ? $this->sanitizeBoundedText((string) \wp_unslash($_POST['global_prompt']), 6000) : '';
             $sessionId = isset($_POST['session_id']) ? $this->sanitizeMemoryId((string) \wp_unslash($_POST['session_id'])) : '';
+            $history = $this->mergePersistedSessionMemory($pluginSlug, $sessionId, $history, self::MAX_HISTORY_MESSAGES_FOR_PIPELINE, 18000);
             $loopIndex = isset($_POST['loop_index']) ? \max(1, \absint(\wp_unslash($_POST['loop_index']))) : 1;
 
             if (!isset($steps[$stepIndex])) {
                 $this->throwTypedException('Agent step validation failed.', 'security');
             }
 
-            $pluginMap = $this->getOrBuildPluginMap($pluginSlug, $scope);
-            $fileContext = $this->buildPluginFileContext($pluginSlug, $scope, $pluginMap, self::MAX_CONTEXT_PACK_BYTES);
-
             $currentStep = $steps[$stepIndex];
+            $modelId = $currentStep['model'];
+            $modelMeta = self::ALL_MODELS[$modelId] ?? null;
+            $contextWindow = $modelMeta['context_window'] ?? 131072;
+            $maxContextPackBytes = (int) ($contextWindow * 3.5 * 0.6);
+            $maxContextPackBytes = \min(5000000, \max(150000, $maxContextPackBytes));
+
+            $pluginMap = $this->getOrBuildPluginMap($pluginSlug, $scope);
+            $fileContext = $this->buildPluginFileContext($pluginSlug, $scope, $pluginMap, $maxContextPackBytes);
             try {
                 $apiResponse = $this->queryGroqGateway(
                     $this->getDecryptedApiKey(),
@@ -183,6 +215,7 @@ trait AjaxActionsTrait
                 'content' => $apiResponse['content'],
                 'reasoning' => $apiResponse['reasoning'],
                 'usage' => $apiResponse['usage'],
+                'context_usage' => $apiResponse['context_usage'],
                 'proposals' => $proposals,
                 'rejected_writes' => $rejectedWrites,
                 'session_id' => $memory['session_id'],
@@ -207,13 +240,14 @@ trait AjaxActionsTrait
         $this->sendJsonFromOperation(function (): array {
             $this->assertAjaxAccess();
 
-            $pluginSlug = isset($_POST['plugin_slug']) ? \sanitize_text_field((string) \wp_unslash($_POST['plugin_slug'])) : '';
+            $pluginSlugRaw = isset($_POST['plugin_slug']) ? (string) \wp_unslash($_POST['plugin_slug']) : '';
+            $pluginSlug = $pluginSlugRaw !== '' ? $this->sanitizePluginSlug($pluginSlugRaw) : '';
             $proposalId = isset($_POST['proposal_id']) ? \sanitize_text_field((string) \wp_unslash($_POST['proposal_id'])) : '';
             if (\preg_match('/\A[a-f0-9]{64}\z/i', $proposalId) !== 1) {
                 $this->throwTypedException('Patch token validation failed.', 'security');
             }
 
-            $scope = $this->resolveInactivePluginScope($pluginSlug);
+            $scope = $pluginSlug === '' ? $this->resolveDraftPluginScope() : $this->resolveInactivePluginScope($pluginSlug);
             $vault = $this->getPatchVault($pluginSlug);
             if (!isset($vault[$proposalId]) || !\is_array($vault[$proposalId])) {
                 $this->throwTypedException('Patch token not found.', 'security');
@@ -221,6 +255,9 @@ trait AjaxActionsTrait
 
             $proposal = $vault[$proposalId];
             $relativePath = $this->sanitizeRelativePath((string) $proposal['path']);
+            if ($pluginSlug === '') {
+                $this->assertDraftWritePath($relativePath);
+            }
             $proposedCode = (string) $proposal['code'];
             if ($proposedCode === '' || \strlen($proposedCode) > self::MAX_WRITE_BYTES) {
                 $this->throwTypedException('Write payload size rejected.', 'validation');
@@ -245,20 +282,117 @@ trait AjaxActionsTrait
     }
 
 
+    public function ajaxPreparePatchBundleReview(): void
+    {
+        $this->initializeErrorHandling();
+        $this->sendJsonFromOperation(function (): array {
+            $this->assertAjaxAccess();
+
+            $pluginSlugRaw = isset($_POST['plugin_slug']) ? (string) \wp_unslash($_POST['plugin_slug']) : '';
+            $pluginSlug = $pluginSlugRaw !== '' ? $this->sanitizePluginSlug($pluginSlugRaw) : '';
+            $scope = $pluginSlug === '' ? $this->resolveDraftPluginScope() : $this->resolveInactivePluginScope($pluginSlug);
+            $vault = $this->getPatchVault($pluginSlug);
+            $files = [];
+
+            foreach ($vault as $proposalId => $proposal) {
+                if (!\is_array($proposal) || (isset($proposal['committed_at']) && (string) $proposal['committed_at'] !== '')) {
+                    continue;
+                }
+
+                if (\preg_match('/\A[a-f0-9]{64}\z/i', (string) $proposalId) !== 1) {
+                    continue;
+                }
+
+                $relativePath = $this->sanitizeRelativePath((string) $proposal['path']);
+                if ($pluginSlug === '') {
+                    $this->assertDraftWritePath($relativePath);
+                }
+                $proposedCode = (string) $proposal['code'];
+                if ($proposedCode === '' || \strlen($proposedCode) > self::MAX_WRITE_BYTES) {
+                    continue;
+                }
+
+                $destination = $this->resolvePatchDestination($scope, $relativePath);
+                $currentCode = $this->readCurrentTargetContent($scope, $destination);
+                $reviewToken = \bin2hex(\random_bytes(32));
+                $vault[$proposalId]['review_token_hash'] = $this->hashReviewToken((string) $proposalId, $reviewToken);
+                $vault[$proposalId]['reviewed_at'] = \gmdate('c');
+                $files[] = [
+                    'proposal_id' => (string) $proposalId,
+                    'path' => $relativePath,
+                    'review_token' => $reviewToken,
+                    'current_code' => $currentCode,
+                    'proposed_code' => $proposedCode,
+                    'diff' => $this->buildSideBySideDiff($currentCode, $proposedCode),
+                    'bytes' => \strlen($proposedCode),
+                ];
+            }
+
+            if ($files === []) {
+                throw new ValidationException('No pending patch proposals found.');
+            }
+
+            $this->savePatchVault($pluginSlug, $vault);
+            return ['files' => $files];
+        });
+    }
+
+
+    public function ajaxAnalyzeError(): void
+    {
+        $this->initializeErrorHandling();
+        $this->sendJsonFromOperation(function (): array {
+            $this->assertAjaxAccess();
+
+            $pluginSlugRaw = isset($_POST['plugin_slug']) ? (string) \wp_unslash($_POST['plugin_slug']) : '';
+            $pluginSlug = $pluginSlugRaw !== '' ? $this->sanitizePluginSlug($pluginSlugRaw) : '';
+            $errorCode = isset($_POST['error_code']) ? \strtoupper(\sanitize_text_field((string) \wp_unslash($_POST['error_code']))) : '';
+            if (\preg_match('/\AVGTA-[A-F0-9]{12}\z/', $errorCode) !== 1) {
+                $this->throwTypedException('Error token validation failed.', 'security');
+            }
+
+            $event = $this->findDiagnosticEvent($pluginSlug, $errorCode);
+            if ($event === []) {
+                throw new ValidationException('Diagnostic event not found. Retry the failed action once, then analyze again.');
+            }
+
+            $repairModel = $this->sanitizeModel(self::REPAIR_AGENT_MODEL_ALIAS);
+            $messages = $this->buildRepairMessages($event, [], [], 'Analyze this VGTAstra runtime failure and explain the root cause, safest fix, and whether an automatic retry is appropriate.');
+            $apiResponse = $this->queryGroqGateway($this->getDecryptedApiKey(), $repairModel, $messages, $this->sanitizeReasoningEffort($repairModel, 'low'), 4096);
+
+            return [
+                'role' => 'Repair',
+                'model' => $repairModel,
+                'content' => $apiResponse['content'],
+                'reasoning' => $apiResponse['reasoning'],
+                'usage' => $apiResponse['usage'],
+                'context_usage' => $apiResponse['context_usage'],
+                'event' => [
+                    'code' => $errorCode,
+                    'action' => isset($event['action']) ? (string) $event['action'] : '',
+                    'scope' => isset($event['error_scope']) ? (string) $event['error_scope'] : '',
+                    'created_at' => isset($event['created_at']) ? (string) $event['created_at'] : '',
+                ],
+            ];
+        });
+    }
+
+
     public function ajaxCommitStagedPatch(): void
     {
         $this->initializeErrorHandling();
         $this->sendJsonFromOperation(function (): array {
             $this->assertAjaxAccess();
 
-            $pluginSlug = isset($_POST['plugin_slug']) ? \sanitize_text_field((string) \wp_unslash($_POST['plugin_slug'])) : '';
+            $pluginSlugRaw = isset($_POST['plugin_slug']) ? (string) \wp_unslash($_POST['plugin_slug']) : '';
+            $pluginSlug = $pluginSlugRaw !== '' ? $this->sanitizePluginSlug($pluginSlugRaw) : '';
             $proposalId = isset($_POST['proposal_id']) ? \sanitize_text_field((string) \wp_unslash($_POST['proposal_id'])) : '';
             $reviewToken = isset($_POST['review_token']) ? \sanitize_text_field((string) \wp_unslash($_POST['review_token'])) : '';
             if (\preg_match('/\A[a-f0-9]{64}\z/i', $proposalId) !== 1) {
                 $this->throwTypedException('Patch token validation failed.', 'security');
             }
 
-            $scope = $this->resolveInactivePluginScope($pluginSlug);
+            $scope = $pluginSlug === '' ? $this->resolveDraftPluginScope() : $this->resolveInactivePluginScope($pluginSlug);
             $vault = $this->getPatchVault($pluginSlug);
             if (!isset($vault[$proposalId]) || !\is_array($vault[$proposalId])) {
                 $this->throwTypedException('Patch token not found.', 'security');
@@ -268,6 +402,9 @@ trait AjaxActionsTrait
             $this->assertReviewToken($proposalId, $reviewToken, $proposal);
             $this->assertCommitGuard($pluginSlug, $proposalId);
             $relativePath = $this->sanitizeRelativePath((string) $proposal['path']);
+            if ($pluginSlug === '') {
+                $this->assertDraftWritePath($relativePath);
+            }
             $codeRaw = (string) $proposal['code'];
             if ($codeRaw === '' || \strlen($codeRaw) > self::MAX_WRITE_BYTES) {
                 $this->throwTypedException('Write payload size rejected.', 'validation');
@@ -306,8 +443,11 @@ trait AjaxActionsTrait
         $this->sendJsonFromOperation(function (): array {
             $this->assertAjaxAccess();
 
-            $pluginSlug = isset($_POST['plugin_slug']) ? \sanitize_text_field((string) \wp_unslash($_POST['plugin_slug'])) : '';
-            $this->resolveInactivePluginScope($pluginSlug);
+            $pluginSlugRaw = isset($_POST['plugin_slug']) ? (string) \wp_unslash($_POST['plugin_slug']) : '';
+            $pluginSlug = $pluginSlugRaw !== '' ? $this->sanitizePluginSlug($pluginSlugRaw) : '';
+            if ($pluginSlug !== '') {
+                $this->resolveInactivePluginScope($pluginSlug);
+            }
             \delete_option($this->getPatchVaultOptionKey($pluginSlug));
 
             return [
@@ -324,7 +464,8 @@ trait AjaxActionsTrait
         $this->sendJsonFromOperation(function (): array {
             $this->assertAjaxAccess();
 
-            $pluginSlug = isset($_POST['plugin_slug']) ? \sanitize_text_field((string) \wp_unslash($_POST['plugin_slug'])) : '';
+            $pluginSlugRaw = isset($_POST['plugin_slug']) ? (string) \wp_unslash($_POST['plugin_slug']) : '';
+            $pluginSlug = $pluginSlugRaw !== '' ? $this->sanitizePluginSlug($pluginSlugRaw) : '';
             if ($pluginSlug !== '') {
                 $this->resolveInactivePluginScope($pluginSlug);
             }
@@ -340,7 +481,8 @@ trait AjaxActionsTrait
         $this->sendJsonFromOperation(function (): array {
             $this->assertAjaxAccess();
 
-            $pluginSlug = isset($_POST['plugin_slug']) ? \sanitize_text_field((string) \wp_unslash($_POST['plugin_slug'])) : '';
+            $pluginSlugRaw = isset($_POST['plugin_slug']) ? (string) \wp_unslash($_POST['plugin_slug']) : '';
+            $pluginSlug = $pluginSlugRaw !== '' ? $this->sanitizePluginSlug($pluginSlugRaw) : '';
             $sessionId = isset($_POST['session_id']) ? \sanitize_text_field((string) \wp_unslash($_POST['session_id'])) : '';
             if ($pluginSlug !== '') {
                 $this->resolveInactivePluginScope($pluginSlug);
@@ -357,7 +499,8 @@ trait AjaxActionsTrait
         $this->sendJsonFromOperation(function (): array {
             $this->assertAjaxAccess();
 
-            $pluginSlug = isset($_POST['plugin_slug']) ? \sanitize_text_field((string) \wp_unslash($_POST['plugin_slug'])) : '';
+            $pluginSlugRaw = isset($_POST['plugin_slug']) ? (string) \wp_unslash($_POST['plugin_slug']) : '';
+            $pluginSlug = $pluginSlugRaw !== '' ? $this->sanitizePluginSlug($pluginSlugRaw) : '';
             $artifactId = isset($_POST['artifact_id']) ? \sanitize_text_field((string) \wp_unslash($_POST['artifact_id'])) : '';
             if ($pluginSlug !== '') {
                 $this->resolveInactivePluginScope($pluginSlug);
@@ -374,7 +517,7 @@ trait AjaxActionsTrait
         $this->sendJsonFromOperation(function (): array {
             $this->assertAjaxAccess();
             $message = $this->sanitizeBoundedText(isset($_POST['message']) ? (string) \wp_unslash($_POST['message']) : '', self::MAX_CHAT_BYTES);
-            $model = $this->sanitizeModel(isset($_POST['model']) ? (string) \wp_unslash($_POST['model']) : 'openai/gpt-oss-20b');
+            $model = $this->sanitizeModel(isset($_POST['model']) ? (string) \wp_unslash($_POST['model']) : 'compact_default');
             if ($message === '') {
                 throw new ValidationException('Agent intent required.');
             }

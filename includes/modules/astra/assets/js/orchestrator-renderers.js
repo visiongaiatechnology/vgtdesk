@@ -106,11 +106,37 @@ window.VGTAstraRenderers = (() => {
         }
         const responseDiv = document.createElement('div');
         responseDiv.className = 'vgta-response-content';
-        renderMarkdownSafely(String(content), responseDiv, createTextElement);
         body.appendChild(responseDiv);
         box.appendChild(body);
         nodes.chatLog.appendChild(box);
         nodes.chatLog.scrollTop = nodes.chatLog.scrollHeight;
+
+        const text = String(content);
+        let currentPos = 0;
+        const chunkSize = 16;
+        const intervalMs = 15;
+
+        function tick() {
+            currentPos += chunkSize;
+            if (currentPos >= text.length) {
+                currentPos = text.length;
+                responseDiv.replaceChildren();
+                renderMarkdownSafely(text, responseDiv, createTextElement);
+                nodes.chatLog.scrollTop = nodes.chatLog.scrollHeight;
+                return;
+            }
+            responseDiv.replaceChildren();
+            renderMarkdownSafely(text.slice(0, currentPos), responseDiv, createTextElement);
+            
+            const cursor = document.createElement('span');
+            cursor.className = 'vgta-typing-cursor';
+            cursor.textContent = '█';
+            responseDiv.appendChild(cursor);
+            
+            nodes.chatLog.scrollTop = nodes.chatLog.scrollHeight;
+            window.setTimeout(tick, intervalMs);
+        }
+        tick();
     }
 
     function renderMarkdownSafely(text, container, createTextElement) {

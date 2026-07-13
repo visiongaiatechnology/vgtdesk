@@ -44,7 +44,11 @@ final class Admin
     {
         if (strpos($hook, 'vgt-chronos-builder') === false) return;
 
-        wp_enqueue_style('vgt-admin-css', VGT_CHRONOS_URL . 'assets/vgt-admin.css', [], Bootstrapper::VERSION);
+        if (class_exists('\\VisionGaia\\WPDesk\\WPDeskDesignSystem')) {
+            \VisionGaia\WPDesk\WPDeskDesignSystem::enqueue('chronos');
+        }
+
+        wp_enqueue_style('vgt-admin-css', VGT_CHRONOS_URL . 'assets/vgt-admin.css', ['vgt-ds-compat'], Bootstrapper::VERSION);
         wp_enqueue_script('vgt-admin-js', VGT_CHRONOS_URL . 'assets/vgt-admin.js', [], Bootstrapper::VERSION, true);
     }
 

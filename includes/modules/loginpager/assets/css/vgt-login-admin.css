@@ -3,12 +3,12 @@
  */
 
 :root {
-    --vgt-sys-bg: #09090b;
-    --vgt-sys-surface: #18181b;
-    --vgt-sys-border: rgba(255, 255, 255, 0.08);
-    --vgt-sys-text: #ffffff;
-    --vgt-sys-muted: #a1a1aa;
-    --vgt-accent: #00f0ff;
+    --vgt-sys-bg: var(--vgt-ds-bg, #070b14);
+    --vgt-sys-surface: var(--vgt-ds-surface-solid, #0f172a);
+    --vgt-sys-border: var(--vgt-ds-border, rgba(148, 163, 184, 0.14));
+    --vgt-sys-text: var(--vgt-ds-text-primary, #ffffff);
+    --vgt-sys-muted: var(--vgt-ds-muted, #94a3b8);
+    --vgt-accent: var(--vgt-ds-accent, #6366f1);
     --vgt-sim-grid: rgba(255, 255, 255, 0.03);
 }
 

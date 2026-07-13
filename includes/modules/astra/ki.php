@@ -1,12 +1,12 @@
 <?php
 /**
- * Module Name: VGTAstra Agent System
- * Module Description: Zero-dependency WordPress AI assistant system with live chat, Groq reasoning pipelines, encrypted vault storage, and safe plugin patch staging.
- * Module Version: 1.4.0-beta.1
- * Module Author URI: https://visiongaiatechnology.de
+ * Plugin Name: VGTAstra Agent System
+ * Description: Zero-dependency WordPress AI assistant system with live chat, Groq reasoning pipelines, encrypted vault storage, and safe plugin patch staging.
+ * Version: 1.4.0-beta.5
+* Author URI:        https://visiongaiatechnology.de
  * License:           AGPLv3
  * License URI:       https://www.gnu.org/licenses/agpl-3.0.html
- * Module Domain: vgt-astra
+ * Text Domain:       vgt-astra
  *
  * --- LICENSE & COPYRIGHT INFORMATION ---
  * (c) 2024-2026 VisionGaiaTechnology. All Rights Reserved.
@@ -22,17 +22,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-if (!defined('VGTA_PLUGIN_DIR')) {
-    define('VGTA_PLUGIN_DIR', plugin_dir_path(__FILE__));
-}
-
-if (!defined('VGTA_PLUGIN_URL')) {
-    define('VGTA_PLUGIN_URL', plugin_dir_url(__FILE__));
-}
-
-if (!defined('VGTA_PLUGIN_VERSION')) {
-    define('VGTA_PLUGIN_VERSION', '1.4.0-beta.1');
-}
+define('VGTA_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('VGTA_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('VGTA_PLUGIN_VERSION', '1.4.0-beta.5');
 
 require_once VGTA_PLUGIN_DIR . 'includes/class-vgta-exceptions.php';
 require_once VGTA_PLUGIN_DIR . 'includes/class-vgta-crypto-vault.php';
@@ -49,10 +41,14 @@ require_once VGTA_PLUGIN_DIR . 'includes/trait-vgta-agent-registry.php';
 require_once VGTA_PLUGIN_DIR . 'includes/trait-vgta-grounding-broker.php';
 require_once VGTA_PLUGIN_DIR . 'includes/trait-vgta-validation.php';
 require_once VGTA_PLUGIN_DIR . 'includes/trait-vgta-groq.php';
+require_once VGTA_PLUGIN_DIR . 'includes/trait-vgta-gemini.php';
+require_once VGTA_PLUGIN_DIR . 'includes/trait-vgta-claude.php';
+require_once VGTA_PLUGIN_DIR . 'includes/trait-vgta-openai.php';
+require_once VGTA_PLUGIN_DIR . 'includes/class-vgta-gutenberg-content.php';
+require_once VGTA_PLUGIN_DIR . 'includes/class-vgta-gutenberg-bridge.php';
 require_once VGTA_PLUGIN_DIR . 'includes/class-vgta-orchestrator.php';
 
-if (!defined('VGTA_MODULE_BOOTSTRAPPED')) {
-    define('VGTA_MODULE_BOOTSTRAPPED', true);
-    new \VGTAstra\AgentSystem\AgenticOrchestrator();
-}
+new \VGTAstra\AgentSystem\AgenticOrchestrator();
 
+// Gutenberg insert bridge (local-first content assist) — only when Astra module is loaded.
+\VGTAstra\AgentSystem\GutenbergBridge::boot();

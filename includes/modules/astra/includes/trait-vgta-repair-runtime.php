@@ -42,17 +42,18 @@ trait RepairRuntimeTrait
         }
 
         try {
+            $repairModel = $this->sanitizeModel(self::REPAIR_AGENT_MODEL_ALIAS);
             $repairResponse = $this->queryGroqGateway(
                 $this->getDecryptedApiKey(),
-                self::REPAIR_AGENT_MODEL,
+                $repairModel,
                 $this->buildRepairMessages($event, $history, $pipelineLedger, $globalPrompt),
-                $this->sanitizeReasoningEffort(self::REPAIR_AGENT_MODEL, 'low'),
+                $this->sanitizeReasoningEffort($repairModel, 'low'),
                 4096
             );
             $repairAction = $this->extractRepairAction($repairResponse['stage_content']);
-            $proposals = $this->stageFileWritesFromContent($pluginSlug, 'Repair', self::REPAIR_AGENT_MODEL, $repairResponse['stage_content']);
+            $proposals = $this->stageFileWritesFromContent($pluginSlug, 'Repair', $repairModel, $repairResponse['stage_content']);
             $repairRejectedWrites = $this->consumeRejectedWrites();
-            $memory = $this->persistAssistantExchange($pluginSlug, $sessionId, '', 'Repair', self::REPAIR_AGENT_MODEL, $repairResponse, $proposals);
+            $memory = $this->persistAssistantExchange($pluginSlug, $sessionId, '', 'Repair', $repairModel, $repairResponse, $proposals);
         } catch (\Throwable $repairThrowable) {
             $repairCode = $this->buildOpaqueErrorCode($repairThrowable);
             $this->logInternalThrowable('REPAIR', $repairCode, $repairThrowable);
@@ -61,11 +62,12 @@ trait RepairRuntimeTrait
 
         return [
             'role' => 'Repair',
-            'model' => self::REPAIR_AGENT_MODEL,
+            'model' => $repairModel,
             'reasoning_effort' => 'low',
             'content' => $repairResponse['content'],
             'reasoning' => $repairResponse['reasoning'],
             'usage' => $repairResponse['usage'],
+            'context_usage' => $repairResponse['context_usage'],
             'proposals' => $proposals,
             'rejected_writes' => $repairRejectedWrites,
             'session_id' => $memory['session_id'],
@@ -82,7 +84,7 @@ trait RepairRuntimeTrait
             ],
             'memory_entry' => [
                 'role' => 'Repair',
-                'model' => self::REPAIR_AGENT_MODEL,
+                'model' => $repairModel,
                 'loop' => \max(1, $loopIndex),
                 'content' => \substr($repairResponse['content'], 0, self::MAX_REPAIR_SUMMARY_BYTES),
             ],
@@ -190,6 +192,20 @@ trait RepairRuntimeTrait
      * @param list<array{role:string,model:string,loop:int,content:string}> $pipelineLedger
      * @return list<array{role:string,content:string}>
      */
+    private function findDiagnosticEvent(string $pluginSlug, string $errorCode): array
+    {
+        foreach ([$pluginSlug, ''] as $scopeSlug) {
+            foreach (\array_reverse($this->loadErrorEvents($scopeSlug)) as $event) {
+                if (\is_array($event) && isset($event['error_code']) && \hash_equals((string) $event['error_code'], $errorCode)) {
+                    return $event;
+                }
+            }
+        }
+
+        return [];
+    }
+
+
     private function buildRepairMessages(array $event, array $history, array $pipelineLedger, string $globalPrompt): array
     {
         $context = [
@@ -224,6 +240,7 @@ trait RepairRuntimeTrait
 
     private function buildRepairFallbackResponse(string $pluginSlug, string $sessionId, array $event, string $action, string $message): array
     {
+        $repairModel = $this->sanitizeModel(self::REPAIR_AGENT_MODEL_ALIAS);
         $apiResponse = [
             'content' => "REPAIR_DIAGNOSIS\n" . $message . "\n\nREPAIR_ACTION: " . $action . "\n\nREPAIR_NOTES\nFehlercode: " . (string) $event['error_code'],
             'reasoning' => '',
@@ -231,7 +248,7 @@ trait RepairRuntimeTrait
             'usage' => [],
         ];
         try {
-            $memory = $this->persistAssistantExchange($pluginSlug, $sessionId, '', 'Repair', self::REPAIR_AGENT_MODEL, $apiResponse, []);
+            $memory = $this->persistAssistantExchange($pluginSlug, $sessionId, '', 'Repair', $repairModel, $apiResponse, []);
         } catch (\Throwable $e) {
             $this->logInternalThrowable('MEMORY', $this->buildOpaqueErrorCode($e), $e);
             $memory = [
@@ -243,11 +260,12 @@ trait RepairRuntimeTrait
 
         return [
             'role' => 'Repair',
-            'model' => self::REPAIR_AGENT_MODEL,
+            'model' => $repairModel,
             'reasoning_effort' => 'low',
             'content' => $apiResponse['content'],
             'reasoning' => '',
             'usage' => [],
+            'context_usage' => [],
             'proposals' => $this->summarizePatchVault($pluginSlug),
             'rejected_writes' => [],
             'session_id' => $memory['session_id'],
@@ -264,7 +282,7 @@ trait RepairRuntimeTrait
             ],
             'memory_entry' => [
                 'role' => 'Repair',
-                'model' => self::REPAIR_AGENT_MODEL,
+                'model' => $repairModel,
                 'loop' => \max(1, (int) $event['loop_index']),
                 'content' => \substr($apiResponse['content'], 0, self::MAX_REPAIR_SUMMARY_BYTES),
             ],

@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ajaxUrl: vgtaConfig.ajaxUrl,
         nonce: vgtaConfig.nonce,
         models: Array.isArray(vgtaConfig.models) ? vgtaConfig.models : [],
+        modelAliases: vgtaConfig.modelAliases && typeof vgtaConfig.modelAliases === 'object' ? vgtaConfig.modelAliases : {},
         roles: Array.isArray(vgtaConfig.roles) ? vgtaConfig.roles : [],
         activePlugin: '',
         isExecuting: false,
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSessionId: '',
         memory: { sessions: [], artifacts: [] },
         customAgents: Array.isArray(vgtaConfig.customAgents) ? vgtaConfig.customAgents : [],
+        sessionCost: 0.0,
     };
 
     const core = window.VGTAstraCore;
@@ -31,15 +33,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const appendRoleOptions = (select, selectedRole) => core.appendRoleOptions(config, select, selectedRole);
     const appendReasoningOptions = (select, modelId, selectedEffort) => core.appendReasoningOptions(config, select, modelId, selectedEffort);
     const postForm = (formData) => core.postForm(config, formData);
+    const confirmAction = core.confirmAction;
+    const showNotice = core.showNotice;
     const formatAjaxError = core.formatAjaxError;
     const getLoopCount = () => core.getLoopCount(nodes);
-    const updateMetricsRow = (usage, latencyMs) => core.updateMetricsRow(nodes, createTextElement, usage, latencyMs);
+    const updateMetricsRow = (usage, latencyMs) => core.updateMetricsRow(nodes, createTextElement, usage, latencyMs, config.sessionCost);
+    const updateContextMeter = (contextUsage) => core.updateContextMeter(nodes, createTextElement, contextUsage);
     let memoryController = null;
     let forgeController = null;
 
-    const defaultModel = pickModel('openai/gpt-oss-120b');
-    const compactModel = pickModel('openai/gpt-oss-20b');
-    const auditModel = pickModel('qwen/qwen3-32b');
+    const defaultModel = pickModel('architect_default');
+    const compactModel = pickModel('compact_default');
+    const auditModel = pickModel('audit_default');
 
     let workflowSteps = [
         {
@@ -64,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const nodes = {
         apiKeyInput: document.getElementById('vgta-api-key'),
+        providerSelect: document.getElementById('vgta-provider-select'),
         btnSaveCredentials: document.getElementById('vgta-btn-save-credentials'),
         pluginSelect: document.getElementById('vgta-plugin-select'),
         btnGenerateMap: document.getElementById('vgta-btn-generate-map'),
@@ -79,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput: document.getElementById('vgta-chat-input'),
         btnSendChat: document.getElementById('vgta-btn-send-chat'),
         metricsDisplay: document.getElementById('vgta-metrics-display'),
+        contextMeter: document.getElementById('vgta-context-meter'),
         globalPrompt: document.getElementById('vgta-global-prompt'),
         loopCount: document.getElementById('vgta-loop-count'),
         stopMode: document.getElementById('vgta-stop-mode'),
@@ -87,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnStartOrchestration: document.getElementById('vgta-btn-start-orchestration'),
         btnAbortOrchestration: document.getElementById('vgta-btn-abort-orchestration'),
         patchList: document.getElementById('vgta-patch-list'),
+        btnReviewBundle: document.getElementById('vgta-btn-review-bundle'),
         btnClearPatches: document.getElementById('vgta-btn-clear-patches'),
         btnNewChat: document.getElementById('vgta-btn-new-chat'),
         memorySessions: document.getElementById('vgta-memory-sessions'),
@@ -113,11 +121,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!apiKey) {
             return;
         }
+        const provider = nodes.providerSelect ? nodes.providerSelect.value : 'groq';
 
         const formData = new FormData();
         formData.append('action', 'vgta_save_credentials');
         formData.append('nonce', config.nonce);
         formData.append('api_key', apiKey);
+        formData.append('provider', provider);
 
         nodes.btnSaveCredentials.disabled = true;
         postForm(formData)
@@ -125,8 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.success) {
                     nodes.apiKeyInput.value = '';
                     appendPlainMessage('system', 'VGTAstra Vault', response.data.message);
+                    window.setTimeout(() => window.location.reload(), 1500);
                 } else {
-                    appendPlainMessage('system error', 'Credential Error', formatAjaxError(response.data));
+                    appendAjaxError('Credential Error', response.data);
                 }
             })
             .catch((error) => appendPlainMessage('system error', 'Network Error', error.message))
@@ -172,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     nodes.btnStartOrchestration.disabled = false;
                     memoryController.loadMemory();
                 } else {
-                    appendPlainMessage('system error', 'Map Error', formatAjaxError(response.data));
+                    appendAjaxError('Map Error', response.data);
                 }
             })
             .catch((error) => {
@@ -234,7 +245,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     appendRichAssistantMessage(payload.role, payload.model, payload.content, payload.reasoning);
                     config.chatHistory.push({ role: 'assistant', content: payload.content });
                     config.currentSessionId = String(payload.session_id || config.currentSessionId);
+                    config.sessionCost += Number(payload.usage ? payload.usage.cost || 0 : 0);
                     updateMetricsRow(payload.usage || {}, Math.round(performance.now() - startTime));
+                    updateContextMeter(payload.context_usage || null);
                     updateProposals(payload.proposals || config.proposals);
                     memoryController.renderMemoryData(payload.memory || config.memory);
                     if (payload.memory_warning) {
@@ -243,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     forgeController.renderGroundingPack(payload.grounding_pack);
                     forgeController.renderBlueprint(payload.agent_blueprint);
                 } else {
-                    appendPlainMessage('system error', 'Chat Error', formatAjaxError(response.data));
+                    appendAjaxError('Chat Error', response.data);
                 }
             })
             .catch((error) => {
@@ -351,7 +364,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         };
                     config.pipelineLedger.push(ledgerEntry);
                     
+                    config.sessionCost += Number(payload.usage ? payload.usage.cost || 0 : 0);
                     updateMetricsRow(payload.usage || {}, Math.round(performance.now() - startTime));
+                    updateContextMeter(payload.context_usage || null);
                     updateProposals(payload.proposals || config.proposals);
                     memoryController.renderMemoryData(payload.memory || config.memory);
                     if (payload.memory_warning) {
@@ -387,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     window.setTimeout(() => executeWorkflowCycle(loopIndex, stepIndex + 1), 400);
                 } else {
-                    appendPlainMessage('system error', 'Pipeline Error', formatAjaxError(response.data));
+                    appendAjaxError('Pipeline Error', response.data);
                     config.isExecuting = false;
                     resetExecutionControls();
                 }
@@ -440,6 +455,55 @@ document.addEventListener('DOMContentLoaded', () => {
         window.VGTAstraRenderers.appendPlainMessage(kind, meta, content, nodes, createTextElement);
     }
 
+    function appendAjaxError(meta, data) {
+        appendPlainMessage('system error', meta, formatAjaxError(data));
+        if (!data || typeof data !== 'object' || typeof data.code !== 'string' || data.code.trim() === '') {
+            return;
+        }
+
+        const box = document.createElement('div');
+        box.className = 'vgta-message system error';
+        box.appendChild(createTextElement('div', 'vgta-message-meta', 'VGTAstra Error Diagnostic'));
+        const body = document.createElement('div');
+        body.className = 'vgta-message-body';
+        body.appendChild(createTextElement('div', 'vgta-response-content', `Fehlercode ${data.code} kann mit Server-Kontext analysiert werden.`));
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'vgta-btn secondary tiny';
+        button.textContent = 'ANALYZE ERROR';
+        button.addEventListener('click', () => analyzeError(data.code, button));
+        body.appendChild(button);
+        box.appendChild(body);
+        nodes.chatLog.appendChild(box);
+        nodes.chatLog.scrollTop = nodes.chatLog.scrollHeight;
+    }
+
+    function analyzeError(errorCode, button) {
+        const formData = new FormData();
+        formData.append('action', 'vgta_analyze_error');
+        formData.append('nonce', config.nonce);
+        formData.append('plugin_slug', config.activePlugin);
+        formData.append('error_code', errorCode);
+        button.disabled = true;
+        button.textContent = 'ANALYZING';
+        postForm(formData)
+            .then((response) => {
+                if (response.success) {
+                    const payload = response.data;
+                    appendRichAssistantMessage(payload.role || 'Repair', payload.model || 'diagnostic', payload.content || '', payload.reasoning || '');
+                    updateMetricsRow(payload.usage || {}, 0);
+                    updateContextMeter(payload.context_usage || null);
+                } else {
+                    appendPlainMessage('system error', 'Diagnostic Error', formatAjaxError(response.data));
+                }
+            })
+            .catch((error) => appendPlainMessage('system error', 'Diagnostic Network Error', error.message))
+            .finally(() => {
+                button.disabled = false;
+                button.textContent = 'ANALYZE ERROR';
+            });
+    }
+
     function appendRichAssistantMessage(role, model, content, reasoning) {
         window.VGTAstraRenderers.appendRichAssistantMessage(role, model, content, reasoning, nodes, createTextElement);
     }
@@ -453,8 +517,25 @@ document.addEventListener('DOMContentLoaded', () => {
         window.VGTAstraPatchReview.renderPatchVault(config, nodes, createTextElement, preparePatchReview);
     }
 
+    function preparePatchBundleReview() {
+        const formData = new FormData();
+        formData.append('action', 'vgta_prepare_patch_bundle_review');
+        formData.append('nonce', config.nonce);
+        formData.append('plugin_slug', config.activePlugin);
+
+        postForm(formData)
+            .then((response) => {
+                if (response.success) {
+                    window.VGTAstraPatchReview.openPatchReviewModal(response.data, createTextElement, commitProposal);
+                } else {
+                    appendAjaxError('Patch Bundle Review Error', response.data);
+                }
+            })
+            .catch((error) => appendPlainMessage('system error', 'Network Error', error.message));
+    }
+
     function preparePatchReview(proposalId) {
-        if (!config.activePlugin || !proposalId) {
+        if (!proposalId) {
             return;
         }
 
@@ -469,57 +550,98 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.success) {
                     window.VGTAstraPatchReview.openPatchReviewModal(response.data, createTextElement, commitProposal);
                 } else {
-                    appendPlainMessage('system error', 'Patch Review Error', formatAjaxError(response.data));
+                    appendAjaxError('Patch Review Error', response.data);
                 }
             })
             .catch((error) => appendPlainMessage('system error', 'Network Error', error.message));
     }
 
-    function commitProposal(proposalId, reviewToken) {
-        if (!config.activePlugin || !proposalId || !reviewToken) {
+    function commitProposal(filesOrProposalId, reviewToken) {
+        const files = Array.isArray(filesOrProposalId)
+            ? filesOrProposalId
+            : [{ proposal_id: filesOrProposalId, review_token: reviewToken }];
+        const selectedFiles = files.filter((file) => file && file.proposal_id && file.review_token);
+        if (selectedFiles.length === 0) {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('action', 'vgta_commit_staged_patch');
-        formData.append('nonce', config.nonce);
-        formData.append('plugin_slug', config.activePlugin);
-        formData.append('proposal_id', proposalId);
-        formData.append('review_token', reviewToken);
+        confirmAction({
+            title: 'Patch Commit Approval',
+            message: `Commit ${selectedFiles.length} reviewed file(s)? This writes the staged code after token validation.`,
+            detail: selectedFiles.map((file) => String(file.path || file.proposal_id)).join('\n'),
+            confirmLabel: 'COMMIT',
+            cancelLabel: 'CANCEL',
+            danger: false,
+        }).then((approved) => {
+            if (!approved) {
+                return;
+            }
+            commitSelectedFiles(selectedFiles);
+        });
+    }
 
-        postForm(formData)
-            .then((response) => {
-                if (response.success) {
-                    window.VGTAstraPatchReview.closePatchReviewModal();
-                    appendPlainMessage('system', 'Patch Vault', response.data.message);
-                    updateProposals(response.data.proposals || []);
-                } else {
-                    appendPlainMessage('system error', 'Patch Error', formatAjaxError(response.data));
+    function commitSelectedFiles(selectedFiles) {
+        const commitNext = (index) => {
+            if (index >= selectedFiles.length) {
+                window.VGTAstraPatchReview.closePatchReviewModal();
+                appendPlainMessage('system', 'Patch Vault', `${selectedFiles.length} approved file(s) committed or workspace-staged.`);
+                return Promise.resolve();
+            }
+
+            const file = selectedFiles[index];
+            const formData = new FormData();
+            formData.append('action', 'vgta_commit_staged_patch');
+            formData.append('nonce', config.nonce);
+            formData.append('plugin_slug', config.activePlugin);
+            formData.append('proposal_id', file.proposal_id);
+            formData.append('review_token', file.review_token);
+
+            return postForm(formData).then((response) => {
+                if (!response.success) {
+                    appendAjaxError('Patch Error', response.data);
+                    return Promise.reject(new Error('Patch commit rejected.'));
                 }
-            })
-            .catch((error) => appendPlainMessage('system error', 'Network Error', error.message));
+                updateProposals(response.data.proposals || []);
+                return commitNext(index + 1);
+            });
+        };
+
+        commitNext(0).catch((error) => appendPlainMessage('system error', 'Patch Commit Halted', error.message));
+    }
+
+    if (nodes.btnReviewBundle) {
+        nodes.btnReviewBundle.addEventListener('click', preparePatchBundleReview);
     }
 
     nodes.btnClearPatches.addEventListener('click', () => {
-        if (!config.activePlugin) {
-            return;
-        }
+        confirmAction({
+            title: 'Clear Patch Vault',
+            message: 'Remove all staged patch proposals for the current Astra scope?',
+            detail: `${config.proposals.length} proposal(s) staged. This does not touch committed files.`,
+            confirmLabel: 'CLEAR',
+            cancelLabel: 'CANCEL',
+            danger: true,
+        }).then((approved) => {
+            if (!approved) {
+                return;
+            }
 
-        const formData = new FormData();
-        formData.append('action', 'vgta_clear_patch_vault');
-        formData.append('nonce', config.nonce);
-        formData.append('plugin_slug', config.activePlugin);
+            const formData = new FormData();
+            formData.append('action', 'vgta_clear_patch_vault');
+            formData.append('nonce', config.nonce);
+            formData.append('plugin_slug', config.activePlugin);
 
-        postForm(formData)
-            .then((response) => {
-                if (response.success) {
-                    appendPlainMessage('system', 'Patch Vault', response.data.message);
-                    updateProposals([]);
-                } else {
-                    appendPlainMessage('system error', 'Patch Vault Error', formatAjaxError(response.data));
-                }
-            })
-            .catch((error) => appendPlainMessage('system error', 'Network Error', error.message));
+            postForm(formData)
+                .then((response) => {
+                    if (response.success) {
+                        appendPlainMessage('system', 'Patch Vault', response.data.message);
+                        updateProposals([]);
+                    } else {
+                        appendAjaxError('Patch Vault Error', response.data);
+                    }
+                })
+                .catch((error) => appendPlainMessage('system error', 'Network Error', error.message));
+        });
     });
 
     appendModelOptions(nodes.chatModel, compactModel);
@@ -535,6 +657,7 @@ document.addEventListener('DOMContentLoaded', () => {
         createTextElement,
         appendPlainMessage,
     });
+    void showNotice;
     forgeController = window.VGTAstraAgentForge.createController({
         config,
         nodes,
@@ -544,8 +667,12 @@ document.addEventListener('DOMContentLoaded', () => {
         appendPlainMessage,
         rerenderSteps: renderStepsConfig,
     });
+    if (window.VGTAstraLayout && typeof window.VGTAstraLayout.init === 'function') {
+        window.VGTAstraLayout.init(nodes);
+    }
     renderStepsConfig();
     renderPatchVault();
+    updateContextMeter(null);
     memoryController.loadMemory();
     forgeController.loadAgents();
 });

@@ -12,6 +12,28 @@ if (!defined('ABSPATH')) {
 
 trait ValidationTrait
 {
+    private function sanitizePluginSlug(string $pluginSlug): string
+    {
+        $normalized = \trim(\str_replace('\\', '/', \sanitize_text_field($pluginSlug)));
+        if ($normalized === '' || \strlen($normalized) > 260 || \str_contains($normalized, "\0") || \str_starts_with($normalized, '/') || \preg_match('/\A[A-Za-z]:/i', $normalized) === 1) {
+            $this->throwTypedException('Plugin path validation failed.', 'security');
+        }
+
+        $segments = \explode('/', $normalized);
+        foreach ($segments as $segment) {
+            if ($segment === '' || $segment === '.' || $segment === '..' || \preg_match('/\A[\pL\pN _.,@+\-]+\z/u', $segment) !== 1) {
+                $this->throwTypedException('Plugin path validation failed.', 'security');
+            }
+        }
+
+        if (\strtolower((string) \pathinfo($normalized, \PATHINFO_EXTENSION)) !== 'php') {
+            $this->throwTypedException('Plugin path validation failed.', 'security');
+        }
+
+        return $normalized;
+    }
+
+
     private function sanitizeRelativePath(string $filepath): string
     {
         $normalized = \trim($filepath);
@@ -106,23 +128,30 @@ trait ValidationTrait
 
     private function sanitizeModel(string $model): string
     {
-        $clean = \sanitize_text_field($model);
-        if (!isset(self::GROQ_MODELS[$clean])) {
-            $this->throwTypedException('Model validation failed.', 'validation');
+        $clean = $this->resolveModelAlias(\sanitize_text_field($model));
+        if (!isset(self::ALL_MODELS[$clean])) {
+            $this->throwTypedException('Model validation failed: ' . $clean, 'validation');
         }
 
         return $clean;
     }
 
 
+    private function resolveModelAlias(string $model): string
+    {
+        $clean = \sanitize_text_field($model);
+        return self::MODEL_ALIASES[$clean] ?? $clean;
+    }
+
+
     private function sanitizeReasoningEffort(string $model, string $reasoningEffort): string
     {
-        if (!isset(self::GROQ_MODELS[$model])) {
-            $this->throwTypedException('Model validation failed.', 'validation');
+        if (!isset(self::ALL_MODELS[$model])) {
+            $this->throwTypedException('Model validation failed for reasoning check.', 'validation');
         }
 
-        $allowed = self::GROQ_MODELS[$model]['reasoning_values'];
-        $default = self::GROQ_MODELS[$model]['reasoning_default'];
+        $allowed = self::ALL_MODELS[$model]['reasoning_values'];
+        $default = self::ALL_MODELS[$model]['reasoning_default'];
         if ($allowed === []) {
             return $default;
         }

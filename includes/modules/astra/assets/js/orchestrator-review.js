@@ -8,7 +8,10 @@ window.VGTAstraPatchReview = (() => {
 
     function renderPatchVault(config, nodes, createTextElement, preparePatchReview) {
         nodes.patchList.replaceChildren();
-        nodes.btnClearPatches.disabled = config.activePlugin === '' || config.proposals.length === 0;
+        nodes.btnClearPatches.disabled = config.proposals.length === 0;
+        if (nodes.btnReviewBundle) {
+            nodes.btnReviewBundle.disabled = config.proposals.filter((proposal) => !proposal.committed).length < 2;
+        }
         if (config.proposals.length === 0) {
             nodes.patchList.appendChild(createTextElement('div', 'vgta-placeholder-text', 'No staged file proposals.'));
             return;
@@ -31,7 +34,8 @@ window.VGTAstraPatchReview = (() => {
             button.className = 'vgta-btn success tiny';
             button.textContent = proposal.committed ? 'COMMITTED' : 'REVIEW';
             button.disabled = Boolean(proposal.committed);
-            button.addEventListener('click', () => preparePatchReview(proposal.id));
+            const proposalId = proposal.id || proposal.proposal_id || '';
+            button.addEventListener('click', () => preparePatchReview(proposalId));
             row.appendChild(button);
             nodes.patchList.appendChild(row);
         });
@@ -39,34 +43,84 @@ window.VGTAstraPatchReview = (() => {
 
     function openPatchReviewModal(review, createTextElement, commitProposal) {
         closePatchReviewModal();
+        const files = Array.isArray(review.files) && review.files.length > 0 ? review.files : [review];
+        let activeIndex = 0;
+        const selected = new Set(files.map((file) => file.proposal_id));
+
         const overlay = document.createElement('div');
         overlay.className = 'vgta-diff-overlay';
         overlay.id = 'vgta-diff-overlay';
         const modal = document.createElement('div');
-        modal.className = 'vgta-diff-modal';
+        modal.className = 'vgta-diff-modal vgta-diff-modal-tabs';
         overlay.appendChild(modal);
+
         const header = document.createElement('div');
         header.className = 'vgta-diff-header';
-        header.appendChild(createTextElement('div', 'vgta-diff-title', 'Patch Review'));
-        header.appendChild(createTextElement('div', 'vgta-diff-path', review.path || 'unknown'));
+        header.appendChild(createTextElement('div', 'vgta-diff-title', files.length > 1 ? 'Multi-File Patch Review' : 'Patch Review'));
+        const headerPath = createTextElement('div', 'vgta-diff-path', files[0].path || 'unknown');
+        header.appendChild(headerPath);
         modal.appendChild(header);
+
+        const tabBar = document.createElement('div');
+        tabBar.className = 'vgta-diff-tabbar';
+        modal.appendChild(tabBar);
+
         const grid = document.createElement('div');
         grid.className = 'vgta-diff-grid';
-        grid.appendChild(createDiffPane('CURRENT', review.current_code || '', createTextElement));
-        grid.appendChild(createDiffPane('PROPOSED', review.proposed_code || '', createTextElement));
         modal.appendChild(grid);
+
         const table = document.createElement('div');
         table.className = 'vgta-diff-table';
-        (Array.isArray(review.diff) ? review.diff : []).forEach((row) => {
-            const line = document.createElement('div');
-            line.className = `vgta-diff-row ${row.type || 'same'}`;
-            line.appendChild(createTextElement('span', 'line-num', String(row.left || '')));
-            line.appendChild(createTextElement('span', 'line-code', row.left_text || ''));
-            line.appendChild(createTextElement('span', 'line-num', String(row.right || '')));
-            line.appendChild(createTextElement('span', 'line-code', row.right_text || ''));
-            table.appendChild(line);
-        });
         modal.appendChild(table);
+
+        function renderActiveFile() {
+            const file = files[activeIndex];
+            headerPath.textContent = file.path || 'unknown';
+            grid.replaceChildren(
+                createDiffPane('CURRENT', file.current_code || '', createTextElement),
+                createDiffPane('PROPOSED', file.proposed_code || '', createTextElement),
+            );
+            table.replaceChildren();
+            (Array.isArray(file.diff) ? file.diff : []).forEach((row) => {
+                const line = document.createElement('div');
+                line.className = `vgta-diff-row ${row.type || 'same'}`;
+                line.appendChild(createTextElement('span', 'line-num', String(row.left || '')));
+                line.appendChild(createTextElement('span', 'line-code', row.left_text || ''));
+                line.appendChild(createTextElement('span', 'line-num', String(row.right || '')));
+                line.appendChild(createTextElement('span', 'line-code', row.right_text || ''));
+                table.appendChild(line);
+            });
+            renderTabs();
+        }
+
+        function renderTabs() {
+            tabBar.replaceChildren();
+            files.forEach((file, index) => {
+                const tab = document.createElement('button');
+                tab.type = 'button';
+                tab.className = index === activeIndex ? 'vgta-diff-tab active' : 'vgta-diff-tab';
+                tab.textContent = file.path || `file-${index + 1}`;
+                tab.addEventListener('click', () => {
+                    activeIndex = index;
+                    renderActiveFile();
+                });
+
+                const toggle = document.createElement('input');
+                toggle.type = 'checkbox';
+                toggle.checked = selected.has(file.proposal_id);
+                toggle.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (toggle.checked) {
+                        selected.add(file.proposal_id);
+                    } else {
+                        selected.delete(file.proposal_id);
+                    }
+                });
+                tab.prepend(toggle);
+                tabBar.appendChild(tab);
+            });
+        }
+
         const actions = document.createElement('div');
         actions.className = 'vgta-diff-actions';
         const cancel = document.createElement('button');
@@ -78,10 +132,17 @@ window.VGTAstraPatchReview = (() => {
         const confirm = document.createElement('button');
         confirm.type = 'button';
         confirm.className = 'vgta-btn success';
-        confirm.textContent = 'CONFIRM COMMIT';
-        confirm.addEventListener('click', () => commitProposal(review.proposal_id, review.review_token));
+        confirm.textContent = files.length > 1 ? 'COMMIT SELECTED' : 'CONFIRM COMMIT';
+        confirm.addEventListener('click', () => {
+            const selectedFiles = files.filter((file) => selected.has(file.proposal_id));
+            if (selectedFiles.length === 0) {
+                return;
+            }
+            commitProposal(selectedFiles);
+        });
         actions.appendChild(confirm);
         modal.appendChild(actions);
+        renderActiveFile();
         document.body.appendChild(overlay);
     }
 

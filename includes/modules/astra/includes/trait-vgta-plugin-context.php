@@ -31,12 +31,23 @@ trait PluginContextTrait
     /**
      * @return array{root:string,single_file:?string}
      */
+    private function resolveDraftPluginScope(): array
+    {
+        $pluginBase = \realpath(WP_PLUGIN_DIR);
+        if ($pluginBase === false || !\is_dir($pluginBase)) {
+            $this->throwTypedException('Plugin storage root unavailable.', 'storage');
+        }
+
+        return ['root' => $pluginBase, 'single_file' => null];
+    }
+
+    /**
+     * @return array{root:string,single_file:?string}
+     */
 
     private function resolveInactivePluginScope(string $pluginSlug): array
     {
-        if ($pluginSlug === '' || \preg_match('/\A[A-Za-z0-9._\-\/]+\.php\z/', $pluginSlug) !== 1) {
-            $this->throwTypedException('Plugin path validation failed.', 'security');
-        }
+        $pluginSlug = $this->sanitizePluginSlug($pluginSlug);
 
         $inactivePlugins = $this->getInactivePlugins();
         if (!isset($inactivePlugins[$pluginSlug])) {
@@ -210,7 +221,7 @@ trait PluginContextTrait
                 break;
             }
 
-            $fileBlock = $this->buildSingleFileContextBlock($scope['root'], $relativePath, $remainingBytes);
+            $fileBlock = $this->buildSingleFileContextBlock($scope['root'], $relativePath, $remainingBytes, $maxBytes);
             if ($fileBlock === '') {
                 continue;
             }
@@ -279,7 +290,7 @@ trait PluginContextTrait
     }
 
 
-    private function buildSingleFileContextBlock(string $resolvedRoot, string $relativePath, int $remainingBytes): string
+    private function buildSingleFileContextBlock(string $resolvedRoot, string $relativePath, int $remainingBytes, int $maxBytes): string
     {
         $cleanPath = $this->sanitizeRelativePath($relativePath);
         $absolutePath = $resolvedRoot . \DIRECTORY_SEPARATOR . \str_replace('/', \DIRECTORY_SEPARATOR, $cleanPath);
@@ -297,7 +308,8 @@ trait PluginContextTrait
             return '';
         }
 
-        $readLimit = (int) \min(self::MAX_CONTEXT_FILE_BYTES, \max(0, $remainingBytes - 1024), $realSize);
+        $maxFileLimit = (int) ($maxBytes * 0.45);
+        $readLimit = (int) \min($maxFileLimit, \max(0, $remainingBytes - 1024), $realSize);
         if ($readLimit < 512) {
             return '';
         }

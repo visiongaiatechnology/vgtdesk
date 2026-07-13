@@ -39,10 +39,14 @@ final class Dashboard {
 
         $version = \defined('VGT_BOOK_READER_VERSION') ? VGT_BOOK_READER_VERSION : '1.0.0';
 
+        if (\class_exists('\\VisionGaia\\WPDesk\\WPDeskDesignSystem')) {
+            \VisionGaia\WPDesk\WPDeskDesignSystem::enqueue('book-reader');
+        }
+
         \wp_enqueue_style(
             'vgt-admin-css',
             VGT_BOOK_READER_URL . 'assets/css/vgt-admin.css',
-            [],
+            ['vgt-ds-compat'],
             $version
         );
 
