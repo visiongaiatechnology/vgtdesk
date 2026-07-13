@@ -1,6 +1,18 @@
 # 🖥️ VGT WP-Desk — Strategic Development Roadmap
 
+**Nordstern: Operator OS for WordPress** — local-first Operator Workspace with optional security, not “another WAF” and not “another Mac admin theme”.
+
+Editions (product packaging): **Core** · **Secure** · **Studio** · **Ops**. See [PRODUCT.md](PRODUCT.md).
+
 Dieses Dokument beschreibt die verbleibenden Meilensteine, Architekturoptimierungen und Sicherheitserweiterungen für **VGT WP-Desk**. Die Planung folgt konsequent der **Zero-Overheat-Doktrin** (maximale Performance, minimaler Fußabdruck) und entspricht den strengen Kriterien des **DIAMANT VGT SUPREME** Standards.
+
+---
+
+## Near-term stack (Production Hardening)
+
+1. **Recovery outside the desktop** — force classic / disable auto-redirect with capability + CSRF (Tools → VGT Recovery).
+2. **Iframe compatibility** — profiler + classic mode per app.
+3. **Audit / ops trust** — revision-safe activity trail; honest diagnostics metrics.
 
 ---
 

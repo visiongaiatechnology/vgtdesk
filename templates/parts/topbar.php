@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
                 </div>
                 <span class="vgt-topbar-separator">|</span>
                 <span class="vgt-topbar-branding">Powered by <a href="https://visiongaiatechnology.de" target="_blank" style="color: inherit; text-decoration: underline; transition: color 0.2s;">VisionGaiaTechnology</a></span>
-                <span class="vgt-topbar-version-badge">V1.0 Beta v4</span>
+                <span class="vgt-topbar-version-badge"><?php echo esc_html(defined('VGT_WPDESK_VERSION_LABEL') ? VGT_WPDESK_VERSION_LABEL : 'V2.0 Beta v1'); ?></span>
                 <span class="vgt-topbar-separator">|</span>
                 <div class="vgt-topbar-nav">
                     <button class="vgt-topbar-btn" onclick="VGTDeskEngine.openWindow('welcome')">Home</button>

@@ -45,7 +45,10 @@ if (!defined('ABSPATH')) {
                             <iframe 
                                 id="iframe-<?php echo esc_attr($key); ?>" 
                                 src="about:blank" 
-                                data-src="<?php echo esc_url($app['url']); ?>"
+                                data-src="<?php echo esc_url($app['url'] ?? ''); ?>"
+                                data-app-id="<?php echo esc_attr($key); ?>"
+                                data-open-mode="<?php echo esc_attr($app['open_mode'] ?? 'iframe-ok'); ?>"
+                                title="<?php echo esc_attr($app['title'] ?? $key); ?>"
                                 onload="window.VGTDeskEngine && VGTDeskEngine.handleIframeLoaded('<?php echo esc_js($key); ?>')">
                             </iframe>
                         </div>

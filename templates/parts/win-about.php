@@ -46,7 +46,7 @@ if (!defined('ABSPATH')) {
                         <div class="vgt-about-info">
                             <div class="vgt-about-info-row">
                                 <span>Build-Version:</span>
-                                <strong class="vgt-build-badge" onclick="VGTDeskEngine.triggerEasterEgg()">V1.0.0-Beta v4 (Stable Candidate)</strong>
+                                <strong class="vgt-build-badge" onclick="VGTDeskEngine.triggerEasterEgg()"><?php echo esc_html(defined('VGT_WPDESK_VERSION_LABEL') ? VGT_WPDESK_VERSION_LABEL : 'V2.0 Beta v1'); ?></strong>
                             </div>
                             <div class="vgt-about-info-row">
                                 <span>Lizenz:</span>

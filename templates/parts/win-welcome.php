@@ -33,7 +33,10 @@ $show_welcome = !isset($user_settings['show_welcome_on_startup']) || $user_setti
                             <span class="vgt-window-dot dot-amber" onclick="VGTDeskEngine.minimizeWindow('welcome')"></span>
                             <span class="vgt-window-dot dot-emerald" onclick="VGTDeskEngine.maximizeWindow('welcome')"></span>
                         </div>
-                        <span class="vgt-window-title" id="welcome-title-accent"><?php echo esc_html__('Willkommen bei VGT WP-Desk — V1.0 Beta v4', 'vgtdesk'); ?></span>
+                        <span class="vgt-window-title" id="welcome-title-accent"><?php
+                            $vlabel = defined('VGT_WPDESK_VERSION_LABEL') ? VGT_WPDESK_VERSION_LABEL : 'V2.0 Beta v1';
+                            echo esc_html(sprintf(/* translators: %s: version label */ __('Willkommen bei VGT WP-Desk — %s', 'vgtdesk'), $vlabel));
+                        ?></span>
                         <div class="vgt-window-spacer"></div>
                     </div>
                     
@@ -42,9 +45,12 @@ $show_welcome = !isset($user_settings['show_welcome_on_startup']) || $user_setti
                         
                         <style nonce="<?php echo function_exists('vgt_get_csp_nonce') ? esc_attr(vgt_get_csp_nonce()) : ''; ?>">
                             .vgt-welcome-hero {
-                                background: linear-gradient(135deg, rgba(var(--vgt-accent-rgb), 0.12) 0%, rgba(6, 182, 212, 0.05) 100%);
-                                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                                padding: 25px 30px;
+                                background:
+                                    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99, 102, 241, 0.28), transparent 55%),
+                                    radial-gradient(ellipse 50% 40% at 90% 20%, rgba(168, 85, 247, 0.12), transparent 50%),
+                                    linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(7, 10, 19, 0.98) 100%);
+                                border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+                                padding: 28px 30px 24px;
                                 text-align: center;
                                 position: relative;
                                 overflow: hidden;
@@ -55,23 +61,38 @@ $show_welcome = !isset($user_settings['show_welcome_on_startup']) || $user_setti
                                 bottom: -50px;
                                 left: 50%;
                                 transform: translateX(-50%);
-                                width: 220px;
-                                height: 100px;
-                                background: radial-gradient(circle, var(--vgt-accent-rgba15) 0%, transparent 70%);
+                                width: 280px;
+                                height: 120px;
+                                background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
                                 pointer-events: none;
                             }
-                            .vgt-v4-badge {
-                                display: inline-block;
-                                background: linear-gradient(135deg, var(--vgt-accent-color) 0%, #06b6d4 100%);
+                            .vgt-v2-badge {
+                                display: inline-flex;
+                                align-items: center;
+                                gap: 8px;
+                                background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 55%, #a855f7 100%);
                                 color: #ffffff;
-                                font-size: 10px;
+                                font-size: 11px;
                                 font-weight: 800;
                                 text-transform: uppercase;
-                                padding: 4px 12px;
+                                padding: 6px 14px;
                                 border-radius: 50px;
-                                letter-spacing: 1.5px;
-                                margin-bottom: 10px;
-                                box-shadow: 0 0 15px var(--vgt-accent-rgba15);
+                                letter-spacing: 1.2px;
+                                margin-bottom: 12px;
+                                box-shadow: 0 0 24px rgba(99, 102, 241, 0.45), inset 0 1px 0 rgba(255,255,255,0.25);
+                                border: 1px solid rgba(255,255,255,0.18);
+                                animation: vgtV2Pulse 2.8s ease-in-out infinite;
+                            }
+                            .vgt-v2-badge-spark {
+                                display: inline-block;
+                                width: 7px; height: 7px;
+                                border-radius: 50%;
+                                background: #fbbf24;
+                                box-shadow: 0 0 10px #fbbf24;
+                            }
+                            @keyframes vgtV2Pulse {
+                                0%, 100% { box-shadow: 0 0 18px rgba(99, 102, 241, 0.35), inset 0 1px 0 rgba(255,255,255,0.2); }
+                                50% { box-shadow: 0 0 32px rgba(139, 92, 246, 0.55), inset 0 1px 0 rgba(255,255,255,0.3); }
                             }
                             .vgt-welcome-h2 {
                                 font-size: 22px;
@@ -210,10 +231,17 @@ $show_welcome = !isset($user_settings['show_welcome_on_startup']) || $user_setti
 
                         <!-- Hero Header -->
                         <div class="vgt-welcome-hero">
-                            <span class="vgt-v4-badge">VGT WP-Desk V4 Stable</span>
-                            <h2 class="vgt-welcome-h2">Das Betriebssystem für Ihr WordPress 🚀</h2>
+                            <span class="vgt-v2-badge">
+                                <span class="vgt-v2-badge-spark" aria-hidden="true"></span>
+                                <?php echo esc_html(defined('VGT_WPDESK_VERSION_LABEL') ? VGT_WPDESK_VERSION_LABEL : 'V2.0 Beta v1'); ?>
+                                <span aria-hidden="true">·</span>
+                                Operator OS
+                            </span>
+                            <h2 class="vgt-welcome-h2">Willkommen in der V2-Ära ✨</h2>
                             <p class="vgt-welcome-p">
-                                Willkommen im ultimativen Desktop-Workspace. Version 4 bringt bahnbrechende Upgrades in Stabilität, Hardening und Interface-Management — nativ, superschnell und ohne Overhead.
+                                <strong style="color:#e2e8f0;">VGT WP-Desk <?php echo esc_html(defined('VGT_WPDESK_VERSION_LABEL') ? VGT_WPDESK_VERSION_LABEL : 'V2.0 Beta v1'); ?></strong>
+                                — ein Guss aus Design System, gehärtetem Portal, Security Center und KI-Workbench.
+                                Unified UI, Frame Policy, Card-Portale und Zero-Overheat. Das ist euer Operator-OS für WordPress.
                             </p>
                         </div>
 
@@ -268,42 +296,42 @@ $show_welcome = !isset($user_settings['show_welcome_on_startup']) || $user_setti
                                     </div>
                                 </div>
 
-                                <!-- Right Column: V4 Highlights -->
+                                <!-- Right Column: V2 Highlights -->
                                 <div class="vgt-column-right">
                                     <h3 style="color: #ffffff; font-size: 14px; font-weight: 700; margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;">
-                                        <span>✨</span> Was ist neu in V4?
+                                        <span>🚀</span> Neu in <?php echo esc_html(defined('VGT_WPDESK_VERSION_LABEL') ? VGT_WPDESK_VERSION_LABEL : 'V2.0 Beta v1'); ?>
                                     </h3>
                                     
                                     <div class="vgt-feat-card">
                                         <div class="vgt-feat-header">
-                                            <span class="vgt-feat-icon">🖥️</span>
-                                            <span class="vgt-feat-title">Aero Snap Layouts</span>
+                                            <span class="vgt-feat-icon">🎨</span>
+                                            <span class="vgt-feat-title">Unified Design System</span>
                                         </div>
-                                        <p class="vgt-feat-desc">Ziehen Sie Fenster an den Bildschirmrand zum schnellen Andocken, oder nutzen Sie das neue Snap-Menü durch Hovern über den grünen Maximieren-Button.</p>
+                                        <p class="vgt-feat-desc">Ein Guss: Security Center, Sentinel, Astra, Vault &amp; Desk teilen Tokens, Cards, Sidebar und Indigo-Brand — keine Patchwork-UIs mehr.</p>
+                                    </div>
+
+                                    <div class="vgt-feat-card">
+                                        <div class="vgt-feat-header">
+                                            <span class="vgt-feat-icon">🪟</span>
+                                            <span class="vgt-feat-title">Portal Harden &amp; Frame Policy</span>
+                                        </div>
+                                        <p class="vgt-feat-desc">Saubere X-Frame-Policy, Admin-only Portale, Card-Layouts für Seiten/Plugins/Themes und Rescue bei Frontend-Escapes.</p>
                                     </div>
 
                                     <div class="vgt-feat-card">
                                         <div class="vgt-feat-header">
                                             <span class="vgt-feat-icon">⚡</span>
-                                            <span class="vgt-feat-title">Zero-Overheat & RAM-Safe</span>
+                                            <span class="vgt-feat-title">Zero-Overheat Runtime</span>
                                         </div>
-                                        <p class="vgt-feat-desc">Intelligente RAM-Hibernation versetzt inaktive Tabs/Iframes in den Ruhezustand und spart Arbeitsspeicher. 100% nativer, frameworkfreier Code.</p>
+                                        <p class="vgt-feat-desc">Iframe-Hibernation, Vanilla-JS Engine und gezielte Asset-Versionen — flüssig auch mit vielen offenen Portalen.</p>
                                     </div>
 
                                     <div class="vgt-feat-card">
                                         <div class="vgt-feat-header">
-                                            <span class="vgt-feat-icon">📊</span>
-                                            <span class="vgt-feat-title">Gehärtetes Dattrack-Tracking</span>
+                                            <span class="vgt-feat-icon">🛡️</span>
+                                            <span class="vgt-feat-title">Operator Security Plane</span>
                                         </div>
-                                        <p class="vgt-feat-desc">Volle DSGVO-Konformität durch Same-Origin-Payloads, signierte Site-Tokens und stündliche Ratenbegrenzungen. Keine externen Datenflüsse.</p>
-                                    </div>
-
-                                    <div class="vgt-feat-card">
-                                        <div class="vgt-feat-header">
-                                            <span class="vgt-feat-icon">🩹</span>
-                                            <span class="vgt-feat-title">Early Boot Recovery Hook</span>
-                                        </div>
-                                        <p class="vgt-feat-desc">Ein dedizierter Recovery-Modus greift direkt im WordPress <code>admin_init</code> Hook, um fatalen Fehlern vorzubeugen und den Classic-Bypass sicherzustellen.</p>
+                                        <p class="vgt-feat-desc">Security Center, Throne Guard, Recovery und Sentinel in einer Control-Plane — gehärtet, auditierbar, local-first.</p>
                                     </div>
                                 </div>
                             </div>
@@ -347,7 +375,7 @@ $show_welcome = !isset($user_settings['show_welcome_on_startup']) || $user_setti
                             <!-- BRANDING FOOTER -->
                             <div class="vgt-popup-footer" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #475569;">
                                 <span class="vgt-footer-branding">Powered by <a href="https://visiongaiatechnology.de" target="_blank" style="color: inherit; text-decoration: underline; transition: color 0.2s;">VisionGaiaTechnology</a></span>
-                                <span class="vgt-footer-version"><?php echo esc_html__('V1.0 Beta v4 (Stable Candidate)', 'vgtdesk'); ?></span>
+                                <span class="vgt-footer-version"><?php echo esc_html(defined('VGT_WPDESK_VERSION_LABEL') ? VGT_WPDESK_VERSION_LABEL : 'V2.0 Beta v1'); ?></span>
                             </div>
                         </div>
                     </div>
