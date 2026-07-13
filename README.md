@@ -39,7 +39,7 @@ See: [SECURITY_POSTURE.md](SECURITY_POSTURE.md)
 
 ---
 
-<img width="2560" height="1232" alt="image" src="https://github.com/user-attachments/assets/336383e1-653c-4353-aaea-7414d909b3bf" />
+<img width="2560" height="1229" alt="image" src="https://github.com/user-attachments/assets/a3120a9e-49fd-4ce8-947f-a62bceddf2cb" />
 
 ---
 
@@ -150,7 +150,7 @@ Persistent Settings (Relational DB)
 → Migration: wp_usermeta data imported on first load
 ```
 
-<img width="2560" height="1229" alt="image" src="https://github.com/user-attachments/assets/a3120a9e-49fd-4ce8-947f-a62bceddf2cb" />
+
 
 ---
 
