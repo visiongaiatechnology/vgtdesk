@@ -74,8 +74,13 @@ class VGTS_Dashboard_Core {
             return;
         }
 
+        // 0. Unified Operator OS design system
+        if (class_exists('\\VisionGaia\\WPDesk\\WPDeskDesignSystem')) {
+            \VisionGaia\WPDesk\WPDeskDesignSystem::enqueue('sentinel');
+        }
+
         // 1. BASE ASSETS
-        wp_enqueue_style('vgts-dashboard-css', VGTS_URL . 'assets/css/vgts-dashboard.css', [], VGTS_VERSION);
+        wp_enqueue_style('vgts-dashboard-css', VGTS_URL . 'assets/css/vgts-dashboard.css', ['vgt-ds-compat'], VGTS_VERSION);
         wp_enqueue_script('vgts-dashboard-js', VGTS_URL . 'assets/js/vgts-dashboard.js', ['jquery'], VGTS_VERSION, true);
         
         wp_enqueue_style('vgts-sidebar-css', VGTS_URL . 'assets/css/vgts-sidebar.css', ['vgts-dashboard-css'], VGTS_VERSION);
@@ -86,13 +91,15 @@ class VGTS_Dashboard_Core {
             'ajaxUrl' => admin_url('admin-ajax.php')
         ]);
 
-        // 2. MODULAR TAB ASSETS
+        // 2. MODULAR TAB ASSETS (alias mudeployer → mu-deployer via design system helper)
         $active_tab = isset($_GET['tab']) ? sanitize_key(wp_unslash($_GET['tab'])) : 'overview';
         
-        $css_file = 'assets/css/vgts-' . $active_tab . '.css';
+        $css_file = class_exists('\\VisionGaia\\WPDesk\\WPDeskDesignSystem')
+            ? \VisionGaia\WPDesk\WPDeskDesignSystem::sentinel_tab_css_rel($active_tab)
+            : ('assets/css/vgts-' . $active_tab . '.css');
         $js_file  = 'assets/js/vgts-' . $active_tab . '.js';
 
-        if (file_exists(VGTS_PATH . $css_file)) {
+        if ($css_file !== '' && file_exists(VGTS_PATH . $css_file)) {
             wp_enqueue_style('vgts-' . $active_tab . '-css', VGTS_URL . $css_file, ['vgts-dashboard-css', 'vgts-sidebar-css'], VGTS_VERSION);
         }
 

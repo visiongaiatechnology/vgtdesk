@@ -33,22 +33,13 @@ class SecurityException   extends AppException {}  // INTERNAL: Generische Clien
 class StorageException    extends AppException {}  // INTERNAL: Generische Client-Antwort, Full-Detail ins error_log
 
 /**
- * SECTION 1.5.C — ERROR HANDLER CONSISTENCY
- * Maximale interne Sensitivität bei vollständiger Unterdrückung von clientseitigem Rauschen.
+ * SECTION 1.5.C — ERROR HANDLING
+ * No global set_error_handler: desk suite owns at most one optional runtime hook.
+ * Prefer local try/catch on control-plane paths.
  */
-ini_set('display_errors', '0');              // Sichtbare Fehlerausgabe für User unterdrückt
-error_reporting(E_ALL);                      // Internes Fehler-Reporting auf Maximum gesetzt
-set_error_handler(static function(int $sev, string $msg, string $file, int $line): bool {
-    if (!(error_reporting() & $sev)) return false;
-    
-    $normalized_file = str_replace('\\', '/', $file);
-    $normalized_path = str_replace('\\', '/', __DIR__);
-    
-    if (str_contains($normalized_file, $normalized_path)) {
-        throw new ErrorException($msg, 0, $sev, $file, $line);
-    }
-    return false;
-});
+if (function_exists('ini_set')) {
+    @ini_set('display_errors', '0');
+}
 
 /**
  * CORE KERNEL ORCHESTRATOR
@@ -78,7 +69,10 @@ final class CoreEngine
         // Sicherheits-Header injizieren (Section 3.3 Compliance)
         if (!headers_sent()) {
             header('X-Content-Type-Options: nosniff');
-            header('X-Frame-Options: SAMEORIGIN');
+            // XFO owned by WPDeskFramePolicy late consolidation (avoids multi-value stacks).
+            if (!class_exists('\\VisionGaia\\WPDesk\\WPDeskFramePolicy')) {
+                header('X-Frame-Options: SAMEORIGIN');
+            }
             header("Content-Security-Policy: frame-ancestors 'self'");
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
             header('Referrer-Policy: strict-origin-when-cross-origin');
@@ -206,10 +200,14 @@ final class VGT_Omega_Bootstrapper {
             return;
         }
 
+        if (class_exists('\\VisionGaia\\WPDesk\\WPDeskDesignSystem')) {
+            \VisionGaia\WPDesk\WPDeskDesignSystem::enqueue('vault');
+        }
+
         wp_enqueue_style(
             'vgt-vault-admin-style',
             esc_url(VGT_BUILD_CENTER_URL . 'assets/css/vgt-vault-admin.css'),
-            [],
+            ['vgt-ds-compat'],
             '6.0.0'
         );
 

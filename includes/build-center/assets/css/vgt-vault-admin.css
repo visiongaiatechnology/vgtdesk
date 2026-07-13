@@ -4,19 +4,20 @@
  */
 
  :root {
-    --vgt-bg: #050508;
-    --vgt-surface: #0a0a0f;
-    --vgt-surface-card: #0e0e16;
-    --vgt-border: rgba(255, 255, 255, 0.04);
-    --vgt-border-hover: rgba(212, 175, 55, 0.25);
-    --vgt-gold: #d4af37;
-    --vgt-gold-glow: rgba(212, 175, 55, 0.15);
-    --vgt-green: #10b981;
-    --vgt-red: #f43f5e;
-    --vgt-text: #f3f4f6;
-    --vgt-text-muted: #8e939e;
-    --vgt-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-    --vgt-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    /* Unified with Operator OS design system (indigo brand; gold only as optional theme) */
+    --vgt-bg: var(--vgt-ds-bg, #070b14);
+    --vgt-surface: var(--vgt-ds-surface-solid, #0f172a);
+    --vgt-surface-card: var(--vgt-ds-surface, rgba(15, 23, 42, 0.78));
+    --vgt-border: var(--vgt-ds-border, rgba(148, 163, 184, 0.14));
+    --vgt-border-hover: var(--vgt-ds-accent-soft, rgba(99, 102, 241, 0.25));
+    --vgt-gold: var(--vgt-ds-accent, #6366f1);
+    --vgt-gold-glow: var(--vgt-ds-accent-glow, rgba(99, 102, 241, 0.35));
+    --vgt-green: var(--vgt-ds-success, #10b981);
+    --vgt-red: var(--vgt-ds-danger, #f43f5e);
+    --vgt-text: var(--vgt-ds-text, #f3f4f6);
+    --vgt-text-muted: var(--vgt-ds-muted, #94a3b8);
+    --vgt-font-sans: var(--vgt-ds-font, system-ui, -apple-system, sans-serif);
+    --vgt-font-mono: var(--vgt-ds-font-mono, ui-monospace, SFMono-Regular, monospace);
 }
 
 #wpcontent {

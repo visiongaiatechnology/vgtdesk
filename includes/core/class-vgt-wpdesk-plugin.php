@@ -9,8 +9,8 @@ if (!defined('ABSPATH')) {
 
 /**
  * MODULE CONTROLLER: WPDeskPlugin
- * STATUS: ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â  DIAMANT VGT SUPREME
- * Zentraler Boot-Controller und Hook-Manager fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼r das Slim Desktop-System.
+ * STATUS: DIAMANT VGT SUPREME
+ * Zentraler Boot-Controller und Hook-Manager fuer das Slim Desktop-System.
  */
 final class WPDeskPlugin
 {
@@ -18,9 +18,6 @@ final class WPDeskPlugin
 
     private static ?self $instance = null;
     private array $apps = [];
-
-    // Erlaubte Konfigurations-Werte fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼r Strict-Whitelisting
-    private const ALLOWED_ACCENT_COLORS = ['indigo', 'emerald', 'cyan', 'amber', 'rose', 'gold', 'purple', 'violet', 'neon'];
 
     private const INTEGRATED_MODULES = [
         'sentinel_ce' => [
@@ -76,7 +73,8 @@ final class WPDeskPlugin
             'label' => 'VGTAstra',
             'description' => 'Zero-dependency WordPress AI assistant system with Groq reasoning pipelines.',
             'option' => 'vgt_module_astra_enabled',
-            'default' => false,
+            // Default on so the Operator OS ships the Gutenberg assist module unless disabled.
+            'default' => true,
             'reload' => true,
         ],
     ];
@@ -91,72 +89,24 @@ final class WPDeskPlugin
 
     private function __construct()
     {
-        // PATTERN 1.5.C ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Separation of internal reporting vs. display
-        ini_set('display_errors', '0');              // User-visible output suppressed
-        error_reporting(E_ALL);                      // Internal sensitivity maximum
-        set_error_handler(static function(int $sev, string $msg, string $file, int $line): bool {
-            if (!(error_reporting() & $sev)) return false;
-            
-            // Limit strict ErrorException mapping to our own namespace/plugin folder
-            $normalized_file = str_replace('\\', '/', $file);
-            $normalized_path = str_replace('\\', '/', VGT_WPDESK_PATH);
-            
-            if (str_contains($normalized_file, $normalized_path)) {
-                throw new \ErrorException($msg, 0, $sev, $file, $line);
-            }
-            return false;
-        });
+        // No global set_error_handler — WordPress and sibling modules own error reporting.
+        // Log-only preference for desk PHP; never throw ErrorException across the request.
+        if (function_exists('ini_set')) {
+            @ini_set('display_errors', '0');
+        }
 
         self::remove_legacy_integrated_plugins_from_registry();
 
-        if (self::is_integrated_module_enabled('sentinel_ce') && file_exists(VGT_WPDESK_PATH . 'vision-integrity-sentinel.php')) {
-            require_once VGT_WPDESK_PATH . 'vision-integrity-sentinel.php';
-        }
-
-        if (file_exists(VGT_WPDESK_PATH . 'includes/class-iframe-transformer.php')) {
-            require_once VGT_WPDESK_PATH . 'includes/class-iframe-transformer.php';
-        }
-
-        if (self::is_integrated_module_enabled('throne_guard') && file_exists(VGT_WPDESK_PATH . 'includes/class-vgt-throne-guard.php')) {
-            require_once VGT_WPDESK_PATH . 'includes/class-vgt-throne-guard.php';
-        }
-
-        if (file_exists(VGT_WPDESK_PATH . 'includes/dashboard/class-vgt-security-center.php')) {
-            require_once VGT_WPDESK_PATH . 'includes/dashboard/class-vgt-security-center.php';
-            VGTSecurityCenter::get_instance();
-        }
-
-        if (self::is_integrated_module_enabled('loginpager') && file_exists(VGT_WPDESK_PATH . 'includes/modules/loginpager/login-engine.php')) {
-            require_once VGT_WPDESK_PATH . 'includes/modules/loginpager/login-engine.php';
-        }
-
-        if (self::is_integrated_module_enabled('omega_vault') && file_exists(VGT_WPDESK_PATH . 'includes/build-center/vault.php')) {
-            require_once VGT_WPDESK_PATH . 'includes/build-center/vault.php';
-        }
-
-        if (self::is_integrated_module_enabled('book_reader') && file_exists(VGT_WPDESK_PATH . 'includes/book-reader/bookreader.php')) {
-            require_once VGT_WPDESK_PATH . 'includes/book-reader/bookreader.php';
-        }
-
-        if (self::is_integrated_module_enabled('chronos') && file_exists(VGT_WPDESK_PATH . 'includes/chronos/Chronosloader.php')) {
-            require_once VGT_WPDESK_PATH . 'includes/chronos/Chronosloader.php';
-        }
-
-        if (self::is_integrated_module_enabled('astra') && file_exists(VGT_WPDESK_PATH . 'includes/modules/astra/ki.php')) {
-            require_once VGT_WPDESK_PATH . 'includes/modules/astra/ki.php';
-        }
-
-        add_action('plugins_loaded', function() {
-            if (self::is_integrated_module_enabled('dattrack') && !WPDeskSecurity::is_sentinel_v7_active() && !class_exists('VisionGaia\\WPDesk\\VGT_Dattrack_Engine')) {
-                if (file_exists(VGT_WPDESK_PATH . 'includes/modules/dattrack/class-dattrack-engine.php')) {
-                    require_once VGT_WPDESK_PATH . 'includes/modules/dattrack/class-dattrack-engine.php';
-                    VGT_Dattrack_Engine::boot();
-                }
+        WPDeskModuleRegistry::boot_all(static function (string $module): bool {
+            // Always-on services are not option-gated; option_gated keys map to INTEGRATED_MODULES.
+            if ($module === 'iframe_transformer' || $module === 'security_center') {
+                return true;
             }
-        }, 1);
+            return self::is_integrated_module_enabled($module);
+        });
 
         $this->init_hooks();
-        
+
         if (class_exists(__NAMESPACE__ . '\\IframeTransformer')) {
             IframeTransformer::getInstance();
         }
@@ -198,6 +148,11 @@ final class WPDeskPlugin
                 $locked_reason = 'Sentinel V7 ist aktiv. Sentinel CE bleibt als Konfliktschutz deaktiviert.';
             }
 
+            $health = null;
+            if ($key === 'astra' && \class_exists('VGTAstra\\AgentSystem\\AgenticOrchestrator') && \method_exists('VGTAstra\\AgentSystem\\AgenticOrchestrator', 'healthSnapshot')) {
+                $health = \VGTAstra\AgentSystem\AgenticOrchestrator::healthSnapshot();
+            }
+
             $modules[] = [
                 'key' => $key,
                 'label' => $definition['label'],
@@ -207,6 +162,7 @@ final class WPDeskPlugin
                 'locked' => $locked,
                 'lockedReason' => $locked_reason,
                 'reload' => !empty($definition['reload']),
+                'health' => $health,
             ];
         }
 
@@ -362,20 +318,8 @@ final class WPDeskPlugin
             $action = $_GET['vgt_action'];
             if ($action === 'enable_redirect') {
                 check_admin_referer('vgt_toggle_redirect');
-                global $wpdb;
-                $table_name = $wpdb->prefix . 'vgt_desk_settings';
-                WPDeskSettings::maybe_create_table();
-                $wpdb->replace(
-                    $table_name,
-                    [
-                        'user_id'       => $user_id,
-                        'setting_key'   => 'auto_redirect',
-                        'setting_value' => 'true'
-                    ],
-                    ['%d', '%s', '%s']
-                );
-                update_user_meta($user_id, 'vgt_desk_auto_redirect', 'true');
-                
+                WPDeskSettings::set_user_setting($user_id, 'auto_redirect', 'true');
+
                 // Clear bypass cookie
                 $cookie_options = [
                     'expires'  => time() - 3600,
@@ -422,11 +366,20 @@ final class WPDeskPlugin
             'dashicons-desktop',
             2
         );
+        // Recovery must remain reachable outside the multi-window desktop shell.
+        // Register under Tools (classic admin) AND under Security Center when present.
+        add_management_page(
+            'VGT Recovery Center',
+            'VGT Recovery',
+            WPDeskRecovery::CAPABILITY,
+            'vgt-recovery-center',
+            [$this, 'render_recovery_center']
+        );
         add_submenu_page(
             'vgt-security-center',
             'VGT Recovery Center',
             'Recovery Center',
-            'manage_options',
+            WPDeskRecovery::CAPABILITY,
             'vgt-recovery-center',
             [$this, 'render_recovery_center']
         );
@@ -447,31 +400,48 @@ final class WPDeskPlugin
 
         remove_action('wp_head', '_admin_bar_bump_cb');
         wp_enqueue_style('dashicons');
-        wp_enqueue_style('vgt-desktop-core-css', VGT_WPDESK_URL . 'assets/css/desktop-core.css', [], '1.0.0-Beta-6');
-        wp_enqueue_style('vgt-desktop-windows-css', VGT_WPDESK_URL . 'assets/css/desktop-windows.css', ['vgt-desktop-core-css'], '1.0.0-Beta-6');
-        wp_enqueue_style('vgt-desktop-icons-css', VGT_WPDESK_URL . 'assets/css/desktop-icons.css', ['vgt-desktop-core-css'], '1.0.0-Beta-6');
-        wp_enqueue_style('vgt-desktop-widgets-css', VGT_WPDESK_URL . 'assets/css/desktop-widgets.css', ['vgt-desktop-core-css'], '1.0.0-Beta-6');
-        wp_enqueue_style('vgt-desktop-apps-css', VGT_WPDESK_URL . 'assets/css/desktop-apps.css', ['vgt-desktop-core-css'], '1.0.0-Beta-6');
 
-        // Register JS components
-        wp_register_script('vgt-desktop-core', VGT_WPDESK_URL . 'assets/js/modules/desktop-core.js', [], '1.0.0-Beta-6', false);
-        wp_register_script('vgt-desktop-windows', VGT_WPDESK_URL . 'assets/js/modules/desktop-windows.js', ['vgt-desktop-core'], '1.0.0-Beta-6', false);
-        wp_register_script('vgt-desktop-draggable', VGT_WPDESK_URL . 'assets/js/modules/desktop-draggable.js', ['vgt-desktop-core'], '1.0.0-Beta-6', false);
-        wp_register_script('vgt-desktop-icons', VGT_WPDESK_URL . 'assets/js/modules/desktop-icons.js', ['vgt-desktop-core'], '1.0.0-Beta-6', false);
-        wp_register_script('vgt-desktop-menus', VGT_WPDESK_URL . 'assets/js/modules/desktop-menus.js', ['vgt-desktop-core'], '1.0.0-Beta-6', false);
-        wp_register_script('vgt-desktop-widgets', VGT_WPDESK_URL . 'assets/js/modules/desktop-widgets.js', ['vgt-desktop-core'], '1.0.0-Beta-6', false);
-        wp_register_script('vgt-desktop-spotlight', VGT_WPDESK_URL . 'assets/js/modules/desktop-spotlight.js', ['vgt-desktop-core'], '1.0.0-Beta-6', false);
-        wp_register_script('vgt-desktop-modals', VGT_WPDESK_URL . 'assets/js/modules/desktop-modals.js', ['vgt-desktop-core'], '1.0.0-Beta-6', false);
-        wp_register_script('vgt-desktop-folders', VGT_WPDESK_URL . 'assets/js/modules/desktop-folders.js', ['vgt-desktop-core'], '1.0.0-Beta-6', false);
-        wp_register_script('vgt-desktop-wizard', VGT_WPDESK_URL . 'assets/js/modules/desktop-wizard.js', ['vgt-desktop-core'], '1.0.0-Beta-6', false);
-        wp_register_script('vgt-desktop-taskmanager', VGT_WPDESK_URL . 'assets/js/modules/desktop-taskmanager.js', ['vgt-desktop-core'], '1.0.0-Beta-6', false);
+        // Shared Operator OS tokens (desk shell + iframe portals share one cast).
+        if (class_exists(WPDeskDesignSystem::class)) {
+            WPDeskDesignSystem::enqueue('desk');
+        }
+
+        // filemtime cache-bust — static Beta versions hid CSS/JS redesigns in browser cache.
+        $asset_ver = static function (string $rel): string {
+            $path = VGT_WPDESK_PATH . ltrim($rel, '/\\');
+            $mt = is_readable($path) ? @filemtime($path) : false;
+            return $mt ? ('p8.' . $mt) : '1.0.0-Portal-8';
+        };
+
+        wp_enqueue_style('vgt-desktop-core-css', VGT_WPDESK_URL . 'assets/css/desktop-core.css', [], $asset_ver('assets/css/desktop-core.css'));
+        wp_enqueue_style('vgt-desktop-windows-css', VGT_WPDESK_URL . 'assets/css/desktop-windows.css', ['vgt-desktop-core-css'], $asset_ver('assets/css/desktop-windows.css'));
+        wp_enqueue_style('vgt-desktop-icons-css', VGT_WPDESK_URL . 'assets/css/desktop-icons.css', ['vgt-desktop-core-css'], $asset_ver('assets/css/desktop-icons.css'));
+        wp_enqueue_style('vgt-desktop-widgets-css', VGT_WPDESK_URL . 'assets/css/desktop-widgets.css', ['vgt-desktop-core-css'], $asset_ver('assets/css/desktop-widgets.css'));
+        wp_enqueue_style('vgt-desktop-apps-css', VGT_WPDESK_URL . 'assets/css/desktop-apps.css', ['vgt-desktop-core-css'], $asset_ver('assets/css/desktop-apps.css'));
+
+        // Register JS components (split windows/menus keep Object.assign engine)
+        wp_register_script('vgt-desktop-core', VGT_WPDESK_URL . 'assets/js/modules/desktop-core.js', [], $asset_ver('assets/js/modules/desktop-core.js'), false);
+        wp_register_script('vgt-desktop-windows-lifecycle', VGT_WPDESK_URL . 'assets/js/modules/desktop-windows-lifecycle.js', ['vgt-desktop-core'], $asset_ver('assets/js/modules/desktop-windows-lifecycle.js'), false);
+        wp_register_script('vgt-desktop-windows', VGT_WPDESK_URL . 'assets/js/modules/desktop-windows.js', ['vgt-desktop-core', 'vgt-desktop-windows-lifecycle'], $asset_ver('assets/js/modules/desktop-windows.js'), false);
+        wp_register_script('vgt-desktop-draggable', VGT_WPDESK_URL . 'assets/js/modules/desktop-draggable.js', ['vgt-desktop-core'], $asset_ver('assets/js/modules/desktop-draggable.js'), false);
+        wp_register_script('vgt-desktop-icons', VGT_WPDESK_URL . 'assets/js/modules/desktop-icons.js', ['vgt-desktop-core'], $asset_ver('assets/js/modules/desktop-icons.js'), false);
+        wp_register_script('vgt-desktop-menus-dock', VGT_WPDESK_URL . 'assets/js/modules/desktop-menus-dock.js', ['vgt-desktop-core'], $asset_ver('assets/js/modules/desktop-menus-dock.js'), false);
+        wp_register_script('vgt-desktop-menus', VGT_WPDESK_URL . 'assets/js/modules/desktop-menus.js', ['vgt-desktop-core', 'vgt-desktop-menus-dock'], $asset_ver('assets/js/modules/desktop-menus.js'), false);
+        wp_register_script('vgt-desktop-widgets', VGT_WPDESK_URL . 'assets/js/modules/desktop-widgets.js', ['vgt-desktop-core'], $asset_ver('assets/js/modules/desktop-widgets.js'), false);
+        wp_register_script('vgt-desktop-spotlight', VGT_WPDESK_URL . 'assets/js/modules/desktop-spotlight.js', ['vgt-desktop-core'], $asset_ver('assets/js/modules/desktop-spotlight.js'), false);
+        wp_register_script('vgt-desktop-modals', VGT_WPDESK_URL . 'assets/js/modules/desktop-modals.js', ['vgt-desktop-core'], $asset_ver('assets/js/modules/desktop-modals.js'), false);
+        wp_register_script('vgt-desktop-folders', VGT_WPDESK_URL . 'assets/js/modules/desktop-folders.js', ['vgt-desktop-core'], $asset_ver('assets/js/modules/desktop-folders.js'), false);
+        wp_register_script('vgt-desktop-wizard', VGT_WPDESK_URL . 'assets/js/modules/desktop-wizard.js', ['vgt-desktop-core'], $asset_ver('assets/js/modules/desktop-wizard.js'), false);
+        wp_register_script('vgt-desktop-taskmanager', VGT_WPDESK_URL . 'assets/js/modules/desktop-taskmanager.js', ['vgt-desktop-core'], $asset_ver('assets/js/modules/desktop-taskmanager.js'), false);
 
         // Enqueue the primary orchestrator that depends on all sub-modules
         wp_enqueue_script('vgt-desktop-js', VGT_WPDESK_URL . 'assets/js/desktop.js', [
             'vgt-desktop-core',
+            'vgt-desktop-windows-lifecycle',
             'vgt-desktop-windows',
             'vgt-desktop-draggable',
             'vgt-desktop-icons',
+            'vgt-desktop-menus-dock',
             'vgt-desktop-menus',
             'vgt-desktop-widgets',
             'vgt-desktop-spotlight',
@@ -479,23 +449,12 @@ final class WPDeskPlugin
             'vgt-desktop-folders',
             'vgt-desktop-wizard',
             'vgt-desktop-taskmanager'
-        ], '1.0.0-Beta-6', false);
+        ], $asset_ver('assets/js/desktop.js'), false);
 
         $user_id       = get_current_user_id();
         $user_settings = WPDeskSettings::get_user_settings($user_id);
 
-        global $wpdb;
-        $bans_count = 0;
-        // Check Sentinel CE and V7 bans through the same table-existence gate.
-        $table_bans_v5 = $wpdb->prefix . 'vgts_apex_bans';
-        if (WPDeskSecurity::table_exists($table_bans_v5)) {
-            $bans_count += (int) $wpdb->get_var("SELECT COUNT(*) FROM $table_bans_v5");
-        }
-
-        $table_bans_v7 = $wpdb->prefix . 'vis_apex_bans';
-        if (WPDeskSecurity::table_exists($table_bans_v7)) {
-            $bans_count += (int) $wpdb->get_var("SELECT COUNT(*) FROM $table_bans_v7");
-        }
+        $bans_count = WPDeskBanStore::count_all();
 
         $sentinel_state = WPDeskSecurity::sentinel_state();
         $sentinel_v7_active = $sentinel_state['v7_active'];
@@ -504,6 +463,8 @@ final class WPDeskPlugin
         wp_localize_script('vgt-desktop-core', 'vgtConfig', [
             'ajaxUrl'      => admin_url('admin-ajax.php'),
             'adminUrl'     => admin_url(),
+            'version'      => defined('VGT_WPDESK_VERSION') ? VGT_WPDESK_VERSION : '2.0.0-beta.1',
+            'versionLabel' => defined('VGT_WPDESK_VERSION_LABEL') ? VGT_WPDESK_VERSION_LABEL : 'V2.0 Beta v1',
             'nonce'        => wp_create_nonce('vgt_desktop_action'),
             'toggleNonce'  => wp_create_nonce('vgt_toggle_desktop'),
             'userSettings' => $user_settings,
@@ -523,7 +484,13 @@ final class WPDeskPlugin
      */
     public function handle_iframe_restrictions(): void
     {
-        if (isset($_GET['page']) && $_GET['page'] === 'vgt-recovery-center') {
+        // Recovery must remain reachable outside the multi-window desktop shell.
+        $page_slug = isset($_GET['page']) ? sanitize_key((string) $_GET['page']) : '';
+        $view_slug = isset($_GET['view']) ? sanitize_key((string) $_GET['view']) : '';
+        if ($page_slug === 'vgt-recovery-center') {
+            return;
+        }
+        if ($page_slug === 'vgt-security-center' && $view_slug === 'recovery') {
             return;
         }
 
@@ -532,7 +499,7 @@ final class WPDeskPlugin
         if (isset($_GET['vgt_action']) && $user_id) {
             $nonce = $_GET['_wpnonce'] ?? '';
             if (!wp_verify_nonce($nonce, 'vgt_toggle_desktop')) {
-                wp_die(esc_html__('SicherheitsÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼berprÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼fung (CSRF-Schutz) fehlgeschlagen.', 'vgt-wp-desk'), '', ['response' => 403]);
+                wp_die(esc_html__('Sicherheitsueberpruefung (CSRF-Schutz) fehlgeschlagen.', 'vgt-wp-desk'), '', ['response' => 403]);
             }
 
             $cookie_options = [
@@ -544,20 +511,7 @@ final class WPDeskPlugin
             ];
 
             if ($_GET['vgt_action'] === 'disable_desk') {
-                // Auto-redirect deaktivieren
-                global $wpdb;
-                $table_name = $wpdb->prefix . 'vgt_desk_settings';
-                WPDeskSettings::maybe_create_table();
-                $wpdb->replace(
-                    $table_name,
-                    [
-                        'user_id'       => $user_id,
-                        'setting_key'   => 'auto_redirect',
-                        'setting_value' => 'false'
-                    ],
-                    ['%d', '%s', '%s']
-                );
-                update_user_meta($user_id, 'vgt_desk_auto_redirect', 'false');
+                WPDeskSettings::set_user_setting($user_id, 'auto_redirect', 'false');
 
                 $cookie_options['expires'] = time() + (86400 * 30);
                 setcookie('vgt_desk_bypass', '1', $cookie_options);
@@ -565,20 +519,7 @@ final class WPDeskPlugin
                 exit;
             }
             if ($_GET['vgt_action'] === 'enable_desk') {
-                // Auto-redirect aktivieren
-                global $wpdb;
-                $table_name = $wpdb->prefix . 'vgt_desk_settings';
-                WPDeskSettings::maybe_create_table();
-                $wpdb->replace(
-                    $table_name,
-                    [
-                        'user_id'       => $user_id,
-                        'setting_key'   => 'auto_redirect',
-                        'setting_value' => 'true'
-                    ],
-                    ['%d', '%s', '%s']
-                );
-                update_user_meta($user_id, 'vgt_desk_auto_redirect', 'true');
+                WPDeskSettings::set_user_setting($user_id, 'auto_redirect', 'true');
 
                 $cookie_options['expires'] = time() - 3600;
                 setcookie('vgt_desk_bypass', '', $cookie_options);
@@ -653,123 +594,38 @@ final class WPDeskPlugin
         
         $color = $accent_map[$accent_color] ?? $accent_map['indigo'];
 
-        echo '<style nonce="' . (function_exists('vgt_get_csp_nonce') ? esc_attr(vgt_get_csp_nonce()) : '') . '">
+        // Accent tokens + chromeless chrome. Screen layouts live in vgt-portal-screens.css
+        // (enqueued by IframeTransformer with filemtime cache-bust).
+        echo '<style nonce="' . (function_exists('vgt_get_csp_nonce') ? esc_attr(vgt_get_csp_nonce()) : '') . '" id="vgt-chromeless-accent">
             :root {
                 --vgt-accent: ' . esc_html($color['main']) . ';
                 --vgt-accent-hover: ' . esc_html($color['hover']) . ';
                 --vgt-accent-rgba15: ' . esc_html($color['rgba15']) . ';
                 --vgt-accent-rgba8: ' . esc_html($color['rgba8']) . ';
             }
-            #adminmenumain, #adminmenuback, #adminmenuwrap, #wpadminbar, #wpfooter, 
-            .update-nag, #screen-meta-links, .notice, .notice-error, .notice-warning, 
-            .notice-info, .notice-success, #contextual-help-link-wrap, #wp-admin-bar-root-default { 
-                display: none !important; 
+            #adminmenumain, #adminmenuback, #adminmenuwrap, #wpadminbar, #wpfooter,
+            .update-nag, #screen-meta-links, #contextual-help-link-wrap, #wp-admin-bar-root-default {
+                display: none !important;
             }
-            html, html.wp-toolbar { padding-top: 0 !important; margin-top: 0 !important; height: 100vh !important; background: #090d16 !important; }
-            body { background: #090d16 !important; }
-            body.admin-bar #wpcontent, #wpcontent, #wpbody, .wrap { margin-left: 0 !important; margin-right: 0 !important; padding: 15px !important; background: #090d16 !important; color: #cbd5e1 !important; min-height: 100vh !important; box-sizing: border-box !important; }
-            .wrap h1, .wrap h2, .wrap h3, h1, h2, h3, h4, h5, h6, .title, .postbox-header h2, .wp-heading-inline, .card h2, .form-table th, label, .manage-column, .column-title, strong, td, th, .wp-filter-search { color: #f1f5f9 !important; }
-            p, span, .description, .help, .tablenav, .subsubsub a { color: #94a3b8 !important; }
-            a { color: var(--vgt-accent) !important; } a:hover { color: var(--vgt-accent-hover) !important; }
-            .widefat, .wp-list-table { background: #0f172a !important; border: 1px solid #1e293b !important; }
-            .widefat td, .widefat th { border-bottom: 1px solid #1e293b !important; color: #cbd5e1 !important; }
-            .alternate, .striped > tbody > :nth-child(odd) { background-color: #0b0f19 !important; }
-            input[type="text"], input[type="search"], input[type="number"], input[type="password"], input[type="email"], textarea, select { background-color: #0f172a !important; border: 1px solid #334155 !important; color: #f1f5f9 !important; border-radius: 6px !important; }
-            .postbox, .card, .welcome-panel { background: #0f172a !important; border: 1px solid #1e293b !important; border-radius: 12px !important; }
-            ::-webkit-scrollbar { width: 8px; height: 8px; }
-            ::-webkit-scrollbar-track { background: #090d16; }
-            ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 99px; border: 2px solid #090d16; }
-            ::-webkit-scrollbar-thumb:hover { background: #334155; }
-            body.plugins-php table.wp-list-table.plugins tr.active td, body.plugins-php table.wp-list-table.plugins tr.active th { background: rgb(9 13 22) !important; }
-            body.plugins-php table.wp-list-table.plugins tr.inactive td, body.plugins-php table.wp-list-table.plugins tr.inactive th { background: rgb(9 13 22) !important; }
-            body.plugins-php table.wp-list-table.plugins tr td, body.plugins-php table.wp-list-table.plugins tr th { background: rgb(9 13 22) !important; color: #ffffff !important; }
-
-            /* Medien-Bibliothek & Filter Toolbar */
-            .wp-filter, .media-toolbar, .media-frame-content, .media-sidebar, .attachments-browser, .uploader-inline {
-                background: #090d16 !important;
-                background-color: #090d16 !important;
-                border-color: #1e293b !important;
-            }
-            .media-toolbar select, .media-toolbar input[type="search"] {
-                background-color: #0f172a !important;
-                color: #cbd5e1 !important;
-                border: 1px solid #334155 !important;
-            }
-            .media-frame {
-                background: #090d16 !important;
-            }
-            
-            /* Themes (Design) Screen Fixes */
-            .theme-about, .theme-info, .theme-browser .theme, .theme-browser .theme .theme-name, 
-            .theme-overlay .theme-header, .theme-overlay .theme-about, .theme-overlay, .theme-wrap {
-                background: #090d16 !important;
-                background-color: #090d16 !important;
-                color: #cbd5e1 !important;
-                border-color: #1e293b !important;
-            }
-            .theme-browser .themes {
-                display: flex !important;
-                flex-wrap: wrap !important;
-                gap: 20px !important;
-            }
-            .theme-browser .theme {
-                float: none !important;
-                margin: 0 !important;
-                background: #0f172a !important;
-                border: 1px solid #1e293b !important;
-                border-radius: 12px !important;
-                overflow: hidden !important;
-                width: calc(33.333% - 14px) !important;
-                min-width: 260px !important;
+            html, html.wp-toolbar { padding-top: 0 !important; margin-top: 0 !important; height: 100vh !important; background: #070b14 !important; }
+            body { background: #070b14 !important; }
+            body.admin-bar #wpcontent, #wpcontent, #wpbody, .wrap {
+                margin-left: 0 !important; margin-right: 0 !important; padding: 16px !important;
+                background: #070b14 !important; color: #cbd5e1 !important; min-height: 100vh !important;
                 box-sizing: border-box !important;
             }
-            .theme-browser .theme.add-new-theme {
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: center !important;
-                justify-content: center !important;
-                height: auto !important;
-                min-height: 250px !important;
-                background: rgba(255, 255, 255, 0.02) !important;
-                border: 2px dashed rgba(255, 255, 255, 0.15) !important;
+            a { color: var(--vgt-accent) !important; }
+            a:hover { color: var(--vgt-accent-hover) !important; }
+            ::-webkit-scrollbar { width: 8px; height: 8px; }
+            ::-webkit-scrollbar-track { background: #070b14; }
+            ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 99px; border: 2px solid #070b14; }
+            .postbox, .card, .welcome-panel {
+                background: #0f172a !important; border: 1px solid #1e293b !important; border-radius: 12px !important;
             }
-            .theme-browser .theme.add-new-theme:hover {
-                border-color: var(--vgt-accent) !important;
-                background: var(--vgt-accent-rgba8) !important;
-            }
-            .theme-browser .theme.add-new-theme a {
-                color: #cbd5e1 !important;
-            }
-
-            /* MenÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼s (nav-menus.php) Screen Fixes */
-            #nav-menus-frame, #menu-settings-column, .posttypediv, .postboxes-column, .postbox, 
-            .accordion-container, .accordion-section, .accordion-section-title, .accordion-trigger,
-            .accordion-section-content, .menu-item-bar, .menu-item-handle, .menu-item-settings, .nav-menu-header, 
-            .nav-menu-footer, #nav-menu-header, #nav-menu-footer, #menu-management, .manage-menus,
-            .tabs-panel, .tabs-panel-active, .add-menu-item-tabs, .posttype-tabs, .post-body-plain, 
-            .drag-instructions, .menu-instructions, .bulk-actions, #post-body-content, #menu-to-edit {
-                background: #090d16 !important;
-                background-color: #090d16 !important;
-                color: #cbd5e1 !important;
-                border-color: #1e293b !important;
-            }
-            .categorychecklist li, .categorychecklist label, .categorychecklist input {
-                background: transparent !important;
-                color: #cbd5e1 !important;
-            }
-            .menu-item-bar .menu-item-handle {
-                background: #0f172a !important;
-                border: 1px solid #1e293b !important;
-                color: #f1f5f9 !important;
-            }
-            .wp-core-ui .button-secondary {
-                background: #1e293b !important;
-                border: 1px solid #334155 !important;
-                color: #cbd5e1 !important;
-            }
-            .wp-core-ui .button-secondary:hover {
-                background: #334155 !important;
-                color: #ffffff !important;
+            input[type="text"], input[type="search"], input[type="number"], input[type="password"],
+            input[type="email"], textarea, select {
+                background-color: #0f172a !important; border: 1px solid #334155 !important;
+                color: #f1f5f9 !important; border-radius: 6px !important;
             }
         </style>';
     }
@@ -805,73 +661,71 @@ final class WPDeskPlugin
             return;
         }
 
-        if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Zu dieser Aktion besitzen Sie nicht genÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼gend Rechte.', 'vgt-wp-desk'));
-        }
+        $page = isset($_GET['page']) ? sanitize_key((string) $_GET['page']) : 'vgt-recovery-center';
+        $view = isset($_GET['view']) ? sanitize_key((string) $_GET['view']) : '';
 
-        $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : 'vgt-security-center';
-        $view = isset($_GET['view']) ? sanitize_key($_GET['view']) : 'recovery';
-        
         $redirect_url = admin_url('admin.php');
-        $redirect_url = add_query_arg('page', $page, $redirect_url);
-        if ($view) {
+        $redirect_url = add_query_arg('page', $page !== '' ? $page : 'vgt-recovery-center', $redirect_url);
+        if ($view !== '') {
             $redirect_url = add_query_arg('view', $view, $redirect_url);
         }
 
-        if (!isset($_POST['vgt_recovery_nonce']) || !wp_verify_nonce($_POST['vgt_recovery_nonce'], 'vgt_recovery_action')) {
-            $redirect_url = add_query_arg('vgt_recovery_err', 'invalid_nonce', $redirect_url);
+        $action = sanitize_key((string) ($_POST['recovery_action'] ?? ''));
+        $nonce_ok = isset($_POST[WPDeskRecovery::NONCE_FIELD])
+            && (bool) wp_verify_nonce((string) $_POST[WPDeskRecovery::NONCE_FIELD], WPDeskRecovery::NONCE_ACTION);
+        $auth = WPDeskRecovery::authorize_action(
+            $action,
+            current_user_can(WPDeskRecovery::CAPABILITY),
+            $nonce_ok
+        );
+
+        if (!$auth['ok']) {
+            if ($auth['code'] === 'capability') {
+                wp_die(esc_html__('Zu dieser Aktion besitzen Sie nicht genuegend Rechte.', 'vgt-wp-desk'));
+            }
+            $redirect_url = add_query_arg('vgt_recovery_err', $auth['code'] === 'invalid_nonce' ? 'invalid_nonce' : 'invalid_action', $redirect_url);
             wp_safe_redirect($redirect_url);
             exit;
         }
 
-        $action = sanitize_key($_POST['recovery_action']);
         $message = '';
-        
-        if ($action === 'force_classic') {
+
+        if ($action === WPDeskRecovery::ACTION_FORCE_CLASSIC) {
+            $spec = WPDeskRecovery::force_classic_cookie_spec();
             $cookie_options = [
-                'expires'  => time() + (86400 * 30),
+                'expires'  => time() + (int) $spec['ttl_seconds'],
                 'path'     => COOKIEPATH,
                 'domain'   => COOKIE_DOMAIN,
                 'secure'   => is_ssl(),
                 'httponly' => true,
-                'samesite' => 'Strict'
+                'samesite' => 'Strict',
             ];
-            setcookie('vgt_desk_bypass', '1', $cookie_options);
-            $_COOKIE['vgt_desk_bypass'] = '1';
-            $message = 'force_classic';
-        } elseif ($action === 'disable_redirect') {
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'vgt_desk_settings';
-            WPDeskSettings::maybe_create_table();
+            setcookie($spec['name'], $spec['value'], $cookie_options);
+            $_COOKIE[$spec['name']] = $spec['value'];
+            WPDeskSecurity::audit_control_action('recovery_force_classic', ['ttl' => (string) $spec['ttl_seconds']]);
+            $message = WPDeskRecovery::ACTION_FORCE_CLASSIC;
+        } elseif ($action === WPDeskRecovery::ACTION_DISABLE_REDIRECT) {
             $user_id = get_current_user_id();
-            $wpdb->replace(
-                $table_name,
-                [
-                    'user_id'       => $user_id,
-                    'setting_key'   => 'auto_redirect',
-                    'setting_value' => 'false'
-                ],
-                ['%d', '%s', '%s']
-            );
-            update_user_meta($user_id, 'vgt_desk_auto_redirect', 'false');
-            
-            // Clear bypass cookie
+            WPDeskSettings::set_user_setting($user_id, 'auto_redirect', 'false');
+
             $cookie_options = [
                 'expires'  => time() - 3600,
                 'path'     => COOKIEPATH,
                 'domain'   => COOKIE_DOMAIN,
                 'secure'   => is_ssl(),
                 'httponly' => true,
-                'samesite' => 'Strict'
+                'samesite' => 'Strict',
             ];
             setcookie('vgt_desk_bypass', '', $cookie_options);
             unset($_COOKIE['vgt_desk_bypass']);
-            
-            $message = 'disable_redirect';
-        } elseif ($action === 'disable_dattrack') {
+
+            WPDeskSecurity::audit_control_action('recovery_disable_redirect', ['user_id' => (string) $user_id]);
+            $message = WPDeskRecovery::ACTION_DISABLE_REDIRECT;
+        } elseif ($action === WPDeskRecovery::ACTION_DISABLE_DATTRACK) {
             update_option('vgt_dattrack_enabled', 'false');
-            $message = 'disable_dattrack';
-        } elseif ($action === 'export_diagnostics') {
+            WPDeskSecurity::audit_control_action('recovery_disable_dattrack', []);
+            $message = WPDeskRecovery::ACTION_DISABLE_DATTRACK;
+        } elseif ($action === WPDeskRecovery::ACTION_EXPORT_DIAGNOSTICS) {
             $this->export_diagnostics_file();
             exit;
         }
@@ -879,15 +733,19 @@ final class WPDeskPlugin
         if ($message) {
             $redirect_url = add_query_arg('vgt_recovery_msg', $message, $redirect_url);
         }
-        
+
         wp_safe_redirect($redirect_url);
         exit;
     }
 
     public function render_recovery_center(): void
     {
-        if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Zu dieser Aktion besitzen Sie nicht genÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼gend Rechte.', 'vgt-wp-desk'));
+        if (!current_user_can(WPDeskRecovery::CAPABILITY)) {
+            wp_die(esc_html__('Zu dieser Aktion besitzen Sie nicht genuegend Rechte.', 'vgt-wp-desk'));
+        }
+
+        if (class_exists(WPDeskDesignSystem::class)) {
+            WPDeskDesignSystem::enqueue('recovery');
         }
 
         $message = '';
@@ -896,9 +754,9 @@ final class WPDeskPlugin
         if (isset($_GET['vgt_recovery_msg'])) {
             $msg_key = sanitize_key($_GET['vgt_recovery_msg']);
             if ($msg_key === 'force_classic') {
-                $message = 'Klassische Ansicht wurde erzwungen (Bypass Cookie fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼r 30 Tage gesetzt).';
+                $message = 'Klassische Ansicht wurde erzwungen (Bypass Cookie fuer 30 Tage gesetzt).';
             } elseif ($msg_key === 'disable_redirect') {
-                $message = 'Auto-Redirect wurde fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼r Ihren Account deaktiviert.';
+                $message = 'Auto-Redirect wurde fuer Ihren Account deaktiviert.';
             } elseif ($msg_key === 'disable_dattrack') {
                 $message = 'Dattrack Telemetrie wurde global deaktiviert.';
             }
@@ -907,7 +765,7 @@ final class WPDeskPlugin
         if (isset($_GET['vgt_recovery_err'])) {
             $err_key = sanitize_key($_GET['vgt_recovery_err']);
             if ($err_key === 'invalid_nonce') {
-                $error = 'UngÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼ltiger CSRF Token.';
+                $error = 'Ungueltiger CSRF Token.';
             }
         }
 

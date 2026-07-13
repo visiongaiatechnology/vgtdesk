@@ -116,24 +116,40 @@ final class VGTSecurityCenter {
         $url = defined('VGTS_URL') ? VGTS_URL : VGT_WPDESK_URL;
         $version = defined('VGTS_VERSION') ? VGTS_VERSION : '1.0.0';
 
-        wp_enqueue_style('vgts-dashboard-css', $url . 'assets/css/vgts-dashboard.css', [], $version);
+        // Unified Operator OS design system (one cast across all desk views).
+        if (class_exists('\\VisionGaia\\WPDesk\\WPDeskDesignSystem')) {
+            \VisionGaia\WPDesk\WPDeskDesignSystem::enqueue('security-center');
+        }
+
+        wp_enqueue_style('vgts-dashboard-css', $url . 'assets/css/vgts-dashboard.css', ['vgt-ds-compat'], $version);
         wp_enqueue_style('vgts-sidebar-css', $url . 'assets/css/vgts-sidebar.css', ['vgts-dashboard-css'], $version);
         wp_enqueue_style('dashicons');
 
         $is_iframe = class_exists('VisionGaia\WPDesk\WPDeskPlugin') && \VisionGaia\WPDesk\WPDeskPlugin::getInstance()->is_iframe_context();
 
-        // Apply clean sidebar adjustment style
-        echo '<style nonce="' . (function_exists('vgt_get_csp_nonce') ? esc_attr(vgt_get_csp_nonce()) : '') . '">
-            #wpbody-content { padding-bottom: 0 !important; }
-            .vgts-omega-wrapper { margin-left: -20px !important; margin-right: -20px !important; }
-            .vgts-sidebar { left: ' . ($is_iframe ? '0' : '160px') . ' !important; }
-            @media screen and (max-width: 960px) {
-                .vgts-sidebar { left: ' . ($is_iframe ? '0' : '36px') . ' !important; }
-            }
-            @media screen and (max-width: 782px) {
-                .vgts-sidebar { left: 0 !important; }
-            }
-        </style>';
+        // Portal iframe: full-bleed shell. Standalone WP admin: account for admin menu.
+        if ($is_iframe) {
+            echo '<style nonce="' . (function_exists('vgt_get_csp_nonce') ? esc_attr(vgt_get_csp_nonce()) : '') . '">
+                html, body, #wpwrap, #wpcontent, #wpbody, #wpbody-content { margin:0!important; padding:0!important; height:100%!important; overflow:hidden!important; background:#070b14!important; }
+                #wpadminbar, #adminmenumain, #adminmenuback, #adminmenuwrap, #wpfooter { display:none!important; }
+                .vgts-omega-wrapper { margin:0!important; min-height:100vh!important; height:100vh!important; overflow:hidden!important; }
+                .vgts-sidebar { position:fixed!important; top:0!important; left:0!important; bottom:0!important; height:100vh!important; width:268px!important; z-index:50!important; }
+                .vgts-content { margin-left:268px!important; min-height:100vh!important; height:100vh!important; overflow-y:auto!important; padding:28px 32px!important; box-sizing:border-box!important; }
+                #wpbody-content::before { display:none!important; content:none!important; }
+            </style>';
+        } else {
+            echo '<style nonce="' . (function_exists('vgt_get_csp_nonce') ? esc_attr(vgt_get_csp_nonce()) : '') . '">
+                #wpbody-content { padding-bottom: 0 !important; }
+                .vgts-omega-wrapper { margin-left: -20px !important; margin-right: -20px !important; }
+                .vgts-sidebar { left: 160px !important; top: 32px !important; height: calc(100vh - 32px) !important; }
+                @media screen and (max-width: 960px) {
+                    .vgts-sidebar { left: 36px !important; }
+                }
+                @media screen and (max-width: 782px) {
+                    .vgts-sidebar { left: 0 !important; top: 46px !important; height: calc(100vh - 46px) !important; }
+                }
+            </style>';
+        }
     }
 
     public function render_page(): void {
@@ -494,26 +510,7 @@ final class VGTSecurityCenter {
             wp_send_json_error('Berechtigung verweigert.');
         }
 
-        // =========================================================================
-        // PATTERN 1.5.C — Error Handler Consistency
-        // =========================================================================
-        ini_set('display_errors', '0'); // Benutzerseitige Fehlerausgabe komplett blockiert
-        error_reporting(E_ALL);         // Maximale interne Fehlersensitivität
-
-        set_error_handler(static function(int $sev, string $msg, string $file, int $line): bool {
-            if (!(error_reporting() & $sev)) {
-                return false;
-            }
-            
-            $normalized_file = str_replace('\\', '/', $file);
-            $normalized_path = defined('VGT_WPDESK_PATH') ? str_replace('\\', '/', VGT_WPDESK_PATH) : '';
-            
-            if (!empty($normalized_path) && str_contains($normalized_file, $normalized_path)) {
-                throw new \ErrorException($msg, 0, $sev, $file, $line);
-            }
-            return false;
-        });
-
+        // Local exception handling only — no global set_error_handler.
         try {
             $results = $this->execute_security_audit();
             wp_send_json_success($results);

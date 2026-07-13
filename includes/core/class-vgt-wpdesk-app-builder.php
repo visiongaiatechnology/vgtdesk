@@ -15,6 +15,40 @@ if (!defined('ABSPATH')) {
 final class WPDeskAppBuilder
 {
     /**
+     * Resolve a $menu / $submenu slug into a safe absolute admin URL.
+     * Handles "edit.php?post_type=page" without mangling the query string.
+     */
+    public static function resolve_admin_menu_url(string $slug): string
+    {
+        $slug = ltrim(trim($slug), '/');
+        if ($slug === '') {
+            return admin_url();
+        }
+        if (preg_match('#^https?://#i', $slug)) {
+            return $slug;
+        }
+
+        // "edit.php?post_type=page" / "upload.php?page=..." etc.
+        if (str_contains($slug, '?')) {
+            [$path, $query] = explode('?', $slug, 2);
+            $path = $path !== '' ? $path : 'admin.php';
+            $url = admin_url($path);
+            $params = [];
+            parse_str($query, $params);
+            if (!empty($params)) {
+                $url = add_query_arg($params, $url);
+            }
+            return $url;
+        }
+
+        if (str_contains($slug, '.php')) {
+            return admin_url($slug);
+        }
+
+        return admin_url('admin.php?page=' . $slug);
+    }
+
+    /**
      * Erstellt die Liste registrierter Desktop-Apps.
      */
     public static function build(array $user_settings): array
@@ -33,7 +67,7 @@ final class WPDeskAppBuilder
             }
 
             $title = wp_strip_all_tags($item[0]);
-            $slug  = $item[2];
+            $slug  = (string) $item[2];
 
             $should_exclude = false;
             foreach ($exclusions as $ex) {
@@ -49,12 +83,31 @@ final class WPDeskAppBuilder
                 continue;
             }
 
-            if (preg_match('/^https?:\/\//', (string)$slug)) {
+            if (preg_match('/^https?:\/\//', $slug)) {
                 continue;
-            } elseif (stripos($slug, '.php') !== false) {
-                $url = admin_url($slug);
-            } else {
-                $url = admin_url('admin.php?page=' . $slug);
+            }
+
+            $url = self::resolve_admin_menu_url($slug);
+            // Never expose bare front/home as a portal target (XFO DENY stacks + blank iframe).
+            // If URL is not an admin portal and cannot be forced, skip the app entirely
+            // (do NOT reassign the same rejected resolve_admin_menu_url result).
+            if (class_exists(WPDeskFramePolicy::class, false)) {
+                $admin_base = function_exists('admin_url') ? admin_url() : '';
+                if ($admin_base !== '' && !WPDeskFramePolicy::is_admin_portal_url($url, $admin_base)) {
+                    $forced = WPDeskFramePolicy::force_admin_portal_url($slug, $admin_base);
+                    if ($forced === '') {
+                        // Last resort: known list screens from mangled slug heuristics.
+                        $forced = WPDeskFramePolicy::force_admin_portal_url(
+                            self::guess_admin_file_from_slug($slug),
+                            $admin_base
+                        );
+                    }
+                    if ($forced !== '' && WPDeskFramePolicy::is_admin_portal_url($forced, $admin_base)) {
+                        $url = $forced;
+                    } else {
+                        continue; // omit non-portal app from desk registry
+                    }
+                }
             }
 
             $icon_type = 'dashicons';
@@ -100,16 +153,18 @@ final class WPDeskAppBuilder
 
                     $sub_title = wp_strip_all_tags($sub_item[0]);
 
-                    if (preg_match('/^https?:\/\//', (string)$sub_item[2])) {
+                    $sub_slug = (string) $sub_item[2];
+                    if (preg_match('/^https?:\/\//', $sub_slug)) {
                         continue;
-                    } elseif (strpos($sub_item[2], '.php') !== false) {
-                        $sub_url = admin_url($sub_item[2]);
+                    }
+                    if (str_contains($sub_slug, '.php') || str_contains($sub_slug, '?')) {
+                        $sub_url = self::resolve_admin_menu_url($sub_slug);
+                    } elseif (str_contains($slug, '.php')) {
+                        // Parent is file-based (e.g. edit.php?post_type=page); child is page slug.
+                        $base = self::resolve_admin_menu_url($slug);
+                        $sub_url = add_query_arg('page', $sub_slug, $base);
                     } else {
-                        if (strpos($slug, '.php') !== false) {
-                            $sub_url = admin_url($slug . '?page=' . $sub_item[2]);
-                        } else {
-                            $sub_url = admin_url('admin.php?page=' . $sub_item[2]);
-                        }
+                        $sub_url = admin_url('admin.php?page=' . $sub_slug);
                     }
 
                     $sub_id = sanitize_key($slug . '_' . $sub_item[2]);
@@ -121,13 +176,21 @@ final class WPDeskAppBuilder
                 }
             }
 
+            $classic_overrides = [];
+            if (!empty($user_settings['classic_apps']) && is_array($user_settings['classic_apps'])) {
+                $classic_overrides = $user_settings['classic_apps'];
+            }
+            $mode = WPDeskIframePolicy::classify((string) $url, $app_id, $classic_overrides);
+
             $parsed_apps[$app_id] = [
-                'title'     => $title,
-                'url'       => $url,
-                'icon_type' => $icon_type,
-                'icon_val'  => $icon_val,
-                'color'     => $color,
-                'submenus'  => $submenus_data
+                'title'        => $title,
+                'url'          => $url,
+                'icon_type'    => $icon_type,
+                'icon_val'     => $icon_val,
+                'color'        => $color,
+                'submenus'     => $submenus_data,
+                'classic_mode' => $mode === WPDeskIframePolicy::MODE_CLASSIC_REQUIRED,
+                'open_mode'    => $mode,
             ];
         }
 
@@ -148,5 +211,39 @@ final class WPDeskAppBuilder
         ];
 
         return apply_filters('vgt_wpdesk_registered_apps', $parsed_apps);
+    }
+
+    /**
+     * Pure heuristic: map a WP menu slug to a known admin PHP file when
+     * force_admin_portal_url cannot rebuild from the slug alone.
+     */
+    public static function guess_admin_file_from_slug(string $slug): string
+    {
+        $slug = strtolower(trim($slug));
+        if ($slug === '') {
+            return '';
+        }
+        if (str_contains($slug, 'post_type=page') || preg_match('/page/', $slug) === 1 && str_contains($slug, 'edit')) {
+            return 'edit.php?post_type=page';
+        }
+        if (str_contains($slug, 'plugin')) {
+            return 'plugins.php';
+        }
+        if (str_contains($slug, 'theme')) {
+            return 'themes.php';
+        }
+        if (str_contains($slug, 'upload') || str_contains($slug, 'media')) {
+            return 'upload.php';
+        }
+        if (str_contains($slug, 'user')) {
+            return 'users.php';
+        }
+        if (str_contains($slug, 'comment')) {
+            return 'edit-comments.php';
+        }
+        if (preg_match('#([a-z0-9_\-]+\.php)#', $slug, $m) === 1) {
+            return $m[1];
+        }
+        return '';
     }
 }

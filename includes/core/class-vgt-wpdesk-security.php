@@ -57,32 +57,56 @@ final class WPDeskSecurity
         ];
     }
 
+    /**
+     * Throne Guard is "active" when a Superkey is configured (global and/or per-user)
+     * or the Master role is in use — not merely because the PHP class is loaded.
+     */
     public static function throne_guard_active(): bool
     {
-        if (class_exists('VisionGaia\\ThroneGuard\\MasterUserControlPlugin', false)) {
-            $plugin = \VisionGaia\ThroneGuard\MasterUserControlPlugin::get_instance();
-            if ($plugin !== null) {
-                return true;
-            }
-        }
+        return self::throne_guard_superkey_configured()
+            || self::throne_guard_master_role_active();
+    }
 
+    /**
+     * Superkey present in option and/or current user meta (Argon2/bcrypt hashes).
+     */
+    public static function throne_guard_superkey_configured(?int $user_id = null): bool
+    {
+        $uid = $user_id ?? (function_exists('get_current_user_id') ? (int) get_current_user_id() : 0);
         $hashes = [
-            (string)get_option('mcp_superkey_hash', ''),
-            (string)get_user_meta(get_current_user_id(), 'mcp_superkey_hash', true),
+            (string) get_option('mcp_superkey_hash', ''),
         ];
-
+        if ($uid > 0 && function_exists('get_user_meta')) {
+            $hashes[] = (string) get_user_meta($uid, 'mcp_superkey_hash', true);
+        }
         foreach ($hashes as $hash) {
-            if ($hash !== '') {
+            $hash = trim($hash);
+            // password_hash strings are non-empty and typically start with $
+            if ($hash !== '' && $hash !== '0' && $hash !== 'false') {
                 return true;
             }
         }
+        return false;
+    }
 
-        $master = get_role('master_user');
-        if ($master !== null && !empty($master->capabilities['mcp_master_access'])) {
+    public static function throne_guard_master_role_active(): bool
+    {
+        if (function_exists('current_user_can') && current_user_can('mcp_master_access')) {
             return true;
         }
+        if (function_exists('get_role')) {
+            $master = get_role('master_user');
+            if ($master !== null && !empty($master->capabilities['mcp_master_access'])) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-        return current_user_can('mcp_master_access');
+    /** Module PHP class loaded (not the same as "superkey configured"). */
+    public static function throne_guard_module_loaded(): bool
+    {
+        return class_exists('VisionGaia\\ThroneGuard\\MasterUserControlPlugin', false);
     }
 
     public static function table_exists(string $table): bool
@@ -116,14 +140,19 @@ final class WPDeskSecurity
 
     public static function audit_control_action(string $action, array $context = []): void
     {
+        // Single operational audit trail (validated + capped).
+        if (class_exists(WPDeskAudit::class, false) || class_exists(__NAMESPACE__ . '\\WPDeskAudit')) {
+            WPDeskAudit::record($action, $context);
+            return;
+        }
+        // Fallback if audit class not loaded yet during early bootstrap.
         $entry = [
-            'timestamp' => current_time('mysql'),
-            'user_id' => get_current_user_id(),
+            'timestamp' => function_exists('current_time') ? current_time('mysql') : gmdate('Y-m-d H:i:s'),
+            'user_id' => function_exists('get_current_user_id') ? get_current_user_id() : 0,
             'action' => sanitize_key($action),
             'ip' => self::client_ip(),
             'context' => array_map(static fn($value) => is_scalar($value) ? sanitize_text_field((string)$value) : '[structured]', $context),
         ];
-
         $log = get_option('vgt_operational_audit_log', []);
         if (!is_array($log)) {
             $log = [];
@@ -144,8 +173,20 @@ final class WPDeskSecurity
         return $ip;
     }
 
-    public static function is_safe_wallpaper_url(string $value): bool
-    {
+    /**
+     * Pure wallpaper safety check (injectable hosts for unit tests).
+     *
+     * Rules:
+     * - data:image/*;base64,... allowed
+     * - Absolute / protocol-relative URLs (non-empty host): host must equal site or upload host
+     * - Relative paths only: single leading slash (not //) or scheme-less relative path
+     * - Never accept a foreign host because the path contains /wp-content/uploads/
+     */
+    public static function is_safe_wallpaper_url_with_hosts(
+        string $value,
+        ?string $site_host,
+        ?string $upload_host
+    ): bool {
         if ($value === '') {
             return true;
         }
@@ -158,16 +199,81 @@ final class WPDeskSecurity
             return false;
         }
 
-        $site_host = parse_url(site_url(), PHP_URL_HOST);
+        // Protocol-relative //evil.example/... always has a host in parse_url.
+        // Absolute URLs with a host must match allowlisted hosts only — path substrings never override.
         $value_host = parse_url($value, PHP_URL_HOST);
-        $upload_dir = wp_upload_dir();
-        $upload_host = parse_url($upload_dir['baseurl'] ?? '', PHP_URL_HOST);
+        if (is_string($value_host) && $value_host !== '') {
+            $value_host = strtolower($value_host);
+            $site = $site_host !== null ? strtolower($site_host) : null;
+            $upload = $upload_host !== null ? strtolower($upload_host) : null;
+            return ($site !== null && $value_host === $site)
+                || ($upload !== null && $value_host === $upload);
+        }
 
-        return empty($value_host)
-            || $value_host === $site_host
-            || $value_host === $upload_host
-            || str_starts_with($value, '/')
-            || str_contains($value, '/wp-content/uploads/');
+        // Host-less: reject any leftover protocol-relative form and foreign schemes.
+        if (str_starts_with($value, '//')) {
+            return false;
+        }
+        if (preg_match('#^[a-z][a-z0-9+.-]*:#i', $value) === 1) {
+            return false;
+        }
+
+        // True relative paths: "/media/..." or "wallpapers/wall1.webp"
+        return str_starts_with($value, '/') || !str_contains($value, '://');
+    }
+
+    public static function is_safe_wallpaper_url(string $value): bool
+    {
+        $site_host = null;
+        $upload_host = null;
+        if (function_exists('site_url')) {
+            $site_host = parse_url(site_url(), PHP_URL_HOST);
+            $site_host = is_string($site_host) ? $site_host : null;
+        }
+        if (function_exists('wp_upload_dir')) {
+            $upload_dir = wp_upload_dir();
+            $upload_host = parse_url($upload_dir['baseurl'] ?? '', PHP_URL_HOST);
+            $upload_host = is_string($upload_host) ? $upload_host : null;
+        }
+
+        return self::is_safe_wallpaper_url_with_hosts($value, $site_host, $upload_host);
+    }
+
+    /**
+     * Honest CPU metric: real loadavg-derived percentage, or null when unavailable.
+     * Never invents values with sin/rand.
+     */
+    public static function cpu_load_percent(): ?int
+    {
+        if (!function_exists('sys_getloadavg')) {
+            return null;
+        }
+        $load = sys_getloadavg();
+        if (!is_array($load) || !isset($load[0]) || !is_numeric($load[0])) {
+            return null;
+        }
+        $pct = (int) round(((float) $load[0]) * 100 / 2);
+        return min(100, max(0, $pct));
+    }
+
+    /**
+     * VGT-owned tables eligible for OPTIMIZE (prefix-relative suffixes).
+     *
+     * @return list<string>
+     */
+    public static function optimizable_table_suffixes(): array
+    {
+        return [
+            'vgt_desk_settings',
+            'vgts_apex_bans',
+            'vgts_omega_logs',
+            'vis_apex_bans',
+            'vis_omega_logs',
+            'mcp_user_roles',
+            'vgt_dattrack_stats',
+            'vgt_omega_forms',
+            'vgt_omega_submissions',
+        ];
     }
 
     public static function csp_policy(string $surface, string $nonce = ''): string

@@ -30,10 +30,11 @@ class ValidationException extends AppException {}
 class SecurityException extends AppException {}    
 class StorageException extends AppException {}     
 
-/* --------------------------- 1.5.C - Error Handler Consistency --------------------------- */
-ini_set('display_errors', '0');
-ini_set('log_errors', '1');
-error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
+/* --------------------------- 1.5.C - Error reporting (no global set_error_handler) --------------------------- */
+if (function_exists('ini_set')) {
+    @ini_set('display_errors', '0');
+    @ini_set('log_errors', '1');
+}
 
 /* -------------------------------------------------------------------------
  * SECTION 2 - PLUGIN CORE CLASS
@@ -177,7 +178,21 @@ final class MasterUserControlPlugin {
     public function inject_security_headers(array $headers): array {
         $nonce = self::get_csp_nonce();
         $headers['X-Content-Type-Options'] = 'nosniff';
-        $headers['X-Frame-Options'] = 'SAMEORIGIN'; // Korrektur auf SAMEORIGIN für verbesserte Plugin-Kompatibilität
+        // Single value only — late WPDeskFramePolicy consolidates if present.
+        // Do NOT hardcode embed=false; desk iframes need SAMEORIGIN, not a DENY stack.
+        if (class_exists('\\VisionGaia\\WPDesk\\WPDeskFramePolicy')) {
+            $embed = !empty($_GET['vgt_iframe']) && (string) $_GET['vgt_iframe'] === 'true';
+            if (!$embed && !empty($_SERVER['HTTP_SEC_FETCH_DEST'])) {
+                $embed = strtolower((string) $_SERVER['HTTP_SEC_FETCH_DEST']) === 'iframe';
+            }
+            $headers['X-Frame-Options'] = \VisionGaia\WPDesk\WPDeskFramePolicy::x_frame_options_value(
+                is_admin(),
+                $embed,
+                !is_admin() && !$embed
+            );
+        } else {
+            $headers['X-Frame-Options'] = 'SAMEORIGIN';
+        }
         $headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload';
         $headers['Referrer-Policy'] = 'strict-origin-when-cross-origin';
         $headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()';
@@ -899,6 +914,10 @@ EOT;
 
     public function render_dashboard(): void {
         $this->enforce_global_upload_jail();
+
+        if (class_exists('\\VisionGaia\\WPDesk\\WPDeskDesignSystem')) {
+            \VisionGaia\WPDesk\WPDeskDesignSystem::enqueue('throne-guard');
+        }
         
         $csrf_token = $this->generate_csrf_token();
         global $wpdb;
@@ -918,8 +937,14 @@ EOT;
         $admin_role = get_role('administrator');
         $admin_caps = $admin_role ? $admin_role->capabilities : [];
         ?>
-        <div class="wrap">
-            <h1><?php esc_html_e('Master User Control Dashboard', 'mcp'); ?></h1>
+        <div class="vgt-throne-shell vgt-ds-root wrap">
+            <div class="vgt-ds-page-header">
+                <div>
+                    <span class="vgt-ds-eyebrow">Security · Zero Trust</span>
+                    <h1 class="vgt-ds-page-title"><?php esc_html_e('Master User Control Dashboard', 'mcp'); ?></h1>
+                </div>
+                <span class="vgt-ds-badge vgt-ds-badge-danger">Throne Guard</span>
+            </div>
             
             <?php if (isset($_GET['success'])): ?>
                 <div class="notice notice-success is-dismissible"><p>Änderungen sicher gespeichert.</p></div>
@@ -928,9 +953,9 @@ EOT;
                 <div class="notice notice-error is-dismissible"><p>Sicherheitsverletzung: Superkey ungültig oder Aktion abgelehnt.</p></div>
             <?php endif; ?>
 
-            <div style="background: rgba(15, 23, 42, 0.45); padding: 25px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; margin-bottom: 20px;">
-                <h2 style="margin-top: 0; color: #f43f5e;">☢️ Admin Neutering (Zero-Trust Override)</h2>
-                <p>Entziehe der Rolle <strong>Administrator</strong> kritische Rechte. Ein Angreifer, der Admin-Zugriff erhält, ist machtlos.</p>
+            <div class="vgt-ds-card" style="margin-bottom: 20px;">
+                <h2 style="margin-top: 0; color: var(--vgt-ds-danger);">Admin Neutering (Zero-Trust Override)</h2>
+                <p style="color: var(--vgt-ds-muted);">Entziehe der Rolle <strong>Administrator</strong> kritische Rechte. Ein Angreifer, der Admin-Zugriff erhält, ist machtlos.</p>
                 
                 <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                     <?php wp_nonce_field('mcp_admin_hardening', 'mcp_nonce'); ?>
@@ -974,9 +999,9 @@ EOT;
             </div>
 
             <?php if ($is_superkey_set): ?>
-            <div style="background: rgba(15, 23, 42, 0.45); padding: 25px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; margin-bottom: 20px;">
-                <h2 style="margin-top: 0; color: #6366f1;">🔑 Superkey ändern</h2>
-                <p>Ändere deinen persönlichen Throneguard Superkey. Der Superkey schützt den Zugang zu deinen Master-Privilegien.</p>
+            <div class="vgt-ds-card" style="margin-bottom: 20px;">
+                <h2 style="margin-top: 0; color: var(--vgt-ds-accent);">Superkey ändern</h2>
+                <p style="color: var(--vgt-ds-muted);">Ändere deinen persönlichen Throneguard Superkey. Der Superkey schützt den Zugang zu deinen Master-Privilegien.</p>
                 
                 <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                     <?php wp_nonce_field('mcp_change_superkey', 'mcp_nonce'); ?>
@@ -997,8 +1022,8 @@ EOT;
             </div>
             <?php endif; ?>
 
-            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.05); margin: 30px 0;">
-            <h2><?php esc_html_e('Rollen-Beschreibungen', 'mcp'); ?></h2>
+            <div class="vgt-ds-card" style="margin-bottom: 20px;">
+            <h2 style="margin-top:0;"><?php esc_html_e('Rollen-Beschreibungen', 'mcp'); ?></h2>
             <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                 <?php wp_nonce_field('mcp_save_roles', 'mcp_nonce'); ?>
                 <input type="hidden" name="action" value="mcp_save_roles">
@@ -1019,18 +1044,20 @@ EOT;
                     <?php submit_button(esc_html__('Rollen speichern', 'mcp'), 'secondary', 'submit', false); ?>
                 </div>
             </form>
+            </div>
 
-            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.05); margin: 30px 0;">
-            <h2><?php esc_html_e('Sicherer Datei-Upload (Jailed Vault)', 'mcp'); ?></h2>
+            <div class="vgt-ds-card">
+            <h2 style="margin-top:0;"><?php esc_html_e('Sicherer Datei-Upload (Jailed Vault)', 'mcp'); ?></h2>
             <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" enctype="multipart/form-data">
                 <?php wp_nonce_field('mcp_upload_file', 'mcp_nonce'); ?>
                 <input type="hidden" name="action" value="mcp_upload_file">
                 <input type="hidden" name="csrf_token" value="<?php echo esc_attr($csrf_token); ?>">
                 <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                    <input type="file" name="mcp_file" accept="image/jpeg,image/png,image/webp,image/gif" required style="background: #0f172a; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #cbd5e1;">
+                    <input type="file" name="mcp_file" accept="image/jpeg,image/png,image/webp,image/gif" required>
                     <?php submit_button(esc_html__('Upload to Vault', 'mcp'), 'primary', 'submit', false); ?>
                 </div>
             </form>
+            </div>
         </div>
         <?php
     }
