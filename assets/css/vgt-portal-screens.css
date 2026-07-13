@@ -1,0 +1,509 @@
+/**
+ * VGT Portal Screens v2 — visible redesign for desk iframes
+ * Loaded only when vgt_iframe=true / portal context.
+ * Intentionally high-contrast + card layouts so the change is obvious.
+ */
+
+/* ===== Portal chrome (visible proof the stylesheet is active) =====
+   Tokens MUST bind on body.vgt-portal-v2 — admin_body_class only classes <body>, not <html>. */
+body.vgt-portal-v2,
+body.vgt-portal-v2.wp-admin,
+html body.vgt-portal-v2 {
+  /* Aligned to VGT Design System tokens */
+  --vgt-portal-bg: var(--vgt-ds-bg, #070b14);
+  --vgt-portal-card: var(--vgt-ds-surface-solid, #0f172a);
+  --vgt-portal-border: var(--vgt-ds-border, rgba(148, 163, 184, 0.16));
+  --vgt-portal-text: var(--vgt-ds-text, #e2e8f0);
+  --vgt-portal-muted: var(--vgt-ds-muted, #94a3b8);
+  --vgt-portal-accent: var(--vgt-ds-accent, var(--vgt-accent, #6366f1));
+  --vgt-portal-accent-soft: var(--vgt-ds-accent-soft, var(--vgt-accent-rgba15, rgba(99, 102, 241, 0.15)));
+}
+
+/* Badge only on classic WP list/admin chrome screens — never on full app shells */
+body.vgt-portal-v2.themes-php #wpbody-content::before,
+body.vgt-portal-v2.plugins-php #wpbody-content::before,
+body.vgt-portal-v2.edit-php #wpbody-content::before,
+body.vgt-portal-v2.upload-php #wpbody-content::before,
+body.vgt-portal-v2.users-php #wpbody-content::before,
+body.vgt-portal-v2.edit-comments-php #wpbody-content::before {
+  content: "VGT Portal · Card Layout";
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px 0 !important;
+  padding: 6px 12px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  color: #fff !important;
+  background: linear-gradient(135deg, var(--vgt-portal-accent), #8b5cf6) !important;
+  box-shadow: 0 8px 24px var(--vgt-portal-accent-soft) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Hide portal badge on Security Center / Astra / full product shells */
+body.vgt-portal-v2:has(.vgts-omega-wrapper) #wpbody-content::before,
+body.vgt-portal-v2:has(.vgta-root) #wpbody-content::before,
+body.vgt-portal-v2:has(.vgt-dashboard-wrapper) #wpbody-content::before,
+body.vgt-portal-v2:has(.vgt-wrapper) #wpbody-content::before,
+body.vgt-portal-v2:has(#vgt-app-root) #wpbody-content::before,
+body.vgt-portal-v2:has(.vgt-recovery-shell) #wpbody-content::before,
+body.vgt-portal-v2:has(.vgt-throne-shell) #wpbody-content::before,
+body.vgt-portal-v2:has(.vgt-matrix-wrapper) #wpbody-content::before,
+body.vgt-portal-v2:has(.vgt-admin-wrapper) #wpbody-content::before {
+  display: none !important;
+  content: none !important;
+}
+
+body.vgt-portal-v2 #wpcontent,
+body.vgt-portal-v2 #wpbody,
+body.vgt-portal-v2 #wpbody-content,
+body.vgt-portal-v2 .wrap {
+  background: var(--vgt-portal-bg) !important;
+  color: var(--vgt-portal-text) !important;
+}
+
+/* Full-bleed app shells inside desk portals (no double padding / overlap) */
+body.vgt-portal-v2:has(.vgts-omega-wrapper) #wpcontent,
+body.vgt-portal-v2:has(.vgts-omega-wrapper) #wpbody,
+body.vgt-portal-v2:has(.vgts-omega-wrapper) #wpbody-content,
+body.vgt-portal-v2:has(.vgta-root) #wpcontent,
+body.vgt-portal-v2:has(.vgta-root) #wpbody,
+body.vgt-portal-v2:has(.vgta-root) #wpbody-content,
+body.vgt-portal-v2:has(.vgt-dashboard-wrapper) #wpcontent,
+body.vgt-portal-v2:has(.vgt-dashboard-wrapper) #wpbody-content,
+body.vgt-portal-v2:has(.vgt-wrapper) #wpcontent,
+body.vgt-portal-v2:has(.vgt-wrapper) #wpbody-content,
+body.vgt-portal-v2:has(#vgt-app-root) #wpcontent,
+body.vgt-portal-v2:has(#vgt-app-root) #wpbody-content {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100vh !important;
+  height: 100% !important;
+  background: var(--vgt-portal-bg) !important;
+  overflow: hidden !important;
+}
+
+/* Security Center: sidebar flush top-to-bottom in portal iframe */
+body.vgt-portal-v2 .vgts-omega-wrapper {
+  margin: 0 !important;
+  min-height: 100vh !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+body.vgt-portal-v2 .vgts-sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  width: var(--vgt-ds-sidebar-w, 268px) !important;
+  z-index: 50 !important;
+}
+
+body.vgt-portal-v2 .vgts-content {
+  margin-left: var(--vgt-ds-sidebar-w, 268px) !important;
+  min-height: 100vh !important;
+  height: 100vh !important;
+  overflow-y: auto !important;
+  padding: 28px 32px !important;
+  box-sizing: border-box !important;
+}
+
+/* Astra full-bleed in portal */
+body.vgt-portal-v2 .vgta-root {
+  margin: 0 !important;
+  min-height: 100vh !important;
+  height: 100vh !important;
+  padding: 16px !important;
+  overflow: auto !important;
+}
+
+body.vgt-portal-v2 .wrap > h1,
+body.vgt-portal-v2 h1.wp-heading-inline {
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.03em !important;
+  color: #fff !important;
+  margin-bottom: 6px !important;
+}
+
+body.vgt-portal-v2 .page-title-action {
+  background: var(--vgt-portal-accent) !important;
+  border: none !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+  padding: 8px 16px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 6px 18px var(--vgt-portal-accent-soft) !important;
+}
+
+/* Pill filters */
+body.vgt-portal-v2 .subsubsub {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin: 16px 0 20px !important;
+  padding: 0 !important;
+  float: none !important;
+  width: 100% !important;
+}
+body.vgt-portal-v2 .subsubsub li {
+  margin: 0 !important;
+  color: transparent !important;
+}
+body.vgt-portal-v2 .subsubsub a {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 7px 14px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid var(--vgt-portal-border) !important;
+  color: var(--vgt-portal-muted) !important;
+  text-decoration: none !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+body.vgt-portal-v2 .subsubsub a.current {
+  color: #fff !important;
+  border-color: var(--vgt-portal-accent) !important;
+  background: var(--vgt-portal-accent-soft) !important;
+}
+
+/* ===== Posts / Pages / Comments — CARD GRID ===== */
+body.vgt-portal-v2.edit-php table.wp-list-table,
+body.vgt-portal-v2.post-type-post table.wp-list-table,
+body.vgt-portal-v2.post-type-page table.wp-list-table,
+body.vgt-portal-v2.edit-comments-php table.wp-list-table {
+  display: block !important;
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+body.vgt-portal-v2.edit-php table.wp-list-table thead,
+body.vgt-portal-v2.post-type-post table.wp-list-table thead,
+body.vgt-portal-v2.post-type-page table.wp-list-table thead,
+body.vgt-portal-v2.edit-comments-php table.wp-list-table thead,
+body.vgt-portal-v2.edit-php table.wp-list-table tfoot,
+body.vgt-portal-v2.post-type-post table.wp-list-table tfoot,
+body.vgt-portal-v2.post-type-page table.wp-list-table tfoot,
+body.vgt-portal-v2.edit-comments-php table.wp-list-table tfoot {
+  display: none !important;
+}
+body.vgt-portal-v2.edit-php table.wp-list-table tbody,
+body.vgt-portal-v2.post-type-post table.wp-list-table tbody,
+body.vgt-portal-v2.post-type-page table.wp-list-table tbody,
+body.vgt-portal-v2.edit-comments-php table.wp-list-table tbody,
+body.vgt-portal-v2.edit-php #the-list,
+body.vgt-portal-v2.edit-comments-php #the-list {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  gap: 18px !important;
+  width: 100% !important;
+}
+body.vgt-portal-v2.edit-php table.wp-list-table tr,
+body.vgt-portal-v2.post-type-post table.wp-list-table tr,
+body.vgt-portal-v2.post-type-page table.wp-list-table tr,
+body.vgt-portal-v2.edit-comments-php table.wp-list-table tr {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(9, 13, 22, 0.98)) !important;
+  border: 1px solid var(--vgt-portal-border) !important;
+  border-left: 4px solid #10b981 !important;
+  border-radius: 16px !important;
+  padding: 18px 18px 14px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease !important;
+  margin: 0 !important;
+  width: auto !important;
+  position: relative !important;
+}
+body.vgt-portal-v2.edit-php table.wp-list-table tr:hover,
+body.vgt-portal-v2.post-type-post table.wp-list-table tr:hover,
+body.vgt-portal-v2.post-type-page table.wp-list-table tr:hover {
+  transform: translateY(-3px) !important;
+  border-color: var(--vgt-portal-accent) !important;
+  box-shadow: 0 16px 40px var(--vgt-portal-accent-soft) !important;
+}
+body.vgt-portal-v2.edit-php table.wp-list-table tr.status-draft,
+body.vgt-portal-v2.post-type-page table.wp-list-table tr.status-draft {
+  border-left-color: #f59e0b !important;
+}
+body.vgt-portal-v2.edit-php table.wp-list-table td,
+body.vgt-portal-v2.post-type-post table.wp-list-table td,
+body.vgt-portal-v2.post-type-page table.wp-list-table td,
+body.vgt-portal-v2.edit-comments-php table.wp-list-table td {
+  display: block !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  width: 100% !important;
+  color: var(--vgt-portal-muted) !important;
+}
+body.vgt-portal-v2.edit-php table.wp-list-table td.column-title .row-title,
+body.vgt-portal-v2.post-type-page table.wp-list-table td.column-title .row-title,
+body.vgt-portal-v2.post-type-post table.wp-list-table td.column-title .row-title {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  text-decoration: none !important;
+}
+body.vgt-portal-v2 th.check-column,
+body.vgt-portal-v2 td.check-column {
+  display: none !important;
+}
+body.vgt-portal-v2 .row-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  opacity: 1 !important;
+  position: static !important;
+  margin-top: 10px !important;
+  left: auto !important;
+}
+body.vgt-portal-v2 .row-actions span a {
+  display: inline-block !important;
+  padding: 5px 10px !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+
+/* ===== Plugins — APP CARDS (not a flat table) ===== */
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins {
+  display: block !important;
+  width: 100% !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-collapse: separate !important;
+}
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins thead,
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins tfoot {
+  display: none !important;
+}
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins tbody {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+  gap: 16px !important;
+  width: 100% !important;
+}
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins tr {
+  display: flex !important;
+  flex-direction: column !important;
+  background: linear-gradient(165deg, #111827 0%, #0b1220 100%) !important;
+  border: 1px solid var(--vgt-portal-border) !important;
+  border-radius: 16px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35) !important;
+  transition: transform 0.18s ease, border-color 0.18s ease !important;
+  margin: 0 !important;
+  width: auto !important;
+  opacity: 1 !important;
+}
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins tr:hover {
+  transform: translateY(-2px) !important;
+  border-color: var(--vgt-portal-accent) !important;
+}
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins tr.active {
+  box-shadow: inset 4px 0 0 #10b981, 0 10px 28px rgba(0, 0, 0, 0.35) !important;
+}
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins tr.inactive {
+  box-shadow: inset 4px 0 0 #475569, 0 10px 28px rgba(0, 0, 0, 0.25) !important;
+  opacity: 0.92 !important;
+}
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins tr.plugin-update-tr {
+  grid-column: 1 / -1 !important;
+  background: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins th,
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins td {
+  display: block !important;
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  color: #e2e8f0 !important;
+  padding: 12px 16px !important;
+  box-sizing: border-box !important;
+}
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins .plugin-title strong {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+}
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins .row-actions {
+  margin-top: 8px !important;
+}
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins .row-actions span.activate a {
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+}
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins .row-actions span.deactivate a {
+  color: #fb7185 !important;
+  border-color: rgba(244, 63, 94, 0.35) !important;
+  background: rgba(244, 63, 94, 0.08) !important;
+}
+body.vgt-portal-v2.plugins-php table.wp-list-table.plugins .plugin-description {
+  color: var(--vgt-portal-muted) !important;
+  font-size: 12px !important;
+  line-height: 1.55 !important;
+}
+
+/* ===== Themes — equal grid cards, add-new never overlays ===== */
+body.vgt-portal-v2.themes-php .theme-browser,
+body.vgt-portal-v2.themes-php .theme-browser .themes {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+  gap: 22px !important;
+  float: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 8px 0 28px !important;
+  background: transparent !important;
+  position: static !important;
+}
+body.vgt-portal-v2.themes-php .theme-browser .theme {
+  float: none !important;
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  background: #0f172a !important;
+  border: 1px solid var(--vgt-portal-border) !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3) !important;
+  transition: transform 0.18s ease, border-color 0.18s ease !important;
+}
+body.vgt-portal-v2.themes-php .theme-browser .theme:hover {
+  transform: translateY(-3px) !important;
+  border-color: var(--vgt-portal-accent) !important;
+}
+body.vgt-portal-v2.themes-php .theme-browser .theme.active {
+  border: 2px solid #10b981 !important;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.25), 0 12px 28px rgba(16, 185, 129, 0.12) !important;
+}
+body.vgt-portal-v2.themes-php .theme-browser .theme .theme-screenshot {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 4 / 3 !important;
+  object-fit: cover !important;
+  position: static !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+body.vgt-portal-v2.themes-php .theme-browser .theme .theme-id-container {
+  background: #0f172a !important;
+  padding: 14px 16px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  position: static !important;
+}
+body.vgt-portal-v2.themes-php .theme-browser .theme .theme-name {
+  color: #fff !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+}
+body.vgt-portal-v2.themes-php .theme-browser .theme.add-new-theme {
+  float: none !important;
+  position: relative !important;
+  inset: auto !important;
+  min-height: 280px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 2px dashed rgba(255, 255, 255, 0.18) !important;
+  background: rgba(15, 23, 42, 0.4) !important;
+  z-index: 1 !important;
+  box-shadow: none !important;
+}
+body.vgt-portal-v2.themes-php .theme-browser .theme.add-new-theme a,
+body.vgt-portal-v2.themes-php .theme-browser .theme.add-new-theme span,
+body.vgt-portal-v2.themes-php .theme-browser .theme.add-new-theme .theme-screenshot {
+  position: static !important;
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  color: #cbd5e1 !important;
+  background: transparent !important;
+  border: none !important;
+  text-align: center !important;
+}
+body.vgt-portal-v2.themes-php .theme-browser .theme:not(.add-new-theme) .theme-actions {
+  position: absolute !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  background: rgba(7, 11, 20, 0.88) !important;
+  opacity: 0 !important;
+  transition: opacity 0.18s ease !important;
+  z-index: 5 !important;
+  pointer-events: none !important;
+}
+body.vgt-portal-v2.themes-php .theme-browser .theme:not(.add-new-theme):hover .theme-actions {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+body.vgt-portal-v2.themes-php .wp-filter {
+  background: rgba(15, 23, 42, 0.55) !important;
+  border: 1px solid var(--vgt-portal-border) !important;
+  border-radius: 14px !important;
+  padding: 12px 16px !important;
+  margin-bottom: 20px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+/* Tablenav polish */
+body.vgt-portal-v2 .tablenav {
+  background: transparent !important;
+  border: none !important;
+  margin: 12px 0 !important;
+  height: auto !important;
+}
+body.vgt-portal-v2 .tablenav select,
+body.vgt-portal-v2 input[type="search"],
+body.vgt-portal-v2 input[type="text"] {
+  background: #0f172a !important;
+  border: 1px solid var(--vgt-portal-border) !important;
+  color: #f1f5f9 !important;
+  border-radius: 8px !important;
+}
+body.vgt-portal-v2 .tablenav .button,
+body.vgt-portal-v2 .button {
+  background: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+}
+body.vgt-portal-v2 .button-primary {
+  background: var(--vgt-portal-accent) !important;
+  border-color: transparent !important;
+}

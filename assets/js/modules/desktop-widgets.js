@@ -12,6 +12,47 @@ Object.assign(window.VGTDeskEngine, {
                 localStorage.setItem('vgt_widget_notes', textarea.value);
             });
         }
+        // Paint security status immediately from localized config (no wait for diagnostics poll).
+        this.refreshSystemSecurityWidget();
+    },
+
+    /**
+     * System & Sicherheit widget: Throne Guard + Sentinel from vgtConfig / last diagnostics.
+     */
+    refreshSystemSecurityWidget(diag) {
+        const wTgStatus = document.getElementById('vgt-widget-tg-status');
+        const wSentinel = document.getElementById('vgt-widget-sentinel-status');
+        const wBans = document.getElementById('vgt-widget-bans-status');
+
+        const cfg = typeof vgtConfig !== 'undefined' ? vgtConfig : {};
+        let tgActive = !!(cfg.superkeyActive);
+        if (diag && diag.throne_guard && typeof diag.throne_guard.active !== 'undefined') {
+            tgActive = !!diag.throne_guard.active;
+            cfg.superkeyActive = tgActive;
+        }
+        if (wTgStatus) {
+            wTgStatus.textContent = tgActive ? 'Aktiv' : 'Inaktiv';
+            wTgStatus.style.color = tgActive ? '#10b981' : '#f43f5e';
+        }
+
+        let sentinelOn = !!cfg.sentinelEnabled;
+        if (diag && diag.sentinel && typeof diag.sentinel.active !== 'undefined') {
+            sentinelOn = !!diag.sentinel.active;
+            cfg.sentinelEnabled = sentinelOn;
+        }
+        if (wSentinel) {
+            wSentinel.textContent = sentinelOn ? 'Aktiv' : 'Inaktiv';
+            wSentinel.style.color = sentinelOn ? '#10b981' : '#f43f5e';
+        }
+
+        let bans = typeof cfg.sentinelBans === 'number' ? cfg.sentinelBans : 0;
+        if (diag && typeof diag.total_bans !== 'undefined') {
+            bans = parseInt(diag.total_bans, 10) || 0;
+            cfg.sentinelBans = bans;
+        }
+        if (wBans) {
+            wBans.textContent = bans + ' IPs';
+        }
     },
 
     isSystemWidgetActive() {
@@ -159,42 +200,110 @@ Object.assign(window.VGTDeskEngine, {
     normalizeWidgetsToViewport() {
         document.querySelectorAll('.vgt-widget').forEach(widget => this.clampWidgetToWorkspace(widget));
     },
+    /**
+     * Apply absolute left/top px to a widget (clears right/bottom zombies).
+     */
+    applyWidgetPosition(widget, pos) {
+        if (!widget || !pos || typeof pos !== 'object') return;
+        if (pos.left) {
+            widget.style.left = pos.left;
+            widget.style.right = 'auto';
+        } else if (pos.right) {
+            widget.style.right = pos.right;
+            widget.style.left = 'auto';
+        }
+        if (pos.top) {
+            widget.style.top = pos.top;
+            widget.style.bottom = 'auto';
+        } else if (pos.bottom) {
+            widget.style.bottom = pos.bottom;
+            widget.style.top = 'auto';
+        }
+        if (pos.visible === false) {
+            widget.style.display = 'none';
+        } else if (pos.visible === true) {
+            widget.style.display = 'flex';
+        }
+    },
+
+    /**
+     * Snapshot current widget box as integer px left+top (workspace-relative).
+     */
+    snapshotWidgetPosition(widget, workspace) {
+        if (!widget || !workspace) return null;
+        const z = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
+        const wsR = workspace.getBoundingClientRect();
+        const r = widget.getBoundingClientRect();
+        let left = (r.left - wsR.left) / z;
+        let top = (r.top - wsR.top) / z;
+        if (!Number.isFinite(left)) left = 10;
+        if (!Number.isFinite(top)) top = 10;
+        return {
+            left: `${Math.round(left)}px`,
+            top: `${Math.round(top)}px`,
+            visible: widget.style.display !== 'none'
+        };
+    },
+
+    persistWidgetPositions() {
+        if (!this.userSettings.widget_positions || Array.isArray(this.userSettings.widget_positions)) {
+            this.userSettings.widget_positions = {};
+        }
+        const payload = { ...this.userSettings.widget_positions };
+        // Local backup so reload still works if AJAX is slow/fails.
+        try {
+            localStorage.setItem('vgt_widget_positions', JSON.stringify(payload));
+        } catch (e) { /* ignore quota */ }
+        this.saveUserSetting('widget_positions', payload);
+    },
+
     initWidgetDraggables() {
         const widgets = document.querySelectorAll('.vgt-widget');
         const workspace = document.getElementById('desktop-workspace');
         if (!workspace) return;
-        
-        const positions = this.userSettings.widget_positions || {};
+
+        // Merge server settings with localStorage backup (server wins on conflict if non-empty).
+        let positions = this.userSettings.widget_positions || {};
+        if (!positions || Array.isArray(positions) || Object.keys(positions).length === 0) {
+            try {
+                const cached = JSON.parse(localStorage.getItem('vgt_widget_positions') || '{}');
+                if (cached && typeof cached === 'object' && !Array.isArray(cached)) {
+                    positions = cached;
+                    this.userSettings.widget_positions = { ...cached };
+                }
+            } catch (e) { /* ignore */ }
+        }
+        if (!this.userSettings.widget_positions || Array.isArray(this.userSettings.widget_positions)) {
+            this.userSettings.widget_positions = {};
+        }
+
         widgets.forEach(widget => {
             const id = widget.id;
+            if (!id) return;
             const saved = positions[id];
             if (saved) {
-                if (saved.left) {
-                    widget.style.left = saved.left;
+                this.applyWidgetPosition(widget, saved);
+            } else {
+                // Convert CSS calc() defaults into absolute px once so later saves are stable.
+                const snap = this.snapshotWidgetPosition(widget, workspace);
+                if (snap) {
+                    widget.style.left = snap.left;
+                    widget.style.top = snap.top;
                     widget.style.right = 'auto';
-                } else if (saved.right) {
-                    widget.style.right = saved.right;
-                    widget.style.left = 'auto';
-                }
-                if (saved.top) {
-                    widget.style.top = saved.top;
-                    widget.style.bottom = '';
-                } else if (saved.bottom) {
-                    widget.style.bottom = saved.bottom;
-                    widget.style.top = '';
-                }
-                if (saved.visible === false) {
-                    widget.style.display = 'none';
-                } else if (saved.visible === true) {
-                    widget.style.display = 'flex';
+                    widget.style.bottom = 'auto';
                 }
             }
         });
-        
+
+        // Clamp after layout so widgets never sit off-screen after restore.
+        requestAnimationFrame(() => {
+            this.normalizeWidgetsToViewport();
+        });
+
         widgets.forEach(widget => {
             let isDragging = false;
             let offsetX = 0, offsetY = 0;
-            
+
             widget.addEventListener('mousedown', (e) => {
                 if (
                     e.target.tagName === 'TEXTAREA' ||
@@ -204,82 +313,78 @@ Object.assign(window.VGTDeskEngine, {
                 ) {
                     return;
                 }
-                
+
                 if (e.button !== 0) return;
-                
+
                 const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
                 isDragging = true;
                 widget.classList.add('dragging');
-                
+
                 const rect = widget.getBoundingClientRect();
-                const wsRect = workspace.getBoundingClientRect();
-                
+
                 offsetX = (e.clientX - rect.left) / zoom;
                 offsetY = (e.clientY - rect.top) / zoom;
-                
+
                 const onMouseMove = (ev) => {
                     if (!isDragging) return;
-                    
+
                     const z = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
                     const wsR = workspace.getBoundingClientRect();
                     const r = widget.getBoundingClientRect();
-                    
+
                     const wsLeft = wsR.left / z;
                     const wsTop = wsR.top / z;
                     const wsWidth = wsR.width / z;
                     const wsHeight = wsR.height / z;
                     const widgetWidth = r.width / z;
                     const widgetHeight = r.height / z;
-                    
+
                     let left = (ev.clientX / z) - wsLeft - offsetX;
                     let top = (ev.clientY / z) - wsTop - offsetY;
-                    
+
                     if (left < 10) left = 10;
                     if (top < 10) top = 10;
                     if (left > wsWidth - widgetWidth - 10) left = wsWidth - widgetWidth - 10;
                     if (top > wsHeight - widgetHeight - 10) top = wsHeight - widgetHeight - 10;
-                    
+
                     widget.style.right = 'auto';
-                    widget.style.left = `${left}px`;
-                    widget.style.top = `${top}px`;
+                    widget.style.bottom = 'auto';
+                    widget.style.left = `${Math.round(left)}px`;
+                    widget.style.top = `${Math.round(top)}px`;
                 };
-                
+
                 const onMouseUp = () => {
                     if (!isDragging) return;
                     isDragging = false;
                     widget.classList.remove('dragging');
-                    
+
                     document.removeEventListener('mousemove', onMouseMove);
                     document.removeEventListener('mouseup', onMouseUp);
-                    
+
+                    if (!widget.id) {
+                        console.warn('VGT: widget without id — position not saved');
+                        return;
+                    }
+
+                    // Prefer geometry snapshot (works even if style.left was calc).
+                    const pos = this.snapshotWidgetPosition(widget, workspace) || {
+                        left: '10px',
+                        top: '10px',
+                        visible: widget.style.display !== 'none'
+                    };
+                    widget.style.left = pos.left;
+                    widget.style.top = pos.top;
+                    widget.style.right = 'auto';
+                    widget.style.bottom = 'auto';
+
                     if (!this.userSettings.widget_positions || Array.isArray(this.userSettings.widget_positions)) {
                         this.userSettings.widget_positions = {};
                     }
-                    
-                    const z = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vgt-font-zoom')) || 1;
-                    const wsR = workspace.getBoundingClientRect();
-                    const r = widget.getBoundingClientRect();
-                    const wsWidth = wsR.width / z;
-                    const widgetWidth = r.width / z;
-                    
-                    const leftVal = parseFloat(widget.style.left);
-                    let pos = {
-                        top: widget.style.top,
-                        visible: widget.style.display !== 'none'
-                    };
-                    
-                    if (leftVal > (wsWidth - widgetWidth) / 2) {
-                        // Right-aligned widget saving
-                        const rightVal = wsWidth - leftVal - widgetWidth;
-                        pos.right = `${rightVal}px`;
-                    } else {
-                        pos.left = widget.style.left;
-                    }
-                    
                     this.userSettings.widget_positions[widget.id] = pos;
-                    this.saveUserSetting('widget_positions', this.userSettings.widget_positions);
+                    // Full-replace payload (server no longer delta-merges widget_positions).
+                    this.persistWidgetPositions();
                 };
-                
+
                 document.addEventListener('mousemove', onMouseMove);
                 document.addEventListener('mouseup', onMouseUp);
             });

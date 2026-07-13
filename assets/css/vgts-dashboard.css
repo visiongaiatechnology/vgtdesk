@@ -5,36 +5,25 @@
 
 /* --- APEX DESIGN VARIABLES --- */
 :root {
-    /* Backgrounds: Pure Void & Obsidian */
-    --vgts-bg-root: #03040b; 
-    --vgts-bg-sidebar: #070913; 
-    --vgts-bg-card: rgba(13, 17, 30, 0.65); 
-    
-    /* Borders: Crisp, High-Contrast Glass Edges */
-    --vgts-border: rgba(255, 255, 255, 0.08);
-    --vgts-border-highlight: rgba(255, 255, 255, 0.18);
-    
-    /* Typography: Maximum Legibility */
-    --vgts-text-primary: #ffffff; 
-    --vgts-text-secondary: #94a3b8; 
-    --vgts-text-muted: #64748b;
-    
-    /* Accents: Cyber-Saturated VGT Palette */
-    --vgts-accent: #00e5ff; /* True Cyan */
-    --vgts-accent-glow: rgba(0, 229, 255, 0.4);
-    
-    --vgts-success: #00fa9a; /* Neon Spring Green */
-    --vgts-success-bg: rgba(0, 250, 154, 0.1);
-    
-    --vgts-danger: #ff2a5f; /* Crimson Neon */
-    --vgts-danger-bg: rgba(255, 42, 95, 0.1);
-    
-    --vgts-warning: #ffb703; /* Cyber Amber */
-    --vgts-purple: #b026ff; /* Deep Neon Purple */
-    
-    /* Typography Stacks */
-    --vgts-font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --vgts-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    /* Bound to VGT Design System (compat re-maps fully; fallbacks if DS not loaded) */
+    --vgts-bg-root: var(--vgt-ds-bg-deep, #070b14);
+    --vgts-bg-sidebar: var(--vgt-ds-sidebar, #0a0f1a);
+    --vgts-bg-card: var(--vgt-ds-surface, rgba(15, 23, 42, 0.78));
+    --vgts-border: var(--vgt-ds-border, rgba(148, 163, 184, 0.14));
+    --vgts-border-highlight: var(--vgt-ds-border-highlight, rgba(255, 255, 255, 0.16));
+    --vgts-text-primary: var(--vgt-ds-text-primary, #ffffff);
+    --vgts-text-secondary: var(--vgt-ds-muted, #94a3b8);
+    --vgts-text-muted: var(--vgt-ds-text-muted, #64748b);
+    --vgts-accent: var(--vgt-ds-accent, #6366f1);
+    --vgts-accent-glow: var(--vgt-ds-accent-glow, rgba(99, 102, 241, 0.35));
+    --vgts-success: var(--vgt-ds-success, #10b981);
+    --vgts-success-bg: var(--vgt-ds-success-soft, rgba(16, 185, 129, 0.12));
+    --vgts-danger: var(--vgt-ds-danger, #f43f5e);
+    --vgts-danger-bg: var(--vgt-ds-danger-soft, rgba(244, 63, 94, 0.12));
+    --vgts-warning: var(--vgt-ds-warning, #f59e0b);
+    --vgts-purple: var(--vgt-ds-purple, #a855f7);
+    --vgts-font-main: var(--vgt-ds-font, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    --vgts-font-mono: var(--vgt-ds-font-mono, ui-monospace, Consolas, monospace);
 }
 
 /* --- LAYOUT RESET & BASE --- */

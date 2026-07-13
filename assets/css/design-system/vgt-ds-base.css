@@ -1,0 +1,106 @@
+/**
+ * VGT Design System — Base (admin chrome helpers, type, scrollbars)
+ */
+
+.vgt-ds-root,
+.vgts-omega-wrapper,
+.vgta-root,
+.vgt-dashboard-wrapper,
+.vgt-app-shell,
+#vgt-app-root,
+.vgt-recovery-shell,
+.vgt-throne-shell {
+  box-sizing: border-box;
+  color: var(--vgt-ds-text);
+  font-family: var(--vgt-ds-font);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+}
+
+.vgt-ds-root *,
+.vgt-ds-root *::before,
+.vgt-ds-root *::after,
+.vgts-omega-wrapper *,
+.vgta-root *,
+.vgt-dashboard-wrapper *,
+.vgt-recovery-shell *,
+.vgt-throne-shell * {
+  box-sizing: border-box;
+}
+
+/* Full-bleed admin shells */
+.vgts-omega-wrapper,
+.vgt-dashboard-wrapper,
+.vgta-root,
+.vgt-app-shell,
+#vgt-app-root {
+  background: var(--vgt-ds-bg) !important;
+  color: var(--vgt-ds-text) !important;
+}
+
+.vgts-omega-wrapper {
+  display: flex;
+  min-height: 100vh;
+  margin-left: -20px;
+  position: relative;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(circle at top right, var(--vgt-ds-accent-soft) 0%, transparent 42%),
+    radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.06) 0%, transparent 40%),
+    linear-gradient(180deg, var(--vgt-ds-bg-deep) 0%, var(--vgt-ds-bg) 100%) !important;
+}
+
+/* Typography */
+.vgts-omega-wrapper h1,
+.vgta-root h1,
+.vgt-dashboard-wrapper h1,
+.vgt-recovery-shell h1,
+.vgt-throne-shell h1 {
+  color: var(--vgt-ds-text-primary) !important;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.vgts-omega-wrapper h2,
+.vgts-omega-wrapper h3,
+.vgta-root h2,
+.vgta-root h3 {
+  color: var(--vgt-ds-text) !important;
+}
+
+.vgts-omega-wrapper p,
+.vgts-omega-wrapper .description,
+.vgta-root p {
+  color: var(--vgt-ds-muted);
+}
+
+/* Scrollbars */
+.vgts-omega-wrapper ::-webkit-scrollbar,
+.vgta-root ::-webkit-scrollbar,
+.vgt-dashboard-wrapper ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.vgts-omega-wrapper ::-webkit-scrollbar-track,
+.vgta-root ::-webkit-scrollbar-track {
+  background: var(--vgt-ds-bg-deep);
+}
+.vgts-omega-wrapper ::-webkit-scrollbar-thumb,
+.vgta-root ::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: var(--vgt-ds-radius-pill);
+  border: 2px solid var(--vgt-ds-bg-deep);
+}
+.vgts-omega-wrapper ::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Links inside shells */
+.vgts-omega-wrapper a:not(.vgts-btn):not(.vgts-nav-item):not(.button),
+.vgt-recovery-shell a,
+.vgt-throne-shell a {
+  color: var(--vgt-ds-accent-hover);
+}
+.vgts-omega-wrapper a:not(.vgts-btn):not(.vgts-nav-item):hover {
+  color: var(--vgt-ds-text-primary);
+}

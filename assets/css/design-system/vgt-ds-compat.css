@@ -1,0 +1,232 @@
+/**
+ * VGT Design System — Compatibility bridges
+ * Maps legacy module tokens/classes onto the unified DS without rewriting every PHP view.
+ */
+
+/* ===== Sentinel / Security Center (--vgts-*) ===== */
+:root,
+.vgts-omega-wrapper {
+  --vgts-bg-root: var(--vgt-ds-bg-deep);
+  --vgts-bg-sidebar: var(--vgt-ds-sidebar);
+  --vgts-bg-card: var(--vgt-ds-surface);
+  --vgts-border: var(--vgt-ds-border);
+  --vgts-border-highlight: var(--vgt-ds-border-highlight);
+  --vgts-text-primary: var(--vgt-ds-text-primary);
+  --vgts-text-secondary: var(--vgt-ds-muted);
+  --vgts-text-muted: var(--vgt-ds-text-muted);
+  --vgts-accent: var(--vgt-ds-accent);
+  --vgts-accent-glow: var(--vgt-ds-accent-glow);
+  --vgts-success: var(--vgt-ds-success);
+  --vgts-success-bg: var(--vgt-ds-success-soft);
+  --vgts-danger: var(--vgt-ds-danger);
+  --vgts-danger-bg: var(--vgt-ds-danger-soft);
+  --vgts-warning: var(--vgt-ds-warning);
+  --vgts-purple: var(--vgt-ds-purple);
+  --vgts-font-main: var(--vgt-ds-font);
+  --vgts-font-mono: var(--vgt-ds-font-mono);
+}
+
+/* Header icon glow uses brand accent */
+.vgts-header-icon {
+  color: var(--vgt-ds-accent) !important;
+  filter: drop-shadow(0 0 8px var(--vgt-ds-accent-glow)) !important;
+}
+
+/* Neon buttons were cyan-on-black; unify to brand primary */
+.vgts-btn-neon {
+  color: #fff !important;
+}
+
+/* Lang toggle chrome */
+.vgts-toggle-label {
+  background: var(--vgt-ds-surface) !important;
+  border: 1px solid var(--vgt-ds-border) !important;
+  border-radius: var(--vgt-ds-radius-pill) !important;
+}
+.vgts-text-de,
+.vgts-state-en .vgts-text-en {
+  color: var(--vgt-ds-accent) !important;
+  text-shadow: 0 0 8px var(--vgt-ds-accent-glow) !important;
+}
+.vgts-switch-thumb {
+  background: var(--vgt-ds-accent) !important;
+  box-shadow: 0 0 8px var(--vgt-ds-accent-glow) !important;
+}
+
+/* ===== Dattrack / generic --vgt-* module roots ===== */
+.vgt-dashboard-wrapper {
+  --vgt-bg: var(--vgt-ds-bg);
+  --vgt-surface: var(--vgt-ds-surface);
+  --vgt-surface-elevated: var(--vgt-ds-surface-elevated);
+  --vgt-border: var(--vgt-ds-border);
+  --vgt-cyan: var(--vgt-ds-accent);
+  --vgt-cyan-glow: var(--vgt-ds-accent-glow);
+  --vgt-text: var(--vgt-ds-text);
+  --vgt-muted: var(--vgt-ds-muted);
+  border-radius: var(--vgt-ds-radius-lg) !important;
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--vgt-ds-border) !important;
+  background: radial-gradient(circle at 50% 0%, var(--vgt-ds-accent-soft) 0%, var(--vgt-ds-bg) 70%) !important;
+}
+
+.vgt-dashboard-wrapper .vgt-header h1::before {
+  background: var(--vgt-ds-accent) !important;
+  box-shadow: 0 0 16px var(--vgt-ds-accent) !important;
+}
+
+.vgt-dashboard-wrapper .vgt-badge,
+.vgt-dashboard-wrapper .vgt-action-sync {
+  border-color: var(--vgt-ds-accent-glow) !important;
+  color: var(--vgt-ds-accent-hover) !important;
+  background: var(--vgt-ds-accent-soft) !important;
+}
+
+/* ===== Astra orchestrator ===== */
+.vgta-root {
+  --bg-main: var(--vgt-ds-bg);
+  --bg-panel: var(--vgt-ds-surface);
+  --bg-panel-strong: var(--vgt-ds-surface-elevated);
+  --bg-input: var(--vgt-ds-input);
+  --bg-rail: var(--vgt-ds-sidebar);
+  --border-color: var(--vgt-ds-border);
+  --border-glow: var(--vgt-ds-accent-soft);
+  --border-hot: var(--vgt-ds-accent-glow);
+  --accent-blue: var(--vgt-ds-accent);
+  --accent-cyan: var(--vgt-ds-cyan);
+  --accent-green: var(--vgt-ds-success);
+  --accent-red: var(--vgt-ds-danger);
+  --accent-amber: var(--vgt-ds-warning);
+  --text-main: var(--vgt-ds-text);
+  --text-dim: var(--vgt-ds-muted);
+  --shadow-panel: var(--vgt-ds-shadow-lg);
+  --font-mono: var(--vgt-ds-font-mono);
+  --font-sans: var(--vgt-ds-font);
+  background:
+    radial-gradient(circle at 50% 0%, var(--vgt-ds-accent-soft), transparent 50%),
+    var(--vgt-ds-bg) !important;
+  border-radius: 0;
+}
+
+.vgta-header {
+  border-radius: var(--vgt-ds-radius-lg) !important;
+  border-color: var(--vgt-ds-border) !important;
+  background: var(--vgt-ds-surface) !important;
+}
+
+.vgta-branding h1 {
+  text-shadow: 0 0 16px var(--vgt-ds-accent-glow) !important;
+}
+
+.vgta-version,
+.vgta-badge {
+  border-radius: var(--vgt-ds-radius-sm) !important;
+  background: var(--vgt-ds-accent-soft) !important;
+  border: 1px solid var(--vgt-ds-accent) !important;
+  color: var(--vgt-ds-accent-hover) !important;
+}
+
+/* ===== Vault gold → premium surface still uses DS geometry ===== */
+.vgt-vault-wrap,
+.vgt-omega-admin,
+#vgt-omega-root {
+  --vgt-gold: var(--vgt-ds-accent);
+  --vgt-gold-glow: var(--vgt-ds-accent-glow);
+  color: var(--vgt-ds-text);
+  font-family: var(--vgt-ds-font);
+}
+
+/* When premium theme is set on vault, gold returns via data-vgt-theme */
+
+/* ===== Book reader / Chronos / Login admin roots ===== */
+#vgt-app-root,
+.vgt-chronos-admin,
+.vgt-login-admin,
+.vgt-login-settings {
+  --vgt-primary: var(--vgt-ds-accent);
+  --vgt-bg: var(--vgt-ds-bg);
+  --vgt-surface: var(--vgt-ds-surface);
+  --vgt-border: var(--vgt-ds-border);
+  --vgt-text: var(--vgt-ds-text);
+  --vgt-muted: var(--vgt-ds-muted);
+  background: var(--vgt-ds-bg);
+  color: var(--vgt-ds-text);
+  font-family: var(--vgt-ds-font);
+}
+
+/* ===== Overview module matrix (Command Center) ===== */
+.vgts-omega-wrapper .vgts-module-grid a,
+.vgts-omega-wrapper a.vgts-module-card {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+/* Status pills common in overview */
+.vgts-status-on,
+.vgts-badge-active {
+  color: #6ee7b7 !important;
+  background: var(--vgt-ds-success-soft) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  border-radius: var(--vgt-ds-radius-pill);
+  padding: 2px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.vgts-status-off,
+.vgts-badge-inactive {
+  color: #fda4af !important;
+  background: var(--vgt-ds-danger-soft) !important;
+  border: 1px solid rgba(244, 63, 94, 0.3) !important;
+  border-radius: var(--vgt-ds-radius-pill);
+  padding: 2px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+/* ===== Console terminal island (keep green as semantic success, not brand) ===== */
+.vgts-console,
+.vgts-terminal {
+  border-color: rgba(16, 185, 129, 0.25) !important;
+  background: rgba(2, 8, 6, 0.85) !important;
+}
+
+/* ===== Audit cyber-hud aliases ===== */
+.cyber-hud-wrap,
+.cyber-audit,
+.vgt-audit-shell {
+  background: var(--vgt-ds-bg) !important;
+  color: var(--vgt-ds-text) !important;
+  font-family: var(--vgt-ds-font) !important;
+}
+
+/* ===== Hardcoded cyan/hex overrides common in tab CSS ===== */
+.vgts-omega-wrapper [style*="#00e5ff"],
+.vgts-omega-wrapper [style*="#00f0ff"] {
+  /* cannot restyle attr styles; prefer classes — left as note */
+}
+
+/* Force indigo over leftover cyan glows on brand chrome */
+.vgts-omega-wrapper .vgts-brand strong,
+.vgts-omega-wrapper .vgts-brand h2 {
+  color: var(--vgt-ds-text-primary) !important;
+}
+
+/* Sidebar width unify (sidebar.css may set 260) */
+.vgts-sidebar {
+  width: var(--vgt-ds-sidebar-w) !important;
+}
+.vgts-content {
+  margin-left: var(--vgt-ds-sidebar-w) !important;
+}
+
+/* Portal screens consume DS when both loaded */
+body.vgt-portal-v2 {
+  --vgt-portal-bg: var(--vgt-ds-bg);
+  --vgt-portal-card: var(--vgt-ds-surface-solid);
+  --vgt-portal-border: var(--vgt-ds-border);
+  --vgt-portal-text: var(--vgt-ds-text);
+  --vgt-portal-muted: var(--vgt-ds-muted);
+  --vgt-portal-accent: var(--vgt-ds-accent);
+  --vgt-portal-accent-soft: var(--vgt-ds-accent-soft);
+}

@@ -41,6 +41,44 @@ window.VGTDeskEngine = {
     /**
      * GEHÄRTET: URL-VALIDATION-GUARD (OPEN-REDIRECT-SCHUTZ & PROTOKOLL-CHECK)
      */
+    /**
+     * Classic-mode: open outside iframe workspace (new admin tab).
+     * Honors app.classic_mode / open_mode and classic_apps overrides.
+     */
+    shouldOpenClassic(appId, url) {
+        const id = String(appId || '');
+        const overrides = (this.userSettings && this.userSettings.classic_apps) ? this.userSettings.classic_apps : {};
+        if (id && overrides[id]) {
+            return true;
+        }
+        const app = (typeof vgtConfig !== 'undefined' && vgtConfig.apps) ? vgtConfig.apps[id] : null;
+        if (app && (app.classic_mode === true || app.open_mode === 'classic-required')) {
+            return true;
+        }
+        const hay = String(url || (app && app.url) || '').toLowerCase();
+        const markers = [
+            'customize.php', 'theme-editor.php', 'plugin-editor.php', 'site-editor.php',
+            'widgets.php', 'nav-menus.php', 'update-core.php', 'elementor', 'brizy',
+            'fl_builder', 'oxygen', 'et_fb='
+        ];
+        return markers.some((m) => hay.indexOf(m) !== -1);
+    },
+
+    openClassicAdmin(url) {
+        const clean = this.cleanUrl(url);
+        if (!clean || clean === 'about:blank') {
+            return;
+        }
+        try {
+            const u = new URL(clean, window.location.origin);
+            u.searchParams.delete('vgt_iframe');
+            window.open(u.toString(), '_blank', 'noopener,noreferrer');
+            this.addLog && this.addLog('Classic-Mode: Admin in neuem Tab geöffnet.');
+        } catch (e) {
+            window.open(clean, '_blank', 'noopener,noreferrer');
+        }
+    },
+
     cleanUrl(urlStr) {
         try {
             if (typeof urlStr === 'string' && /^data:image\/(png|jpe?g|webp|gif);base64,/i.test(urlStr.trim())) {
@@ -56,6 +94,118 @@ window.VGTDeskEngine = {
             return url.toString();
         } catch (e) {
             return 'about:blank';
+        }
+    },
+
+    /**
+     * True when URL targets wp-admin (or login) — never the public front.
+     */
+    isAdminPortalUrl(urlStr) {
+        try {
+            if (!urlStr || urlStr === 'about:blank') return false;
+            const url = new URL(urlStr, window.location.origin);
+            const path = (url.pathname || '').toLowerCase();
+            if (/\/wp-admin(\/|$)/.test(path)) return true;
+            if (/wp-login\.php/.test(path)) return true;
+            // Bare admin scripts only valid when already under admin base path resolution.
+            const adminBase = (typeof vgtConfig !== 'undefined' && vgtConfig.adminUrl)
+                ? String(vgtConfig.adminUrl)
+                : (window.location.origin + '/wp-admin/');
+            if (String(urlStr).indexOf(adminBase) === 0) return true;
+            return false;
+        } catch (e) {
+            return false;
+        }
+    },
+
+    /**
+     * Build a safe same-origin admin portal URL for an app key.
+     * Never returns the public homepage (root) — that triggers XFO DENY stacks.
+     */
+    resolvePortalUrl(appId, preferredUrl) {
+        const adminBase = (typeof vgtConfig !== 'undefined' && vgtConfig.adminUrl)
+            ? String(vgtConfig.adminUrl).replace(/\/?$/, '/')
+            : (window.location.origin + '/wp-admin/');
+
+        const candidates = [];
+        if (preferredUrl) candidates.push(preferredUrl);
+
+        const app = (typeof vgtConfig !== 'undefined' && vgtConfig.apps && appId)
+            ? vgtConfig.apps[appId]
+            : null;
+        if (app && app.url) candidates.push(app.url);
+
+        // Known WordPress admin list screens (sanitize_key mangled slugs).
+        const known = {
+            editphppost_typepage: 'edit.php?post_type=page',
+            'edit.php?post_type=page': 'edit.php?post_type=page',
+            editphp: 'edit.php',
+            pluginsphp: 'plugins.php',
+            themesphp: 'themes.php',
+            uploadphp: 'upload.php',
+            usersphp: 'users.php',
+            editcommentsphp: 'edit-comments.php',
+            indexphp: 'index.php',
+            optionsgeneralphp: 'options-general.php',
+            toolspphp: 'tools.php',
+            toolsphp: 'tools.php'
+        };
+        const idKey = String(appId || '').toLowerCase().replace(/[^a-z0-9_\-?=.&]/g, '');
+        if (known[idKey]) {
+            candidates.push(adminBase + known[idKey]);
+        }
+        // Heuristic: id contains "page" + edit → pages list
+        if (/post_type.?page|editphp.*page|pages?/i.test(String(appId || ''))) {
+            candidates.push(adminBase + 'edit.php?post_type=page');
+        }
+        if (/plugin/i.test(String(appId || ''))) {
+            candidates.push(adminBase + 'plugins.php');
+        }
+        if (/theme|design|designs/i.test(String(appId || ''))) {
+            candidates.push(adminBase + 'themes.php');
+        }
+
+        for (let i = 0; i < candidates.length; i++) {
+            let raw = candidates[i];
+            if (!raw || raw === 'about:blank') continue;
+
+            // Relative admin file → prefix admin base
+            if (!/^https?:\/\//i.test(raw) && /\.php/i.test(raw) && raw.indexOf('/wp-admin') === -1) {
+                raw = adminBase + raw.replace(/^\//, '');
+            }
+
+            const safe = this.cleanUrl(raw);
+            if (!safe || safe === 'about:blank') continue;
+
+            // Reject public front (/, /index.php without wp-admin)
+            try {
+                const u = new URL(safe);
+                const p = (u.pathname || '').replace(/\/+$/, '') || '/';
+                if (p === '/' || p === '' || p === '/index.php') {
+                    continue;
+                }
+            } catch (e) {
+                continue;
+            }
+
+            if (this.isAdminPortalUrl(safe)) {
+                return safe;
+            }
+        }
+        return '';
+    },
+
+    /**
+     * Ensure vgt_iframe=true on an admin portal URL.
+     */
+    withIframeParam(urlStr) {
+        try {
+            const u = new URL(urlStr, window.location.origin);
+            u.searchParams.set('vgt_iframe', 'true');
+            return u.toString();
+        } catch (e) {
+            if (!urlStr) return '';
+            return urlStr + (urlStr.indexOf('?') === -1 ? '?' : '&') + 'vgt_iframe=true';
         }
     },
 

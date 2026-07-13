@@ -1,6 +1,6 @@
 /**
  * VGT Desktop Engine — Orchestrator
- * Version: 1.0.0-Beta (Modular Architecture)
+ * Version: 2.0.0-beta.1 (V2.0 Beta v1 — Modular Operator OS)
  *
  * This file is the lean init-only orchestrator. All domain logic lives in:
  *   modules/desktop-core.js       → Shared state, utilities, AJAX sync, audio

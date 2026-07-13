@@ -7,10 +7,18 @@ Object.assign(window.VGTDeskEngine, {
         const container = document.getElementById('vgt-dynamic-windows');
         if (!container) return;
 
-        const cleanTargetUrl = this.cleanUrl(url);
-        if (cleanTargetUrl === 'about:blank') {
+        // Force admin portal — never frame public front.
+        const portalResolved = this.resolvePortalUrl ? this.resolvePortalUrl(id, url) : url;
+        const cleanTargetUrl = this.cleanUrl(portalResolved || url);
+        if (!cleanTargetUrl || cleanTargetUrl === 'about:blank' || (this.isAdminPortalUrl && !this.isAdminPortalUrl(cleanTargetUrl))) {
             console.error("VGT Safety Guard: Blockiert verdächtigen dynamischen Link.");
             this.addLog("Sicherheits-Alarm: Ungültige Ziel-URL blockiert.");
+            if (url) this.openClassicAdmin(url);
+            return;
+        }
+
+        if (this.shouldOpenClassic && this.shouldOpenClassic(id, cleanTargetUrl)) {
+            this.openClassicAdmin(cleanTargetUrl);
             return;
         }
 
@@ -168,9 +176,28 @@ Object.assign(window.VGTDeskEngine, {
     },
 
     openWindow(id) {
-        const win = document.getElementById(`win-${id}`);
-        if (!win) return;
         this.playSound('click');
+
+        const app = (typeof vgtConfig !== 'undefined' && vgtConfig.apps) ? vgtConfig.apps[id] : null;
+        const appUrl = app && app.url ? app.url : '';
+        if (appUrl && this.shouldOpenClassic && this.shouldOpenClassic(id, appUrl)) {
+            this.openClassicAdmin(appUrl);
+            return;
+        }
+
+        let win = document.getElementById(`win-${id}`);
+        // App registered in config but no static window shell → create dynamic portal.
+        if (!win && app && app.url) {
+            this.createDynamicWindow(id, app.title || id, app.url);
+            return;
+        }
+        if (!win) {
+            // Last resort: open admin URL in classic tab if known.
+            if (appUrl) {
+                this.openClassicAdmin(appUrl);
+            }
+            return;
+        }
 
         win.classList.remove('hidden');
         win.style.transform = 'none';
@@ -194,14 +221,37 @@ Object.assign(window.VGTDeskEngine, {
         if (iframe && (iframe.dataset.loaded !== 'true' || iframe.dataset.suspendedUrl)) {
             const spinner = document.getElementById(`spinner-${id}`);
             if (spinner) spinner.style.display = 'block';
-            
-            let targetUrl = iframe.dataset.suspendedUrl || iframe.dataset.src;
-            delete iframe.dataset.suspendedUrl;
 
-            if (targetUrl.indexOf('vgt_iframe') === -1) {
-                targetUrl += (targetUrl.indexOf('?') === -1 ? '?' : '&') + 'vgt_iframe=true';
+            // Prefer live app URL from config (avoids stale/broken data-src), then suspended, then data-src.
+            // resolvePortalUrl hard-blocks public front (gaiacom.de/) which causes XFO DENY stacks.
+            let targetUrl = this.resolvePortalUrl
+                ? this.resolvePortalUrl(id, iframe.dataset.suspendedUrl || (app && app.url) || iframe.dataset.src || appUrl)
+                : (iframe.dataset.suspendedUrl || (app && app.url) || iframe.dataset.src || appUrl || '');
+            delete iframe.dataset.suspendedUrl;
+            delete iframe.dataset.rescueAttempted;
+            delete iframe.dataset.rescueCount;
+
+            if (!targetUrl || targetUrl === 'about:blank') {
+                if (spinner) spinner.style.display = 'none';
+                this.addLog && this.addLog(`Portal '${id}': leere/ungültige Ziel-URL — Classic-Fallback.`);
+                if (appUrl) this.openClassicAdmin(appUrl);
+                return;
             }
-            iframe.src = this.cleanUrl(targetUrl);
+
+            const withParam = this.withIframeParam ? this.withIframeParam(targetUrl) : (
+                targetUrl.indexOf('vgt_iframe') === -1
+                    ? targetUrl + (targetUrl.indexOf('?') === -1 ? '?' : '&') + 'vgt_iframe=true'
+                    : targetUrl
+            );
+            const safe = this.cleanUrl(withParam);
+            if (!safe || safe === 'about:blank' || (this.isAdminPortalUrl && !this.isAdminPortalUrl(safe))) {
+                if (spinner) spinner.style.display = 'none';
+                this.addLog && this.addLog(`Portal '${id}': kein Admin-Portal-URL — Classic-Fallback.`);
+                this.openClassicAdmin(targetUrl);
+                return;
+            }
+            iframe.src = safe;
+            iframe.dataset.src = safe;
             iframe.dataset.loaded = 'true';
         }
     },
@@ -225,30 +275,7 @@ Object.assign(window.VGTDeskEngine, {
         }
     },
 
-    suspendIframe(id) {
-        const iframe = document.getElementById(`iframe-${id}`);
-        if (!iframe || iframe.dataset.loaded !== 'true') return;
-
-        let currentUrl = iframe.dataset.src;
-        try {
-            if (iframe.contentWindow && iframe.contentWindow.location) {
-                const href = iframe.contentWindow.location.href;
-                if (href && href !== 'about:blank') {
-                    currentUrl = href;
-                }
-            }
-        } catch (e) {
-            if (iframe.src && iframe.src !== 'about:blank') {
-                currentUrl = iframe.src;
-            }
-        }
-
-        iframe.dataset.suspendedUrl = currentUrl;
-        iframe.src = 'about:blank';
-        iframe.dataset.loaded = 'false';
-
-        this.addLog(`Fenster '${id}' suspendiert (RAM freigegeben).`);
-    },
+    // suspendIframe / rehydrateIframe live in desktop-windows-lifecycle.js
 
     focusWindow(id) {
         const win = document.getElementById(`win-${id}`);
@@ -312,19 +339,8 @@ Object.assign(window.VGTDeskEngine, {
             this.startTaskManagerPolling();
         }
 
-        const iframe = document.getElementById(`iframe-${id}`);
-        if (iframe && (iframe.dataset.loaded !== 'true' || iframe.dataset.suspendedUrl)) {
-            const spinner = document.getElementById(`spinner-${id}`);
-            if (spinner) spinner.style.display = 'block';
-
-            let targetUrl = iframe.dataset.suspendedUrl || iframe.dataset.src;
-            delete iframe.dataset.suspendedUrl;
-
-            if (targetUrl.indexOf('vgt_iframe') === -1) {
-                targetUrl += (targetUrl.indexOf('?') === -1 ? '?' : '&') + 'vgt_iframe=true';
-            }
-            iframe.src = this.cleanUrl(targetUrl);
-            iframe.dataset.loaded = 'true';
+        if (typeof this.rehydrateIframe === 'function') {
+            this.rehydrateIframe(id);
         }
     },
 
@@ -398,6 +414,59 @@ Object.assign(window.VGTDeskEngine, {
         if (spinner) spinner.style.display = 'none';
 
         const iframe = document.getElementById(`iframe-${key}`);
+        if (!iframe) return;
+
+        const doRescue = (reason) => {
+            const count = parseInt(iframe.dataset.rescueCount || '0', 10);
+            if (count >= 2) {
+                this.addLog && this.addLog(`Portal '${key}': Rescue erschöpft (${reason}) — Classic-Fallback.`);
+                const classic = this.resolvePortalUrl
+                    ? this.resolvePortalUrl(key, iframe.dataset.src)
+                    : (iframe.dataset.src || '');
+                if (classic) this.openClassicAdmin(classic);
+                return true;
+            }
+            iframe.dataset.rescueCount = String(count + 1);
+            const rescueRaw = this.resolvePortalUrl
+                ? this.resolvePortalUrl(key, iframe.dataset.src)
+                : (iframe.dataset.src || (typeof vgtConfig !== 'undefined' && vgtConfig.apps && vgtConfig.apps[key] && vgtConfig.apps[key].url) || '');
+            if (!rescueRaw) return false;
+            const withParam = this.withIframeParam ? this.withIframeParam(rescueRaw) : rescueRaw;
+            const safe = this.cleanUrl(withParam);
+            if (!safe || safe === 'about:blank' || (this.isAdminPortalUrl && !this.isAdminPortalUrl(safe))) {
+                return false;
+            }
+            // Avoid reload loop if already targeting this URL.
+            try {
+                if (iframe.src && iframe.src.split('#')[0] === safe.split('#')[0] && count > 0) {
+                    this.addLog && this.addLog(`Portal '${key}': Admin-URL blockiert — Classic-Fallback.`);
+                    this.openClassicAdmin(safe);
+                    return true;
+                }
+            } catch (e) { /* ignore */ }
+            this.addLog && this.addLog(`Portal '${key}': ${reason} → Admin-URL neu laden.`);
+            iframe.dataset.src = safe;
+            iframe.src = safe;
+            return true;
+        };
+
+        // If the portal escaped to the public front (gaiacom.de/), snap back to admin data-src.
+        try {
+            const loc = iframe.contentWindow && iframe.contentWindow.location;
+            if (loc && loc.href && loc.origin === window.location.origin) {
+                const pathName = loc.pathname || '';
+                const path = pathName + (loc.search || '');
+                const isAdmin = /\/wp-admin(\/|$)/i.test(pathName) || /wp-login\.php/i.test(pathName);
+                const bareHome = pathName === '/' || pathName === '' || pathName === '/index.php';
+                if (!isAdmin && (bareHome || !/admin-ajax\.php/i.test(path))) {
+                    if (doRescue('Frontend-Escape abgefangen')) return;
+                }
+            }
+        } catch (navErr) {
+            // Cross-origin / XFO DENY blank document — rescue to admin portal URL.
+            if (doRescue('Cross-Origin/XFO-DENY')) return;
+        }
+
         this.interceptIframeNavigations(iframe, key);
         
         // Sync active accent color on iframe load
@@ -438,12 +507,11 @@ Object.assign(window.VGTDeskEngine, {
                 window.parent.VGTDeskEngine.focusWindow(key);
             });
 
-            // Klicks auf Links abfangen und "vgt_iframe=true" anhängen
+            // Klicks: keep admin portals inside wp-admin; open public front in new tab.
             iframeDoc.addEventListener('click', (e) => {
                 const anchor = e.target.closest('a');
                 if (!anchor) return;
 
-                // Verhindert das Ausbrechen aus dem Iframe bei target="_top" oder target="_parent"
                 if (anchor.target === '_top' || anchor.target === '_parent') {
                     anchor.target = '_self';
                 }
@@ -453,14 +521,27 @@ Object.assign(window.VGTDeskEngine, {
 
                 try {
                     const targetUrl = new URL(href, iframeWindow.location.href);
-                    if (targetUrl.origin === window.location.origin) {
-                        if (!targetUrl.searchParams.has('vgt_iframe')) {
-                            targetUrl.searchParams.set('vgt_iframe', 'true');
-                            anchor.href = targetUrl.toString();
+                    if (targetUrl.origin !== window.location.origin) {
+                        return;
+                    }
+                    const path = targetUrl.pathname + targetUrl.search;
+                    const isAdmin = /\/wp-admin\//i.test(path) || /wp-login\.php/i.test(path);
+                    const isFront = !isAdmin && !/admin-ajax\.php/i.test(path);
+                    // "Ansehen" / site links must not replace the portal with the public homepage (XFO DENY).
+                    if (isFront || anchor.target === '_blank' || /\b(row-title|view|preview)\b/i.test(anchor.className || '')) {
+                        if (isFront) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            window.open(targetUrl.toString(), '_blank', 'noopener,noreferrer');
+                            return;
                         }
                     }
+                    if (isAdmin && !targetUrl.searchParams.has('vgt_iframe')) {
+                        targetUrl.searchParams.set('vgt_iframe', 'true');
+                        anchor.href = targetUrl.toString();
+                    }
                 } catch (err) {
-                    // Ignoriere fehlerhafte relative Pfade
+                    // ignore
                 }
             }, true);
 
@@ -771,6 +852,38 @@ Object.assign(window.VGTDeskEngine, {
             state.textContent = moduleInfo.enabled ? 'AKTIV' : 'INAKTIV';
 
             info.append(title, desc, state);
+
+            const health = moduleInfo.health && typeof moduleInfo.health === 'object' ? moduleInfo.health : null;
+            if (health) {
+                const healthGrid = document.createElement('div');
+                healthGrid.className = 'vgt-cc-module-health';
+                const rows = [
+                    ['API-Key', health.apiKeyPresent ? 'vorhanden' : 'fehlt'],
+                    ['Groq', health.groqReachable ? 'erreichbar' : (health.lastGatewayStatus || 'unbekannt')],
+                    ['Modelle', String(health.modelCount || 0)],
+                    ['Memory', health.memoryMode || 'unbekannt'],
+                ];
+                rows.forEach(([labelText, valueText]) => {
+                    const item = document.createElement('span');
+                    const label = document.createElement('b');
+                    label.textContent = `${labelText}: `;
+                    const value = document.createElement('span');
+                    value.textContent = valueText;
+                    item.append(label, value);
+                    healthGrid.appendChild(item);
+                });
+                if (health.lastGatewayError) {
+                    const error = document.createElement('span');
+                    error.className = 'vgt-cc-module-health-error';
+                    const label = document.createElement('b');
+                    label.textContent = 'Gateway: ';
+                    const value = document.createElement('span');
+                    value.textContent = String(health.lastGatewayError).slice(0, 160);
+                    error.append(label, value);
+                    healthGrid.appendChild(error);
+                }
+                info.appendChild(healthGrid);
+            }
 
             const input = document.createElement('input');
             input.type = 'checkbox';
@@ -1109,10 +1222,8 @@ Object.assign(window.VGTDeskEngine, {
                     }
                 }
 
-                const wTgStatus = document.getElementById('vgt-widget-tg-status');
-                if (wTgStatus) {
-                    wTgStatus.textContent = diag.throne_guard.active ? 'Aktiv' : 'Inaktiv';
-                    wTgStatus.style.color = diag.throne_guard.active ? '#10b981' : '#f43f5e';
+                if (typeof this.refreshSystemSecurityWidget === 'function') {
+                    this.refreshSystemSecurityWidget(diag);
                 }
 
                 const wSentinelStatus = document.getElementById('vgt-widget-sentinel-status');

@@ -7,40 +7,7 @@
  */
 
 Object.assign(window.VGTDeskEngine, {
-    initDockMagnification() {
-        const dock = document.getElementById('desktop-dock');
-        if (!dock) return;
-        
-        const items = dock.querySelectorAll('.vgt-dock-item');
-        
-        dock.addEventListener('mousemove', (e) => {
-            const mouseX = e.clientX;
-            
-            items.forEach(item => {
-                const itemRect = item.getBoundingClientRect();
-                const itemCenterX = itemRect.left + itemRect.width / 2;
-                
-                const dist = Math.abs(mouseX - itemCenterX);
-                const maxDist = 120;
-                
-                if (dist < maxDist) {
-                    const scale = 1 + 0.35 * (1 - dist / maxDist);
-                    item.querySelector('.vgt-dock-icon').style.transform = `scale(${scale})`;
-                    item.style.margin = `0 ${8 * (scale - 1)}px`;
-                } else {
-                    item.querySelector('.vgt-dock-icon').style.transform = 'none';
-                    item.style.margin = '0';
-                }
-            });
-        });
-        
-        dock.addEventListener('mouseleave', () => {
-            items.forEach(item => {
-                item.querySelector('.vgt-dock-icon').style.transform = 'none';
-                item.style.margin = '0';
-            });
-        });
-    },
+    // initDockMagnification lives in desktop-menus-dock.js
 
     toggleStartMenu(e) {
         if (e) {
@@ -319,7 +286,12 @@ Object.assign(window.VGTDeskEngine, {
             this.userSettings.widget_positions[widget.id] = {};
         }
         this.userSettings.widget_positions[widget.id].visible = isHidden;
-        this.saveUserSetting('widget_positions', this.userSettings.widget_positions);
+        // Preserve left/top if present; full-replace clone.
+        if (this.persistWidgetPositions) {
+            this.persistWidgetPositions();
+        } else {
+            this.saveUserSetting('widget_positions', { ...this.userSettings.widget_positions });
+        }
 
         if (id === 'system') {
             if (isHidden) {
@@ -784,6 +756,11 @@ Object.assign(window.VGTDeskEngine, {
     openSubmenuWindow(appKey, subTitle, subUrl) {
         const appData = vgtConfig.apps[appKey];
         if (!appData) return;
+
+        if (this.shouldOpenClassic && this.shouldOpenClassic(appKey + '_sub', subUrl)) {
+            this.openClassicAdmin(subUrl);
+            return;
+        }
 
         this.openWindow(appKey);
         const menu = document.getElementById('vgt-start-menu');

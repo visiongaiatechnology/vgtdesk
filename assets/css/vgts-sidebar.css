@@ -4,28 +4,44 @@
  */
 
 .vgts-sidebar {
-    width: 260px;
+    width: var(--vgt-ds-sidebar-w, 268px);
     background: var(--vgts-bg-sidebar);
     border-right: 1px solid var(--vgts-border);
     display: flex !important;
     flex-direction: column !important;
     flex-shrink: 0;
     
-    /* VGT VIEWPORT FIX: Absolut fixiert, zieht die WP-Adminbar ab */
+    /* Standalone WP admin: under admin bar. Portal overrides force top:0 / 100vh. */
     position: fixed; 
-    top: 32px;            /* Unterhalb der WP Admin-Bar */
-    left: 5;              /* Bei WP meistens noch anpassen, wenn das Menü offen ist, aber der Wrapper fängt es ab */
-    height: calc(100vh - 32px); /* 100% Höhe minus WP Admin-Bar */
+    top: 32px;
+    left: 160px;
+    height: calc(100vh - 32px);
     z-index: 50;
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6);
 }
 
-/* Spezifische Anpassung für WP-Mobile (falls die Admin-Bar auf 46px wächst) */
+@media screen and (max-width: 960px) {
+    .vgts-sidebar {
+        left: 36px;
+    }
+}
+
 @media screen and (max-width: 782px) {
     .vgts-sidebar {
         top: 46px;
+        left: 0;
         height: calc(100vh - 46px);
     }
+}
+
+/* Desk portal iframe: flush edge-to-edge */
+body.vgt-portal-v2 .vgts-sidebar,
+body.vgt-iframe-portal .vgts-sidebar {
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
 }
 
 .vgts-brand {
