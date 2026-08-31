@@ -160,6 +160,12 @@ Persistent Settings (Relational DB)
 
 ---
 
+<img width="2560" height="1229" alt="image" src="https://github.com/user-attachments/assets/90970ebf-8247-46e4-a0b7-d5aacb94998a" />
+
+
+<img width="2560" height="1229" alt="image" src="https://github.com/user-attachments/assets/e73f52ef-5561-43f3-83da-7f9f61be304f" />
+
+
 ## 🛡️ Security Center & GeDefense v8.0.0 Integration
 
 VGT WP-Desk v2.0.0 features a completely overhauled **Sicherheits-Center** ([`VGTSecurityCenter`](includes/dashboard/class-vgt-security-center.php)) wired directly to the **GeDefense v8.0.0** engine.
@@ -176,6 +182,9 @@ VGT WP-Desk v2.0.0 features a completely overhauled **Sicherheits-Center** ([`VG
 
 ---
 
+<img width="2560" height="1229" alt="image" src="https://github.com/user-attachments/assets/959d7af9-d7dd-4fc8-8807-a0cc7cea5b7d" />
+
+
 ## 👑 ThroneGuard Master Boundary
 
 ThroneGuard enforces a strict cryptographic boundary between ordinary WordPress Administrators and the **Master Sovereign User**:
@@ -186,6 +195,9 @@ ThroneGuard enforces a strict cryptographic boundary between ordinary WordPress 
 * **SHA256 HMAC Session Fingerprinting:** IP and User-Agent cryptographically bound to the active session.
 
 ---
+
+<img width="2560" height="1229" alt="image" src="https://github.com/user-attachments/assets/2b7e6e50-afa8-4d05-be7f-46b021dc13ae" />
+
 
 ## 🎨 LoginPager Gateway
 
@@ -258,7 +270,6 @@ Accessible outside the desktop shell via `?vgt_bypass=1` or the Tools menu:
 * **Transformed Views:** Posts, Pages, Comments, Plugins.
 * **CSP Nonce Bridge:** ThroneGuard nonces automatically propagated to all injected assets.
 
-<img width="2560" height="1229" alt="IframeTransformer" src="https://github.com/user-attachments/assets/c51ff077-c5f8-4caf-91b6-cbb4b233fb9f" />
 
 ---
 
@@ -270,7 +281,6 @@ Accessible outside the desktop shell via `?vgt_bypass=1` or the Tools menu:
 * **Window Bounds Guard:** Drag capped at `top: 0` — windows cannot slide under top bar.
 * **RAM Hibernation:** Minimized windows suspend iframe to `about:blank` (rehydrated on restore).
 
-<img width="1917" height="908" alt="Multi-Window Workspace" src="https://github.com/user-attachments/assets/1b9b8656-5866-4443-a9a8-ed2c7f7a724b" />
 
 ---
 
