@@ -7,7 +7,7 @@
 
 [![License](https://img.shields.io/badge/License-AGPLv3-green?style=for-the-badge)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen?style=for-the-badge)](#)
-[![Status](https://img.shields.io/badge/Status-V2.0.0_Release-brightgreen?style=for-the-badge)](#)
+[![Status](https://img.shields.io/badge/Status-V2.0.0_Beta_Testsystem_(Stable)-yellow?style=for-the-badge)](#)
 [![Security Core](https://img.shields.io/badge/Security_Core-GeDefense_v8.0.0-00f0ff?style=for-the-badge)](#-security-center--gedefense-v800-integration)
 [![Platform](https://img.shields.io/badge/Platform-WordPress-21759B?style=for-the-badge&logo=wordpress)](#)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php)](#)
@@ -20,9 +20,9 @@
 
 ---
 
-## ⚠️ PRODUCTION READY RELEASE (v2.0.0)
+## ⚠️ V2 BETA TESTSYSTEM // STABLE RELEASE (v2.0.0)
 
-**VGT WP-Desk v2.0.0** is an enterprise-grade Operator OS for WordPress powered by the **GeDefense v8.0.0 Sovereign Security Fabric**. Engineered to the **DIAMANT VGT SUPREME** standard.
+**VGT WP-Desk v2.0.0** is an Operator OS for WordPress powered by the **GeDefense v8.0.0 Sovereign Security Fabric**. This release represents the **V2 Beta Test System** marked as stable and engineered to the **DIAMANT VGT SUPREME** standard.
 
 Found a bug or have an improvement suggestion? **Open an issue or contact our team.**
 
@@ -45,7 +45,7 @@ See: [SECURITY_POSTURE.md](SECURITY_POSTURE.md)
 
 ---
 
-<img width="2560" height="1229" alt="VGT WP-Desk Operator OS" src="https://github.com/user-attachments/assets/a3120a9e-49fd-4ce8-947f-a62bceddf2cb" />
+<img width="2560" height="1229" alt="VGT WP-Desk Operator OS" src="https://github.com/user-attachments/assets/ba5a557f-f1e9-4154-8b71-5ce0df2218a0" />
 
 ---
 
@@ -160,21 +160,26 @@ Persistent Settings (Relational DB)
 
 ---
 
+<img width="2560" height="1229" alt="Sicherheits-Zentrale Overview" src="https://github.com/user-attachments/assets/90970ebf-8247-46e4-a0b7-d5aacb94998a" />
+
+<img width="2560" height="1229" alt="GeDefense Suite Dashboard" src="https://github.com/user-attachments/assets/e73f52ef-5561-43f3-83da-7f9f61be304f" />
+
 ## 🛡️ Security Center & GeDefense v8.0.0 Integration
 
 VGT WP-Desk v2.0.0 features a completely overhauled **Sicherheits-Center** ([`VGTSecurityCenter`](includes/dashboard/class-vgt-security-center.php)) wired directly to the **GeDefense v8.0.0** engine.
 
 | Security Tab | Description |
 |---|---|
-| **Übersicht & Vitals** | 4-Card HUD: Security Core Status, ThroneGuard Master State, LoginPager Gateway, and Cerberus Ban Count. |
+| **Übersicht & Vitals** | 4-Card HUD: Security Core Status, ThroneGuard Master State, LoginPager Gateway, and Cerberus Ban Count with integrated live 14-point invariant audit. |
 | **GeDefense Suite (19 Module)** | Full access to the 19-module GeDefense v8 dashboard (`VIS_Dashboard_View` / `?page=vgt-suite`). |
 | **ThroneGuard Master** | Sovereign Master cockpit: Superkey vault, capability stripping, and hardware deactivation lock. |
 | **LoginPager Gateway** | Cyberpunk login customization with 2-column live preview cockpit and 5 color presets. |
-| **Sicherheits-Audit** | Invariant & health checking powered by `VIS_Security_Health` and `VIS_Oracle`. |
 | **Dattrack Analytics** | Sovereign local analytics and privacy rollups. |
 | **Recovery Center** | Autonomous safe-mode controls outside the desktop workspace. |
 
 ---
+
+<img width="2560" height="1229" alt="ThroneGuard Cockpit" src="https://github.com/user-attachments/assets/959d7af9-d7dd-4fc8-8807-a0cc7cea5b7d" />
 
 ## 👑 ThroneGuard Master Boundary
 
@@ -186,6 +191,8 @@ ThroneGuard enforces a strict cryptographic boundary between ordinary WordPress 
 * **SHA256 HMAC Session Fingerprinting:** IP and User-Agent cryptographically bound to the active session.
 
 ---
+
+<img width="2560" height="1229" alt="LoginPager Gateway" src="https://github.com/user-attachments/assets/2b7e6e50-afa8-4d05-be7f-46b021dc13ae" />
 
 ## 🎨 LoginPager Gateway
 
@@ -258,8 +265,6 @@ Accessible outside the desktop shell via `?vgt_bypass=1` or the Tools menu:
 * **Transformed Views:** Posts, Pages, Comments, Plugins.
 * **CSP Nonce Bridge:** ThroneGuard nonces automatically propagated to all injected assets.
 
-<img width="2560" height="1229" alt="IframeTransformer" src="https://github.com/user-attachments/assets/c51ff077-c5f8-4caf-91b6-cbb4b233fb9f" />
-
 ---
 
 ### 🖱️ 2.2 Multi-Window Workspace
@@ -269,8 +274,6 @@ Accessible outside the desktop shell via `?vgt_bypass=1` or the Tools menu:
 * **Aero Snap:** Drag to top = maximize preview; drag to left/right edge = half-screen snap.
 * **Window Bounds Guard:** Drag capped at `top: 0` — windows cannot slide under top bar.
 * **RAM Hibernation:** Minimized windows suspend iframe to `about:blank` (rehydrated on restore).
-
-<img width="1917" height="908" alt="Multi-Window Workspace" src="https://github.com/user-attachments/assets/1b9b8656-5866-4443-a9a8-ed2c7f7a724b" />
 
 ---
 
@@ -419,7 +422,7 @@ Licensed under **AGPLv3** — *"For Humans, not for SaaS Corporations."*
 
 [![VGT](https://img.shields.io/badge/VGT-VisionGaia_Technology-red?style=for-the-badge)](https://visiongaiatechnology.de)
 
-VisionGaia Technology builds sovereign, enterprise-grade infrastructure — engineered to the **DIAMANT VGT SUPREME** standard.
+VisionGaia Technology builds sovereign, high-performance infrastructure — engineered to the **DIAMANT VGT SUPREME** standard.
 
 ---
 
