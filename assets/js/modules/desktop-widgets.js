@@ -35,14 +35,14 @@ Object.assign(window.VGTDeskEngine, {
             wTgStatus.style.color = tgActive ? '#10b981' : '#f43f5e';
         }
 
-        let sentinelOn = !!cfg.sentinelEnabled;
+        let sentinelOn = !!cfg.sentinelEnabled || !!cfg.isGeDefense;
         if (diag && diag.sentinel && typeof diag.sentinel.active !== 'undefined') {
             sentinelOn = !!diag.sentinel.active;
             cfg.sentinelEnabled = sentinelOn;
         }
         if (wSentinel) {
-            wSentinel.textContent = sentinelOn ? 'Aktiv' : 'Inaktiv';
-            wSentinel.style.color = sentinelOn ? '#10b981' : '#f43f5e';
+            wSentinel.textContent = sentinelOn ? '19 Module aktiv' : 'Inaktiv';
+            wSentinel.style.color = sentinelOn ? '#00f0ff' : '#f43f5e';
         }
 
         let bans = typeof cfg.sentinelBans === 'number' ? cfg.sentinelBans : 0;

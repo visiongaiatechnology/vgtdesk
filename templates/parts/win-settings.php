@@ -94,7 +94,7 @@ if (!defined('ABSPATH')) {
                                             <span class="vgt-cc-card-title">VGT-Datenbankgröße</span>
                                             <span class="vgt-cc-card-value" id="vgt-diag-db-val">-- KB</span>
                                         </div>
-                                        <p class="vgt-cc-card-desc">Speicherbedarf der Desktop-Metadaten, Sentinel Sperr- und Protokolltabellen.</p>
+                                        <p class="vgt-cc-card-desc">Speicherbedarf der Desktop-Metadaten, GeDefense Sperr- und Protokolltabellen.</p>
                                     </div>
                                 </div>
                                 
@@ -308,7 +308,7 @@ if (!defined('ABSPATH')) {
                                         <span class="vgt-preset-active-badge">Aktiv</span>
                                         <span class="vgt-preset-icon">🛡️</span>
                                         <p class="vgt-preset-name">Security Mode</p>
-                                        <p class="vgt-preset-desc">Sentinel & Hardening: Rose Akzent, macOS Layout, Widgets & Symbole eingeblendet.</p>
+                                        <p class="vgt-preset-desc">GeDefense & Hardening: Rose Akzent, macOS Layout, Widgets & Symbole eingeblendet.</p>
                                         <button class="vgt-preset-btn" onclick="event.stopPropagation(); VGTDeskEngine.applyWorkspacePreset('security')">Aktivieren</button>
                                     </div>
                                     <div class="vgt-preset-card preset-developer" data-preset="developer" onclick="VGTDeskEngine.applyWorkspacePreset('developer')">

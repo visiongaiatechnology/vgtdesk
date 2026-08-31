@@ -1,0 +1,107 @@
+{
+    "schema": 2,
+    "algorithm": "sha256",
+    "trust": "entrypoint-pinned",
+    "components": {
+        "root": {
+            "files": 3,
+            "root_hash": "485a08b01cbe17ab2e3e65a4b23963dc81fb8dda2f22e8358b63ea36e1513dd8"
+        },
+        "assets": {
+            "files": 6,
+            "root_hash": "0e39439917696411add178f61f3d77870fac7cecc70ffdf6f0c203f4831cf45a"
+        },
+        "compatibility": {
+            "files": 4,
+            "root_hash": "178ff34fc8b19b5617b1fad47671e0308a613b8c94566ebcda40b13f751130b9"
+        },
+        "core": {
+            "files": 14,
+            "root_hash": "474f72de072b486151c4a557130f98f04f89a61cdf8b2574e4fe3ea47fbe51ed"
+        },
+        "dashboard": {
+            "files": 77,
+            "root_hash": "2f0623c4626ef7e2d35d33950d9217d498e39ae44f6487b84035e67c893f9721"
+        },
+        "scanner": {
+            "files": 13,
+            "root_hash": "e5c438e60f50e75dd73ae274591c26d819f4abcd2ee5b2adbf7aa58fd9e7e323"
+        },
+        "aegis": {
+            "files": 2,
+            "root_hash": "ecb2fe9b6909083640e03f0fd57959b2eb99d49ca412c3ce01049387e64d7904"
+        },
+        "airlock": {
+            "files": 4,
+            "root_hash": "6f3a4d2116c641d0ad91dd32189e1e8b586ca63c467311a3c5ec8aa50906347e"
+        },
+        "cerberus": {
+            "files": 1,
+            "root_hash": "5b004681d3523401b9490fcd5a3bd4ba81a1c120853d3d87bcbecf7fd1d9bed6"
+        },
+        "chronos": {
+            "files": 5,
+            "root_hash": "61acd5da350370a80f99c4a81132c546984a620bd06d38bccd3a0736234373d3"
+        },
+        "filesystem": {
+            "files": 1,
+            "root_hash": "1ae225bf0b86a4878f6775639d6776536ced944f1badb84a33c68af74e699cba"
+        },
+        "gorgon": {
+            "files": 6,
+            "root_hash": "f78123d38bfc5ec6b30be6050c8911cb7f09ce23c0790dd97097e5b8594d428a"
+        },
+        "hades": {
+            "files": 1,
+            "root_hash": "112ec32e9e20880c125a827917d0c605090f46d7c78d28a198f03c59e70b2524"
+        },
+        "kernel": {
+            "files": 1,
+            "root_hash": "9e352c7f5e49a67b0ff53b5482f1a236f1b93fdc2eb4e1c13e2b2f562e2f5245"
+        },
+        "morpheus": {
+            "files": 10,
+            "root_hash": "6cdcbde0475632b9015226e47fa50b938ba6dd4dfc4d8e6cf8f66bed7eea61a5"
+        },
+        "nemesis": {
+            "files": 1,
+            "root_hash": "b132ab13c224ee47ada25ef956cf25823e98531147127411143fdd19c16e58eb"
+        },
+        "oracle": {
+            "files": 1,
+            "root_hash": "cd35b55efd8ffab18a3f0e2cf42255b74a854ccbddc708bc20643226a7639eb9"
+        },
+        "prometheus": {
+            "files": 1,
+            "root_hash": "229384c0f0e38d581cf9a852e5260b668b2a585ee2fdc71076baff10d9a9e4ce"
+        },
+        "styx": {
+            "files": 1,
+            "root_hash": "ad6a790343d05d6b1430a3600e7c1d22115516484be979a067284ad61c572bbc"
+        },
+        "titan": {
+            "files": 1,
+            "root_hash": "ba87e33975e4a0f02b8e9069f42dac3517610c8a158245616b6e9f3656348f68"
+        },
+        "throneguard": {
+            "files": 1,
+            "root_hash": "3dfabb27d28dd61a533b3feb1bdafcf4de69def6bfa1e53e0b02928ec6aacce9"
+        },
+        "loginpager": {
+            "files": 1,
+            "root_hash": "28e46e6a478d5f55dd63fca4588dcda72c4299b0f53443d2828c37e192496bfc"
+        },
+        "trap": {
+            "files": 3,
+            "root_hash": "37357079fe2e3d313df05f38c42b2a25e96de49ee99366f83c97dd9e9a9549ed"
+        },
+        "vault": {
+            "files": 1,
+            "root_hash": "b71b016876c300a21664ad05c042ed05c6cd44507524404d9649f5bee9f83aea"
+        },
+        "zeus": {
+            "files": 4,
+            "root_hash": "b41ae605476d18d080d33a6621ee107540a4ab58e24a19f09e5a2556e0a09d4f"
+        }
+    }
+}

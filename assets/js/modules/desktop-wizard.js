@@ -1,25 +1,22 @@
 /**
  * VGT Desktop Module - First-Run Wizard (Interaktives Onboarding)
- * Handles layout selection, accent selection, superkey config, sentinel settings, redirect toggling, and completion.
+ * Handles layout selection, accent selection, superkey config, GeDefense v8.0.0 settings, redirect toggling, and completion.
  */
 
 Object.assign(window.VGTDeskEngine, {
     vgtWizardState: {
         currentStep: 1,
-        maxSteps: 7,
+        maxSteps: 6,
         layout: 'macos',
         color: 'indigo',
         superkey: '',
         currentSuperkey: '',
         sentinel: true,
-        dattrack: false,
         redirect: false
     },
 
     initFirstRunWizard() {
-        // Run check on initialization
         if (this.userSettings && this.userSettings.first_run_completed === false) {
-            // Wait slightly for shell UI to settle, then start
             setTimeout(() => {
                 this.startFirstRunWizard();
             }, 800);
@@ -30,24 +27,20 @@ Object.assign(window.VGTDeskEngine, {
         const wizardOverlay = document.getElementById('vgt-first-run-wizard');
         if (!wizardOverlay) return;
 
-        const maxSteps = (typeof vgtConfig !== 'undefined' && vgtConfig.isSentinelV7) ? 6 : 7;
         this.vgtWizardState = {
             currentStep: 1,
-            maxSteps: maxSteps,
+            maxSteps: 6,
             layout: this.userSettings.layout_style || 'macos',
             color: this.userSettings.accent_color || 'indigo',
             superkey: '',
             currentSuperkey: '',
-            sentinel: (typeof vgtConfig !== 'undefined' && vgtConfig.sentinelEnabled),
-            dattrack: (typeof vgtConfig !== 'undefined' && vgtConfig.dattrackEnabled),
+            sentinel: (typeof vgtConfig !== 'undefined' ? (vgtConfig.sentinelEnabled || vgtConfig.isGeDefense || true) : true),
             redirect: this.userSettings.auto_redirect || false
         };
 
-        // Initialize UI values to match current state
         this.selectWizardLayout(this.vgtWizardState.layout);
         this.selectWizardColor(this.vgtWizardState.color);
         
-        // Show/hide current superkey row based on whether it is active on the server
         const currentKeyRow = document.getElementById('vgt-wizard-current-key-row');
         if (currentKeyRow) {
             if (typeof vgtConfig !== 'undefined' && vgtConfig.superkeyActive) {
@@ -57,20 +50,14 @@ Object.assign(window.VGTDeskEngine, {
             }
         }
 
-        // Initialize checkbox Toggles
         const sentinelToggle = document.getElementById('vgt-wizard-sentinel-toggle');
         if (sentinelToggle) sentinelToggle.checked = this.vgtWizardState.sentinel;
-
-        const dattrackToggle = document.getElementById('vgt-wizard-dattrack-toggle');
-        if (dattrackToggle) dattrackToggle.checked = this.vgtWizardState.dattrack;
 
         const redirectToggle = document.getElementById('vgt-wizard-redirect-toggle');
         if (redirectToggle) redirectToggle.checked = this.vgtWizardState.redirect;
 
-        // Reset step content visibility
         this.showWizardStep(1);
 
-        // Clear password inputs
         const currentPassInput = document.getElementById('vgt-wizard-superkey-current');
         if (currentPassInput) currentPassInput.value = '';
         const passInput = document.getElementById('vgt-wizard-superkey-input');
@@ -80,10 +67,9 @@ Object.assign(window.VGTDeskEngine, {
         }
         this.updateWizardSuperkeyStrength('');
 
-        // Display Wizard Overlay
         wizardOverlay.classList.remove('hidden');
         this.playSound('click');
-        this.addLog("Setup-Assistent gestartet.");
+        this.addLog("Setup-Assistent gestartet // GeDefense v8.0.0.");
     },
 
     closeFirstRunWizard() {
@@ -96,7 +82,6 @@ Object.assign(window.VGTDeskEngine, {
     showWizardStep(step) {
         this.vgtWizardState.currentStep = step;
 
-        // Toggle step contents active class
         for (let i = 1; i <= this.vgtWizardState.maxSteps; i++) {
             const el = document.getElementById(`vgt-wizard-step-${i}`);
             const ind = document.querySelector(`.vgt-wizard-step-indicator[data-step="${i}"]`);
@@ -109,19 +94,16 @@ Object.assign(window.VGTDeskEngine, {
             }
         }
 
-        // Back button visibility
         const prevBtn = document.getElementById('vgt-wizard-prev');
         if (prevBtn) {
             prevBtn.classList.toggle('hidden', step === 1);
         }
 
-        // Skip Link visibility (only visible during step 3: Superkey)
         const skipLink = document.getElementById('vgt-wizard-skip');
         if (skipLink) {
             skipLink.classList.toggle('hidden', step !== 3);
         }
 
-        // Next button title / states
         const nextBtn = document.getElementById('vgt-wizard-next');
         if (nextBtn) {
             if (step === this.vgtWizardState.maxSteps) {
@@ -137,41 +119,23 @@ Object.assign(window.VGTDeskEngine, {
     nextWizardStep() {
         const step = this.vgtWizardState.currentStep;
         
-        // 1. Validation before advancing
         if (step === 3) {
-            // Validate superkey input if they typed something
             const passInput = document.getElementById('vgt-wizard-superkey-input');
             const keyVal = passInput ? passInput.value : '';
             if (keyVal.length > 0 && keyVal.length < 12) {
                 alert('Der neue Superkey muss mindestens 12 Zeichen lang sein.');
                 return;
             }
-            // Store keys
             this.vgtWizardState.superkey = keyVal;
             const currentPassInput = document.getElementById('vgt-wizard-superkey-current');
             this.vgtWizardState.currentSuperkey = currentPassInput ? currentPassInput.value : '';
         } else if (step === 4) {
-            // Read Sentinel toggle
             const sentinelToggle = document.getElementById('vgt-wizard-sentinel-toggle');
             this.vgtWizardState.sentinel = sentinelToggle ? sentinelToggle.checked : true;
         } else if (step === 5) {
-            if (this.vgtWizardState.maxSteps === 6) {
-                // Sentinel V7 active: step 5 is Auto-Redirect
-                const redirectToggle = document.getElementById('vgt-wizard-redirect-toggle');
-                this.vgtWizardState.redirect = redirectToggle ? redirectToggle.checked : false;
-                this.populateWizardSummary();
-            } else {
-                // Standard mode: step 5 is Dattrack
-                const dattrackToggle = document.getElementById('vgt-wizard-dattrack-toggle');
-                this.vgtWizardState.dattrack = dattrackToggle ? dattrackToggle.checked : false;
-            }
-        } else if (step === 6) {
-            if (this.vgtWizardState.maxSteps === 7) {
-                // Standard mode: step 6 is Auto-Redirect
-                const redirectToggle = document.getElementById('vgt-wizard-redirect-toggle');
-                this.vgtWizardState.redirect = redirectToggle ? redirectToggle.checked : false;
-                this.populateWizardSummary();
-            }
+            const redirectToggle = document.getElementById('vgt-wizard-redirect-toggle');
+            this.vgtWizardState.redirect = redirectToggle ? redirectToggle.checked : false;
+            this.populateWizardSummary();
         }
 
         this.playSound('click');
@@ -179,7 +143,6 @@ Object.assign(window.VGTDeskEngine, {
         if (step < this.vgtWizardState.maxSteps) {
             this.showWizardStep(step + 1);
         } else {
-            // If on step 6, complete setup
             this.completeWizard();
         }
     },
@@ -278,12 +241,7 @@ Object.assign(window.VGTDeskEngine, {
 
         const sentinelLabel = document.getElementById('vgt-summary-sentinel');
         if (sentinelLabel) {
-            sentinelLabel.textContent = this.vgtWizardState.sentinel ? 'Aktiviert 🛡️' : 'Deaktiviert';
-        }
-
-        const dattrackLabel = document.getElementById('vgt-summary-dattrack');
-        if (dattrackLabel) {
-            dattrackLabel.textContent = this.vgtWizardState.dattrack ? 'Aktiviert 📊' : 'Deaktiviert';
+            sentinelLabel.textContent = this.vgtWizardState.sentinel ? 'Aktiv (19 Module) 🛡️' : 'Deaktiviert';
         }
 
         const redirectLabel = document.getElementById('vgt-summary-redirect');
@@ -293,7 +251,6 @@ Object.assign(window.VGTDeskEngine, {
     },
 
     async completeWizard() {
-        // Enforce maximum loading indications and prevent duplicate clicks
         const nextBtn = document.getElementById('vgt-wizard-next');
         if (nextBtn) {
             nextBtn.disabled = true;
@@ -316,16 +273,10 @@ Object.assign(window.VGTDeskEngine, {
             const redirectCheckbox = document.getElementById('redirect-toggle');
             if (redirectCheckbox) redirectCheckbox.checked = this.vgtWizardState.redirect;
 
-            // 4. Save Sentinel Toggle if state changed on client side
+            // 4. Save GeDefense / Sentinel Toggle if changed
             const initialSentinel = (typeof vgtConfig !== 'undefined' && vgtConfig.sentinelEnabled);
             if (this.vgtWizardState.sentinel !== initialSentinel) {
                 await this.ajaxToggleSentinelAsync();
-            }
-
-            // Save Dattrack Toggle if state changed on client side (only in community mode)
-            const initialDattrack = (typeof vgtConfig !== 'undefined' && vgtConfig.dattrackEnabled);
-            if (this.vgtWizardState.maxSteps === 7 && this.vgtWizardState.dattrack !== initialDattrack) {
-                await this.ajaxToggleDattrackAsync(this.vgtWizardState.dattrack);
             }
 
             // 5. Update Superkey if set
@@ -337,15 +288,11 @@ Object.assign(window.VGTDeskEngine, {
             this.userSettings.first_run_completed = true;
             this.saveUserSetting('first_run_completed', true);
 
-            // Hide overlay
             this.closeFirstRunWizard();
-
-            // Success toast
-            this.showPresetToast("VisionGaia Desktop");
+            this.showPresetToast("VisionGaia Desktop // GeDefense v8.0.0");
             this.addLog("Erstkonfiguration erfolgreich abgeschlossen.");
             this.playSound('click');
 
-            // Open welcome window as a nice start
             this.openWindow('welcome');
 
         } catch (err) {
@@ -377,7 +324,6 @@ Object.assign(window.VGTDeskEngine, {
                     if (typeof vgtConfig !== 'undefined') {
                         vgtConfig.sentinelEnabled = !vgtConfig.sentinelEnabled;
                     }
-                    // Update Sentinel Widget UI if functions exist
                     if (typeof this.updateSentinelWidgetUI === 'function') {
                         this.updateSentinelWidgetUI();
                     }
@@ -409,37 +355,6 @@ Object.assign(window.VGTDeskEngine, {
                 if (data.success) {
                     if (typeof vgtConfig !== 'undefined') {
                         vgtConfig.superkeyActive = true;
-                    }
-                    resolve();
-                } else {
-                    reject(new Error(data.data));
-                }
-            })
-            .catch(err => reject(err));
-        });
-    },
-
-    ajaxToggleDattrackAsync(state) {
-        return new Promise((resolve, reject) => {
-            if (typeof vgtConfig === 'undefined' || !vgtConfig.ajaxUrl) return resolve();
-
-            const formData = new FormData();
-            formData.append('action', 'vgt_toggle_dattrack');
-            formData.append('nonce', vgtConfig.nonce);
-
-            fetch(vgtConfig.ajaxUrl, {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    if (typeof vgtConfig !== 'undefined') {
-                        vgtConfig.dattrackEnabled = data.data.enabled;
-                    }
-                    const settingsDattrackToggle = document.getElementById('vgt-cc-dattrack-toggle');
-                    if (settingsDattrackToggle) {
-                        settingsDattrackToggle.checked = data.data.enabled;
                     }
                     resolve();
                 } else {

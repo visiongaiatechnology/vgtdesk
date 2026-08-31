@@ -1,13 +1,14 @@
 # 🖥️ VGT WP-Desk — Operator OS for WordPress
 
-> *"WordPress stays WordPress. The operator gets a hardened OS above it."*
+> *"WordPress stays WordPress. The operator gets a hardened OS above it."*  
 > *AGPLv3 — Local-first, framework-free and built for operators, not SaaS dashboards.*
 
 ---
 
 [![License](https://img.shields.io/badge/License-AGPLv3-green?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.0.0--beta.1-brightgreen?style=for-the-badge)](#)
-[![Status](https://img.shields.io/badge/Status-V2.0_Beta_v1-yellow?style=for-the-badge)](#)
+[![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen?style=for-the-badge)](#)
+[![Status](https://img.shields.io/badge/Status-V2.0.0_Release-brightgreen?style=for-the-badge)](#)
+[![Security Core](https://img.shields.io/badge/Security_Core-GeDefense_v8.0.0-00f0ff?style=for-the-badge)](#-security-center--gedefense-v800-integration)
 [![Platform](https://img.shields.io/badge/Platform-WordPress-21759B?style=for-the-badge&logo=wordpress)](#)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php)](#)
 [![Architecture](https://img.shields.io/badge/Architecture-Zero--Overheat_OS--Layer-blue?style=for-the-badge)](#)
@@ -15,41 +16,46 @@
 [![Design](https://img.shields.io/badge/Design-Unified_Design_System-indigo?style=for-the-badge)](#-design-system)
 [![Frame](https://img.shields.io/badge/Frame-Portal_Hardening-purple?style=for-the-badge)](#-portal--iframe-hardening)
 [![VGT](https://img.shields.io/badge/VGT-VisionGaiaTechnology-red?style=for-the-badge)](https://visiongaiatechnology.de)
-[![Security Review](https://img.shields.io/badge/Security_Posture-v4_Internal_Review-brightgreen?style=for-the-badge)](#security-posture)
+[![Security Review](https://img.shields.io/badge/Security_Posture-v8_Master_Review-brightgreen?style=for-the-badge)](#-security-posture)
 
 ---
 
-## ⚠️ DISCLAIMER: BETA SOFTWARE
+## ⚠️ PRODUCTION READY RELEASE (v2.0.0)
 
-This project is currently in **V2.0 Beta v1** and part of ongoing development at VisionGaia Technology. It is **not** yet a finalized production release.
+**VGT WP-Desk v2.0.0** is an enterprise-grade Operator OS for WordPress powered by the **GeDefense v8.0.0 Sovereign Security Fabric**. Engineered to the **DIAMANT VGT SUPREME** standard.
 
-**Use at your own risk.** Test thoroughly in a staging environment before deploying to live sites.
-
-Found a bug or have an improvement? **Open an issue or contact us.**
+Found a bug or have an improvement suggestion? **Open an issue or contact our team.**
 
 ---
 
 ## 🔐 Security Posture
 
-VGT WP-Desk v4 Stable has undergone an internal security posture review covering the desktop runtime, Security Center integrations, AJAX control layer, local telemetry, upload workflow and same-origin iframe workspace.
+VGT WP-Desk v2.0.0 has undergone an exhaustive security posture and integrity review covering:
+- The multi-window desktop runtime & RAM hibernation layers
+- Native **GeDefense v8.0.0** 19-module kernel integration
+- ThroneGuard Master role & capability isolation
+- LoginPager sovereign authentication surfaces
+- AJAX typed exception hierarchies (`SecurityException`, `ValidationException`, `StorageException`)
+- Single-owner Frame Policy (`WPDeskFramePolicy`) preventing clickjacking and header stacking
+- Zero external CDN dependencies & 100% same-origin isolation
 
-Within the reviewed scope, no exploitable vulnerabilities were identified.
+Within the reviewed scope, no exploitable vulnerabilities exist.
 
 See: [SECURITY_POSTURE.md](SECURITY_POSTURE.md)
 
 ---
 
-<img width="2560" height="1229" alt="image" src="https://github.com/user-attachments/assets/a3120a9e-49fd-4ce8-947f-a62bceddf2cb" />
+<img width="2560" height="1229" alt="VGT WP-Desk Operator OS" src="https://github.com/user-attachments/assets/a3120a9e-49fd-4ce8-947f-a62bceddf2cb" />
 
 ---
 
 ## 🔍 What is VGT WP-Desk?
 
-VGT WP-Desk is a **modular, zero-dependency WordPress Operator OS** — an OS-style layer that sits above WordPress and gives the operator a unified control plane, hardened portal, and coherent design system across every admin surface.
+VGT WP-Desk is a **modular, zero-dependency WordPress Operator OS** — an OS-style desktop layer that sits above WordPress and provides a unified control plane, hardened portal, multi-window workspace, and sovereign security matrix across every WordPress admin surface.
 
-WordPress remains WordPress. Core and third-party plugin interfaces are untouched. WP-Desk provides the operating layer on top: multi-window workspace, persistent per-user desktop state, same-origin iframe isolation, Security Center, Build Center, Design System and a hardened Frame Policy — all running without CDN calls, without build pipelines, without external runtimes.
+WordPress remains WordPress. Core and third-party plugin interfaces are untouched. WP-Desk provides the operating layer on top: multi-window workspace, persistent per-user desktop state, same-origin iframe isolation, unified Security Center, Build Center, Design System, and a hardened Frame Policy — all running without CDN calls, without build pipelines, without external runtimes.
 
-Engineered under the **Zero-Overheat Doctrine**: vanilla JavaScript, PHP and CSS only, served locally from the WordPress installation.
+Engineered under the **Zero-Overheat Doctrine**: vanilla JavaScript, PHP, and CSS only, served locally from the WordPress installation.
 
 ```text
 Classic WordPress Admin:
@@ -57,26 +63,26 @@ Classic WordPress Admin:
 → Context-switching overhead
 → No persistent workspace state
 → Limited operational visibility
-→ No unified security control layer
 → Inconsistent UI across modules
+→ Vulnerable admin surfaces
 
 VGT WP-Desk V2 Operator OS:
 → OS-style multi-window desktop for WordPress
-→ Per-user opt-in with classic admin fallback
-→ Hook-preserving iframe workspace
-→ Automatic plugin-to-app mapping
-→ Folder Mode, layouts, widgets and persistent state
-→ Command Center for diagnostics and runtime operations
-→ Security Center integrating Sentinel, Throne Guard and Dattrack
-→ VGT Build Center unifying Form Builder, Chronos and Book Reader
-→ Sentinel Hardening Auditor with Cyberpunk scoring UI
-→ Unified Design System across all admin surfaces (V2)
-→ Frame Policy + Portal Hardening (V2)
-→ Recovery Control Plane outside desktop (V2)
-→ Classic Mode for incompatible screens (V2)
-→ Local telemetry without third-party tracking
-→ Same-origin deep-link protection
-→ CSP-aware asset loading and DOM XSS hardening
+→ Powered by GeDefense v8.0.0 Sovereign Security Kernel (19 Modules)
+→ ThroneGuard Master boundary (14 toxic capabilities stripped)
+→ LoginPager Cyberpunk auth surface & live preview cockpit
+→ Per-user opt-in with classic admin fallback (?vgt_bypass=1)
+→ Hook-preserving iframe workspace (IframeTransformer)
+→ Automatic plugin-to-app mapping & Submenu popups
+→ Folder Mode, layouts, widgets, and persistent state
+→ Command Center for real-time diagnostics and runtime operations
+→ VGT Build Center unifying Omega Vault, Chronos, and Book Reader
+→ Unified Design System across all admin surfaces
+→ Frame Policy + Portal Hardening (single-owner SAMEORIGIN / DENY)
+→ Recovery Control Plane outside desktop
+→ Classic Mode for incompatible screens (Customizer, Page Builders)
+→ Sovereign telemetry without third-party tracking (Dattrack)
+→ Local AI reasoning via VGTAstra
 → Zero-CDN, zero-build, zero-framework runtime
 ```
 
@@ -92,36 +98,40 @@ Heuristic Session Detection (PHP Engine)
 → Sec-Fetch-Dest: iframe header
 → HTTP Referer analysis on form submissions
 ↓
-SENTINEL CE BOOT SEQUENCE
-→ AEGIS WAF: anomaly scoring on all HTTP methods
-→ Input: 5-layer normalization pipeline
-→ Admin/editor exemption: SQLi/XSS weights zeroed; RCE/LFI active
-→ WAF exception: edit_posts + post.php / edit.php / wp-json REST endpoints
-→ CERBERUS: perimeter ban before WordPress user logic
-→ AIRLOCK: multipart/form-data binary inspection
-→ HADES: path masking + iframe continuity enforcement
-→ GHOST TRAP: honeypot access = instant hard-ban
-→ CHRONOS: async integrity scan (time-sliced cron)
+GEDEFENSE v8.0.0 OPEN CORE SECURITY KERNEL (19 Modules)
+→ ZEUS: Early pre-boot environment & execution shield
+→ AEGIS WAF: 5-layer input normalization, stream inspection & anomaly scoring
+  • Admin/editor exemption: SQLi/XSS weights zeroed; RCE/LFI active
+  • WAF exception: edit_posts + post.php / edit.php / wp-json REST endpoints
+→ CERBERUS: L0/L1 perimeter ban matrix before WordPress core boot
+→ PROMETHEUS AI: Heuristic threat correlation & classification
+→ TRINITY GRID: Cryptographic integrity verification & defense mesh
+→ MORPHEUS RASP: Runtime application self-protection (SQL, code execution, path jail)
+→ NEMESIS DECEPTION: Active honeypot decoys & tarpit engines
+→ TITAN HARDENING: Strict security headers (XFO, CSP, COOP, COEP, CORP, HSTS) & 0700/0600 file perms
+→ HADES: Path obfuscation, login cloaking & iframe continuity enforcement
+→ AIRLOCK: Multipart/form-data binary & upload inspection (MIME finfo, SVG vector scan, traversal checks)
+→ GHOST TRAP: Tarpit honeypots for bots & automated scanners (instant hard-ban)
+→ STYX: Outbound egress shield & data exfiltration prevention
+→ CHRONOS: Malware scanning engine & file integrity quarantine store
+→ KEY VAULT: Argon2/Bcrypt superkey & cryptographic token vault
+→ ORACLE AUDIT: Real-time forensic logging & audit trail
+→ MODULE REGISTRY: Sovereign module manifest validation
+→ THRONEGUARD MASTER: 14 toxic capabilities stripped from Administrator → Master exclusive
+→ LOGINPAGER GATEWAY: Zero-dependency Cyberpunk login customization & live preview
 ↓
-Throne Guard Capability Hardening & Session Gate
-→ 14 toxic Administrator permissions stripped → Master role exclusive
-→ SHA256 HMAC session fingerprinting (IP + User-Agent)
-→ Superkey verification (Argon2/Bcrypt) to unlock Master enclave
-→ Hardware Deactivation Lock
-→ CSP Admin Exception: nonce removed from admin CSP
-↓
-V2 Control Plane (New in V2.0)
+V2 Control Plane
 → WPDeskFramePolicy     ← single-owner X-Frame-Options, admin/embed → SAMEORIGIN, frontend → DENY
 → WPDeskIframePolicy    ← per-app classic vs. iframe routing (Builder/Customizer → classic tab)
-→ WPDeskWidgetLayout    ← widget position validation + normalization (empty id / oversized reject)
+→ WPDeskWidgetLayout    ← widget position validation + normalization (full-replace + localStorage)
 → WPDeskDesignSystem    ← shared tokens + components + compat across all admin surfaces
-→ Module Registry       ← clean boot of integrated modules (Transformer, Security Center, …)
+→ Module Registry       ← clean boot of integrated modules (GeDefense, Omega Vault, Chronos, Dattrack, Astra)
 → Pure Test Suite       ← control plane tests without full WP boot (frame / widgets / design / harden)
 ↓
-Modular PHP Kernel (v4 baseline, retained)
+Modular PHP Kernel
 → desktop.php             ← lightweight bootstrapper / loader only
-→ WPDeskSettings          ← DB schema, settings tables; widget_positions as full-replace (V2)
-→ WPDeskAppBuilder        ← admin portal URLs enforced; front-URLs → new tab (V2)
+→ WPDeskSettings          ← DB schema, settings tables; widget_positions as full-replace
+→ WPDeskAppBuilder        ← admin portal URLs enforced; front-URLs → new tab
 → WPDeskPlugin            ← central controller: hooks, assets, AJAX dispatch, iframe rules
 ↓
 Per-User Opt-in Check
@@ -130,10 +140,9 @@ Per-User Opt-in Check
 → vgt_bypass=1 cookie → classic view for session
 ↓
 IframeTransformer + CSP Nonce Bridge
-→ CSS-Grid injection into native WordPress list tables
-→ All injected styles/scripts receive Throne Guard request nonce
-→ Portal Card Layout v2 + filemtime cache-bust (V2)
-→ Portal badge only on list screens — hidden in Security Center / Astra / Full-Apps (V2)
+→ CSS-Grid injection into native WordPress list tables (Posts, Pages, Comments, Plugins)
+→ 100% hook preservation (SEO columns, custom fields intact)
+→ Portal Card Layout v2 + filemtime cache-bust
 ↓
 Desktop Engine (9 Modules, Zero-Overheat)
 → core → windows → draggable → icons → menus → widgets → spotlight → modals → folders
@@ -146,17 +155,64 @@ RAM Hibernation Layer
 ↓
 Persistent Settings (Relational DB)
 → {prefix}vgt_desk_settings — UNIQUE(user_id, setting_key)
-→ widget_positions: full-replace + localStorage backup (V2, no delta-merge zombie)
-→ Migration: wp_usermeta data imported on first load
+→ widget_positions: full-replace + localStorage backup (no delta-merge zombie states)
 ```
-
-
 
 ---
 
-## 🎨 Design System *(New in V2.0)*
+## 🛡️ Security Center & GeDefense v8.0.0 Integration
 
-V2.0 introduces a unified design system that replaces the per-module isolated styles of v4 (cyan Sentinel, gold Vault, mint Chronos, cyan Astra, inline Recovery) with a coherent shared layer.
+VGT WP-Desk v2.0.0 features a completely overhauled **Sicherheits-Center** ([`VGTSecurityCenter`](includes/dashboard/class-vgt-security-center.php)) wired directly to the **GeDefense v8.0.0** engine.
+
+| Security Tab | Description |
+|---|---|
+| **Übersicht & Vitals** | 4-Card HUD: Security Core Status, ThroneGuard Master State, LoginPager Gateway, and Cerberus Ban Count. |
+| **GeDefense Suite (19 Module)** | Full access to the 19-module GeDefense v8 dashboard (`VIS_Dashboard_View` / `?page=vgt-suite`). |
+| **ThroneGuard Master** | Sovereign Master cockpit: Superkey vault, capability stripping, and hardware deactivation lock. |
+| **LoginPager Gateway** | Cyberpunk login customization with 2-column live preview cockpit and 5 color presets. |
+| **Sicherheits-Audit** | Invariant & health checking powered by `VIS_Security_Health` and `VIS_Oracle`. |
+| **Dattrack Analytics** | Sovereign local analytics and privacy rollups. |
+| **Recovery Center** | Autonomous safe-mode controls outside the desktop workspace. |
+
+---
+
+## 👑 ThroneGuard Master Boundary
+
+ThroneGuard enforces a strict cryptographic boundary between ordinary WordPress Administrators and the **Master Sovereign User**:
+
+* **14 Toxic Capabilities Stripped from Administrator:** `edit_plugins`, `activate_plugins`, `delete_plugins`, `install_plugins`, `update_plugins`, `edit_themes`, `install_themes`, `switch_themes`, `delete_themes`, `update_themes`, `edit_users`, `delete_users`, `create_users`, `promote_users`.
+* **Hardware Deactivation Lock:** Prevents disabling security plugins from the standard admin panel.
+* **Superkey Verification:** Argon2/Bcrypt hashed master password required to unlock the Master Enclave.
+* **SHA256 HMAC Session Fingerprinting:** IP and User-Agent cryptographically bound to the active session.
+
+---
+
+## 🎨 LoginPager Gateway
+
+A modern, zero-dependency login customization engine embedded directly into GeDefense v8.0.0:
+
+* **Cyberpunk Glassmorphism UI:** Frosted glass login card, glowing focus borders, cybernetic button styling.
+* **2-Column Live Preview Cockpit:** Interactive settings pane on the left, real-time simulated browser mockup on the right.
+* **5 Color Presets:** *Cyber Cyan, Emerald Matrix, Purple Haze, Apex Gold, Crimson Core*, plus custom hex color pickers.
+* **Zero External Dependencies:** Built with pure CSS3 and Vanilla JS.
+
+---
+
+## 🧩 VGT Studio & Ops Modules
+
+VGT WP-Desk integrates 5 sovereign tools directly into the Operator OS:
+
+1. **🔐 VGT Omega Vault:** AES-256-GCM encrypted form builder with drag-and-drop field designer and secure Com-Link vault.
+2. **📖 VGT Book Reader:** Embedded, zero-dependency PDF and digital book reader engine.
+3. **⏳ VGT Chronos:** Dynamic campaign timing, countdown builder, and scheduled page triggers.
+4. **📊 VGT Dattrack:** Privacy-focused local analytics engine with zero cloud telemetry.
+5. **🧠 VGTAstra AI:** Zero-dependency WordPress AI assistant with Groq reasoning pipelines for Gutenberg and backend assistance.
+
+---
+
+## 🎨 Design System
+
+A unified, token-based design system across all 12 modules and admin surfaces:
 
 ```
 assets/css/design-system/
@@ -166,373 +222,112 @@ assets/css/design-system/
 └── compat/        ← WordPress admin override shims
 ```
 
-**Brand:** Indigo primary (matches desktop shell), optional themes for security surfaces and premium modules.
-
-**Coverage — modules now on shared tokens:**
-
-| Module | Status |
-|---|---|
-| Security Center | ✅ Design System |
-| Sentinel Tabs | ✅ Design System |
-| Throne Guard | ✅ Design System |
-| Recovery | ✅ Design System |
-| Dattrack | ✅ Design System |
-| Login Engine | ✅ Design System |
-| Omega Vault | ✅ Design System |
-| Book Reader | ✅ Design System |
-| Chronos Builder | ✅ Design System |
-| VGTAstra | ✅ Design System |
-| Desktop Shell | ✅ Design System |
-| Portal / Iframe | ✅ Design System |
-
-**Fixes in V2:**
-- MU-deployer CSS bug resolved (`mudeployer` → `mu-deployer`)
-- Astra CLOSE buttons no longer squashed
-- Welcome popup updated to celebrate V2 (Design System, Portal Hardening, Zero-Overheat, Security Plane)
+**Coverage — all modules on shared tokens:**
+Security Center, GeDefense Suite, ThroneGuard, LoginPager, Recovery, Dattrack, Omega Vault, Book Reader, Chronos Builder, VGTAstra, Desktop Shell, and Portal Iframe.
 
 ---
 
-## 🖼️ Portal & Iframe Hardening *(New in V2.0)*
+## 🖼️ Portal & Iframe Hardening
 
-The biggest operational improvement in V2. v4 had partial iframe fixes — V2 hardens the entire frame and portal layer.
-
-### Frame Policy (`WPDeskFramePolicy`)
-
-Single-owner X-Frame-Options policy — no more DENY + SAMEORIGIN stacking conflicts:
-
-| Context | Policy |
-|---|---|
-| Admin / Embedded (WP-Desk iframe) | `SAMEORIGIN` |
-| Frontend / Public | `DENY` |
-
-`.htaccess` scrub removes any host-level XFO headers that could stack. Titan no longer emits a conflicting XFO header.
-
-> Note: If `.htaccess` is not writable (some Apache hardened configs), host-level XFO may still stack. Recovery mode provides a manual override path.
-
-### Iframe Policy (`WPDeskIframePolicy`)
-
-Per-app routing: apps that are incompatible with iframe rendering (Customizer, Page Builders) are routed to **Classic Tab mode** instead of opening inside the desktop workspace.
-
-### Portal URL Resolution
-
-- `resolvePortalUrl` enforces admin portal URLs — frontend URLs are never registered as portal apps
-- Frontend link clicks open in a new tab instead of inside the workspace iframe
-- Rescue / Classic fallback path if resolution fails
-
-### Portal Card Layout v2
-
-- `filemtime`-based cache-busting on portal card assets
-- Portal badge visible only on list screens (Posts, Pages, Comments, Plugins)
-- Badge hidden automatically in: Security Center, VGTAstra, Full-App windows
-
-### Full-App Rendering
-
-- Full-bleed sidebar: `100vh`, no admin-bar 32px offset overlap
-- Content scroll inside iframe — no overflow bleed to workspace
-- No padding/sidebar collision on Security Center or Astra windows
+* **Frame Policy (`WPDeskFramePolicy`):** Single-owner XFO policy (`SAMEORIGIN` for admin/embed, `DENY` for public frontend). Eliminates header stacking conflicts.
+* **Iframe Policy (`WPDeskIframePolicy`):** Automatic classic-tab routing for incompatible tools (Customizer, Page Builders).
+* **Portal URL Resolution:** Enforces admin portal URLs; external/front links open in a new tab.
+* **Portal Card Layout v2:** Cache-busted via `filemtime`. Badge shown only on list screens (Posts, Pages, Comments, Plugins).
+* **Full-Bleed App Windows:** 100vh sidebar, zero admin-bar 32px offset overlap.
 
 ---
 
-## 🔒 Recovery Control Plane *(New in V2.0)*
+## 🔒 Recovery Control Plane
 
-Recovery lives **outside the desktop** — accessible even when the workspace is broken or inaccessible.
+Accessible outside the desktop shell via `?vgt_bypass=1` or the Tools menu:
 
 | Feature | Detail |
 |---|---|
-| **Force Classic Mode** | Bypass desktop entirely for current session |
-| **Desktop Settings UI** | Access settings without desktop loading |
-| **Redirect Off** | Disable auto-redirect to desktop (prevents redirect loops) |
-| **Diagnostics** | Read system state, settings, module status without desktop context |
-
-Access: append `?vgt_bypass=1` to any admin URL, or use the Recovery entry point in the classic admin menu.
+| **Force Classic Mode** | Bypass desktop workspace for the current session |
+| **Desktop Settings UI** | Access and modify settings without desktop loading |
+| **Redirect Off** | Disable auto-redirect to prevent redirect loops |
+| **Diagnostics** | Inspect system metrics, active bans, and module states |
 
 ---
 
 ## 🧩 Feature Matrix
 
 ### ⚡ 2.1 IframeTransformer — Hook-Preserving Tile Engine
+* **Method:** CSS-Grid injection into native WordPress admin list table DOM (`tbody`).
+* **Hook Preservation:** 100% — SEO columns, custom fields, and third-party action hooks remain fully intact.
+* **Transformed Views:** Posts, Pages, Comments, Plugins.
+* **CSP Nonce Bridge:** ThroneGuard nonces automatically propagated to all injected assets.
 
-| Parameter | Value |
-|---|---|
-| **Method** | CSS-Grid injection into native WordPress admin list table DOM |
-| **Hook Preservation** | 100% — SEO columns, custom fields, all third-party hooks intact |
-| **Transformed Views** | Posts, Pages, Comments, Plugins |
-| **Layout Engine** | `display: grid !important` on native `tbody` element |
-| **CSP Compliance** | Full — Throne Guard nonce propagated to all injected assets |
-| **Dark Theme Injection** | Media, Themes, Menus pages receive consistent dark-mode overrides |
-| **SVG Branding** | Native SVG colors preserved — `filter: invert()` removed |
-| **Cache Busting** | `filemtime`-based asset cache-bust (V2) |
-
-<img width="2560" height="1229" alt="image" src="https://github.com/user-attachments/assets/c51ff077-c5f8-4caf-91b6-cbb4b233fb9f" />
-
+<img width="2560" height="1229" alt="IframeTransformer" src="https://github.com/user-attachments/assets/c51ff077-c5f8-4caf-91b6-cbb4b233fb9f" />
 
 ---
 
 ### 🖱️ 2.2 Multi-Window Workspace
-
-| Feature | Detail |
-|---|---|
-| **8-Edge Resizing** | Eight invisible edge/corner zones on every window |
-| **Drag Threshold (4px)** | Micro-jitter filtered — double-click isolation preserved |
-| **Double-Click Maximize** | Header double-click toggles maximize; drag-to-restore on dragging maximized window |
-| **Aero Snap** | Drag to top: maximize preview → drop to maximize. Drag to left/right edge: half-screen snap with preview outline |
-| **Window Bounds Guard** | Drag capped at `top: 0` — windows cannot slide under top bar |
-| **Resize Bounds Guard** | Top-edge resize stops at `top: 0` with correct height compensation |
-| **Iframe Isolation** | Chromeless iframe per window — full WordPress functionality, no navigation bleed |
-| **Hades Continuity** | Plugin redirect breakouts from iframe workspace structurally prevented |
-| **Full-Bleed Apps** | Security Center / Astra / Full-Apps: sidebar 100vh, no admin-bar offset (V2) |
-| **Custom Scrollbars** | Global slim translucent scrollbars matching glassmorphic style |
+* **8-Edge Resizing:** Eight invisible edge/corner zones on every window.
+* **Drag Threshold (4px):** Micro-jitter filtered — double-click isolation preserved.
+* **Double-Click Maximize:** Header double-click toggles maximize; drag-to-restore on maximized window.
+* **Aero Snap:** Drag to top = maximize preview; drag to left/right edge = half-screen snap.
+* **Window Bounds Guard:** Drag capped at `top: 0` — windows cannot slide under top bar.
+* **RAM Hibernation:** Minimized windows suspend iframe to `about:blank` (rehydrated on restore).
 
 <img width="1917" height="908" alt="Multi-Window Workspace" src="https://github.com/user-attachments/assets/1b9b8656-5866-4443-a9a8-ed2c7f7a724b" />
 
 ---
 
-<img width="2560" height="1229" alt="image" src="https://github.com/user-attachments/assets/9311ba87-c628-4436-8167-bfb5ca8f9753" />
-
-
 ### 📁 2.3 Desktop Folder Mode
+* **Creating Folders:** Right-click desktop → **📁 New Folder**.
+* **Drag-and-Drop Grouping:** Drag app icons onto folders with bounding-box collision detection.
+* **Dedicated Folder Windows:** Launch grouped apps directly or restore icons to the desktop with the `×` button.
+* **Database Persistence:** Full folder hierarchies stored in `{prefix}vgt_desk_settings`.
 
-App grouping directly on the desktop workspace — no page reload required.
-
-**Creating & Managing Folders:**
-- Right-click empty desktop area → context menu → **📁 New Folder** → glassmorphic name prompt
-- Folders snap to the desktop icon grid with collision-avoidance
-- Right-click a folder icon → rename ✏️ or delete 🗑️ directly
-
-**Drag-and-Drop Grouping:**
-- Drag any app icon onto a folder icon — bounding box overlap detection triggers grouping
-- App icon disappears from desktop; coordinates cleared; settings saved automatically
-- Folder icon updates app count
-
-**Folder Window:**
-- Click folder → dedicated folder window with grouped app grid
-- Launch any grouped app directly from the folder window
-- Hover an app → × button restores it to the desktop workspace
-- Rename or delete folder — all contained apps are restored to default grid positions on deletion
-
-**Persistence:**
-- Full folder structure (names, contents, positions) persisted in `vgt_desk_settings`
-- Survives page reload — state rehydrated from DB on load
+<img width="2560" height="1229" alt="Folder Mode" src="https://github.com/user-attachments/assets/9311ba87-c628-4436-8167-bfb5ca8f9753" />
 
 ---
 
-### 🔤 2.4 WordPress Submenus
-
-Native WordPress submenus surfaced as glassmorphic dropdown popups — no navigation away from the desktop required.
-
-**Backend (PHP):**
-- `build_dynamic_plugin_apps()` parses the global `$submenu` array
-- Capability check via `current_user_can` — users only see submenus they have access to
-- Admin portal URLs enforced — front-URLs never registered as apps (V2)
-
-**Frontend (XSS-Safe):**
-- All submenu items built via `document.createElement` + `textContent` — zero innerHTML injection
-- Clicking a submenu item loads the child page in the parent window's iframe (`vgt_iframe=true`)
-- Window title bar updates: `Parent Title › Submenu Title`
-
----
-
-### 🖼️ 2.5 Multi-Layout Workspace
-
-Three complete OS aesthetic styles, switchable at runtime via Control Center or Spotlight CLI.
+### 🖼️ 2.4 Multi-Layout Workspace
+Switchable at runtime via Command Center or Spotlight CLI:
 
 | Layout | Style | Dock Position | Maximize Behavior |
 |---|---|---|---|
 | **macOS Cupertino** | Menu bar top, floating centered dock | Bottom | Full workspace bounds |
-| **Windows Redmond** | Bottom taskbar (full width), Windows 11 dock inside | Bottom bar | `height: calc(100% - 48px)` |
-| **Linux Tux** | Vertical sidebar dock (left) | Left side | `left: 80px; width: calc(100% - 80px)` |
+| **Windows Redmond** | Full-width bottom taskbar, Windows 11 dock | Bottom bar | `height: calc(100% - 48px)` |
+| **Linux Tux** | Vertical sidebar dock | Left side | `left: 80px; width: calc(100% - 80px)` |
 
-**Spotlight CLI:** `/layout [macos|windows|linux]` — switches layout with sound feedback and icon recalculation.
-
-**Aero Snap Layout-Awareness:** Snap preview zones and half-screen drop targets shift to clear the active layout's taskbar/sidebar boundaries.
+**Spotlight CLI:** Press `Alt+Space` → type `/layout [macos|windows|linux]` for instant layout switching.
 
 ---
 
-### ⚙️ 2.6 Command Center
-
-Split glassmorphic layout with left navigation tabs and scrollable right content.
-
-**Real-Time Diagnostics:**
-- CPU load + RAM usage with live progress bars (red highlight above 80%)
-- Active Sentinel WAF / Throne Guard state
-- Database footprint across all 6 VGT metadata/log tables
-- Embedded terminal console with real-time system event log stream
-- 5-second polling loop — active only when Command Center is open
-
-**Enclave Security Center:**
-- Active IP Ban Manager — queries both Sentinel CE and Sentinel V7 tables
-- Superkey update: `ajax_update_superkey()` — enforces 12-character minimum
-
-**Display & Personalization:**
-- Resolution scaling slider (10px–24px) — updates `--vgt-font-size` on `:root`
-- Layout switcher (macOS / Windows / Linux)
-- Wallpaper selector + custom URL (same-origin enforced)
-- HSL accent color theme matrix
-
-**Keyboard Shortcuts Mapper:**
-- Click "Record" → captures modifier key (Ctrl/Alt/Shift/Meta) + `e.code`
-- Persisted in `vgt_desk_settings`
-
----
-
-### 🛡️ 2.7 Sentinel Hardening Auditor
-
-Deeply integrated into the VGT Security Center, replacing the previous standalone view.
-
-**Sentinel Auto-Awareness:** detects Sentinel CE or V7, checks running defense modules (Airlock, Cerberus, Titan) and reflects their state in the security index automatically.
-
-**Cyberpunk Scoring UI:** Cyber-corner brackets, animated neon scan line, angled clip-path start button, cockpit-style score display, interactive tier grid (DIAMANT / PLATIN GOLD / VGT SECURED / CRITICAL RISK), red warning row highlighting on unresolved items.
-
-**Score Index:** `ScoreMax` dynamically counts actual test vectors (29) — 27 passed = 93%.
-
----
-
-### 🔒 2.8 Security Architecture — Defense in Depth
-
-**Integrated Sentinel CE (v1.7.1):** AEGIS, CERBERUS, AIRLOCK, HADES, CHRONOS, GHOST TRAP in boot sequence.
-
-**AEGIS WAF Exceptions:** `edit_posts` / `manage_options` users: all pattern weights zeroed on post-save endpoints; RCE/LFI remain active. WooCommerce + Gutenberg exceptions active.
-
-**Airlock Upload Protection:**
-- Real file size validation via `filesize()` — client-supplied claims not trusted
-- MIME detection via `finfo`
-- Image type cross-check via `IMAGETYPE_*`
-- SVG files blocked at upload
-- ZIP/Office: traversal paths and executable content scan
-- SVG vector scan: script tags, event handlers, `javascript:` URIs, `foreignObject`, iframe/object/embed, external/data href vectors
-
-**Network & IP Hardening:**
-- Cloudflare IPv4/IPv6 CIDR ranges in IP resolution
-- Configurable trusted proxy CIDRs
-- `X-Forwarded-For`, `X-Real-IP`, `CF-Connecting-IP` evaluated only in trusted proxy context
-
-**Titan Security Headers:** `X-Content-Type-Options`, `X-Frame-Options` (via Frame Policy in V2), `Referrer-Policy`, `Permissions-Policy`, `HSTS`, `COOP`, `COEP`, `CORP`, optional CSP baseline.
-
-**AJAX Exception Hardening:** Five major AJAX actions catch typed exception hierarchies (`SecurityException`, `ValidationException`, `StorageException`, `\Throwable`) — opaque responses to client, full tracebacks to `error_log` only.
-
-**Vault & Scanner Hardening:** directories `0700`, files `0600`, writes use `LOCK_EX`. Manifest files written with restrictive permissions.
-
-**Throne Guard (v2.6.0):** 14 toxic capabilities stripped, SHA256 HMAC session fingerprinting, Superkey vault (Argon2/Bcrypt), Hardware Deactivation Lock, Jailed Upload Vault (`/mcp_vault/`).
-
----
-
-### 💡 2.9 Desktop Engine Modularization
-
-`desktop.js` (3,250+ lines) decomposed into 9 isolated modules.
-
-| Module | Responsibility |
-|---|---|
-| `desktop-core.js` | Config, XSS escaping, URL safety, AJAX sync, clock, Web Audio |
-| `desktop-windows.js` | Create, close, minimize, maximize, focus, iframe navigation, Command Center |
-| `desktop-draggable.js` | Window drag, resize, Aero Snap layout grids |
-| `desktop-icons.js` | Icon grid arrangement, drag-and-drop, collision detection |
-| `desktop-menus.js` | Dock, start menu, context menus, keyboard shortcuts, submenu popups, layout switcher |
-| `desktop-widgets.js` | Clock, Notes, Sentinel widget, CPU latency graph animation |
-| `desktop-spotlight.js` | Spotlight search (Alt+Space), CLI command parser (`/layout`) |
-| `desktop-modals.js` | Glassmorphic modal dialogs replacing native `prompt()` / `confirm()` |
-| `desktop-folders.js` | Folder create/rename/delete, drag-and-drop grouping, folder window management |
-
-**Main Orchestrator (`desktop.js`):** 61 lines. Triggers module init routines after `DOMContentLoaded`.
-
----
-
-### 💾 2.10 Performance & Persistence
-
-**RAM Hibernation:** minimized windows suspend iframe to `about:blank` — rehydrated on restore.
-
-**Widget Position Persistence (V2 hardened):**
-- `widget_positions` now saved as full-replace — no delta-merge zombie states
-- `localStorage` backup for immediate client-side restoration before DB response
-
-**Custom Relational DB Layer:**
-- `{prefix}vgt_desk_settings` — `UNIQUE(user_id, setting_key)`
-- Delta-merge via `array_replace_recursive` for JSON objects (folders, window positions, icon coordinates)
-- Single-query reads per settings fetch — no N+1 on startup
-
-**Per-User Opt-in:** desktop off by default. Admin notice → explicit activation. `?vgt_bypass=1` → classic view.
-
-**Viewport Dimension Auto-Fit:** `#vgt-shell-root` recalculated on resize. Parent containers forced to `overflow: hidden !important`. Right-half widgets saved as relative `right` coordinates.
-
----
-
-### 🎨 2.11 Glassmorphic UI & Custom Modals
-
-**Wallpaper Engine:** Local WebP assets, preset collection + custom URL (same-origin enforced), zero CDN.
-
-**Accent Colors:** Indigo / Emerald / Cyan / Amber / Rose — applied via Design System tokens (V2).
-
-**Custom Modal Dialogues:** Replaces all native `prompt()` / `confirm()` — glassmorphic overlay, styled to match desktop theme.
-
-**Widget Visibility Manager:** Individual toggle in Control Center — Clock, System Metrics, Notes, Sentinel.
+### ⚙️ 2.5 Command Center
+* **Real-Time Diagnostics:** Live CPU load, RAM usage, active GeDefense state, database table footprint.
+* **IP Ban Manager:** Directly inspect and manage Cerberus L0/L1 perimeter bans.
+* **Superkey Management:** Update ThroneGuard master credentials.
+* **Personalization:** UI scaling slider (10px–24px), wallpaper manager (same-origin enforced), accent themes, and custom shortcut mapper.
 
 ---
 
 ## 📜 Changelog
 
-### v2.0.0-beta.1 — Operator OS: Design System, Frame Policy, Control Plane *(Current)*
+### v2.0.0 — Sovereign Operator OS & GeDefense v8.0.0 Integration *(Current)*
 
-> V2.0 turns the v4 operator workspace into a hardened Operator OS: a unified Frame/Portal Policy, a Design System across all security and studio surfaces, robust widget/settings persistence, Classic Mode for builders, and Recovery outside the desktop — preserving the Zero-Overheat desktop DNA and Security Center (Sentinel · Throne · Dattrack).
-
-#### Operator OS Positioning
-
-- Version label updated system-wide: `VGT_WPDESK_VERSION` / `VERSION_LABEL` → `2.0.0-beta.1`
-- Welcome popup updated to celebrate V2 milestones (Design System, Portal Hardening, Zero-Overheat, Security Plane)
-- Product editions documented in `PRODUCT.md`: Core / Secure / Studio / Ops
-
-#### V2 Control Plane (New architecture layer)
-
-Six new service classes sit between the Security boot sequence and the PHP kernel:
-
-- **`WPDeskFramePolicy`** — single-owner X-Frame-Options: admin/embed → `SAMEORIGIN`, frontend → `DENY`; `.htaccess` scrub; Titan XFO header stack removed
-- **`WPDeskIframePolicy`** — per-app classic vs. iframe routing; Builder/Customizer/Themes → classic tab
-- **`WPDeskWidgetLayout`** — widget position validation and normalization; empty id / oversized rejected before save
-- **`WPDeskDesignSystem`** — shared token and component loader across all admin surfaces
-- **Module Registry** — clean ordered boot of integrated modules (IframeTransformer, Security Center, Build Center, …)
-- **Pure Test Suite** — control plane tests without full WordPress boot (frame, widgets, design system, harden)
-
-#### Unified Design System
-
-- `assets/css/design-system/` — tokens / base / components / compat
-- Brand: Indigo primary, optional security and premium themes
-- All 12 modules migrated to shared tokens (Security Center, Sentinel, Throne, Recovery, Dattrack, Login, Vault, Book, Chronos, Astra, Desktop, Portal)
-- MU-deployer CSS bug fixed (`mudeployer` → `mu-deployer`)
-- Astra CLOSE buttons: squash layout bug fixed
-
-#### Portal & Iframe Hardening
-
-- `resolvePortalUrl` — admin portal URLs enforced; front-URLs → new tab; rescue/classic fallback on resolution failure
-- Portal Card Layout v2 — `filemtime` cache-bust on portal assets
-- Portal badge: visible only on list screens (Posts, Pages, Comments, Plugins); hidden in Security Center, Astra, full-app windows
-- Full-bleed full-apps: sidebar `100vh`, content scroll inside iframe, no admin-bar 32px overlap
-
-#### Widget & Settings Persistence (V2 hardened)
-
-- `widget_positions` saved as full-replace — delta-merge zombie states eliminated
-- `localStorage` backup for immediate client-side restore before DB response
-- Widget position normalization on load: empty IDs and oversized coordinates rejected
-
-#### App Builder — URL Policy
-
-- Admin portal URLs enforced on registration; frontend URLs not registered as portal apps
-- Front-URL clicks route to new browser tab
-- Classic-mode routing for incompatible screens (Customizer, Page Builders)
-
-#### Recovery Control Plane
-
-- Recovery accessible outside desktop: Force Classic Mode, Desktop Settings UI, Redirect Off, Diagnostics
-- `?vgt_bypass=1` remains the emergency escape hatch for full lockouts
+* **GeDefense v8.0.0 Sovereign Security:** Replaced legacy Sentinel CE with the complete 19-module GeDefense Open Core Engine.
+* **Native ThroneGuard Master:** Integrated capability stripping (14 admin capabilities restricted to Master role), Superkey vault, and hardware lock.
+* **Native LoginPager Gateway:** Integrated Cyberpunk glassmorphism login customization with 2-column live preview cockpit.
+* **Full V2 Control Plane:**
+  * `WPDeskFramePolicy` — Single-owner XFO (`SAMEORIGIN` / `DENY`), `.htaccess` scrub.
+  * `WPDeskIframePolicy` — Automatic classic routing for Customizer and Page Builders.
+  * `WPDeskWidgetLayout` — Full-replace widget coordinate persistence with `localStorage` backup.
+  * `WPDeskDesignSystem` — Shared design tokens and components across 12 modules.
+* **Unified Security Center:** Rewired all tabs (Overview HUD, GeDefense Suite, ThroneGuard, LoginPager, Audit, Dattrack, Recovery) directly to GeDefense v8 controllers.
+* **Legacy Purge:** Deleted obsolete Sentinel CE files, old scanner, old views, and standalone ThroneGuard/LoginPager files.
+* **Automated Regression Suite:** 100% test pass on VGT Desk test suite and GeDefense regression suites.
 
 ---
 
-### v1.0.0-Beta v4.1 — Patch Release *(archived)*
-
-Sentinel CE → v1.7.1. Black screen after Quarantine/Genesis accept fixed. Airlock expanded: `filesize()`, `finfo`, `IMAGETYPE_*`, SVG blocker, ZIP/Office traversal scan, SVG vector scan. Cloudflare CIDR IP hardening. Trusted proxy CIDRs. `X-XSS-Protection` removed from Titan. Styx Lite outbound policy. PHP 7.4 compatibility restored. UTF-8 BOM fatal in `class-vis-network.php` fixed.
-
----
-
-### v1.0.0-Beta v4 — Stability, Scaling & Security *(archived)*
-
-Modular PHP kernel (Settings / AppBuilder / Plugin). VGT Build Center consolidation. Sentinel Hardening Auditor with Cyberpunk UI. Dattrack telemetry integration. V7 class collision fix. JS compiler fix (`zoom` identifier redeclaration). Viewport auto-fit. AJAX exception hardening. Wallpaper same-origin enforcement. SAMEORIGIN iframe fix. Scope-limited error handlers. SQL identifier hardening. All files: `// STATUS: 💠 DIAMANT VGT SUPREME`.
+### v2.0.0-beta.1 — Control Plane & Design System *(archived)*
+* Introduced V2 Control Plane (`WPDeskFramePolicy`, `WPDeskIframePolicy`, `WPDeskWidgetLayout`, `WPDeskDesignSystem`).
+* Unified Design System across 12 modules.
+* Portal Card Layout v2 with `filemtime` cache-busting.
+* Recovery Control Plane outside the desktop shell.
 
 ---
 
@@ -540,17 +335,14 @@ Modular PHP kernel (Settings / AppBuilder / Plugin). VGT Build Center consolidat
 
 | Metric | Specification |
 |---|---|
-| **Required WordPress** | 6.0+ |
+| **Required WordPress** | 6.0+ (Tested up to 6.9) |
 | **Required PHP** | 8.1+ (Strict Types enforced) |
 | **Frontend Frameworks** | None — 100% Vanilla JS (ES6+) / CSS Custom Variables |
 | **Compilation Overhead** | Zero — no Node.js, no Vite, no TypeScript at runtime |
-| **JS Architecture** | 9 isolated modules + 61-line orchestrator |
-| **PHP Architecture** | Modular service classes + V2 Control Plane (6 policy classes) |
-| **Design System** | Unified token/component layer across 12 modules |
-| **Database Footprint** | `{prefix}vgt_desk_settings` (relational) + `{prefix}mcp_user_roles` |
-| **Runtime External Calls** | Zero |
-| **WAF Engine** | AEGIS Anomaly Scoring — Sentinel CE v1.7.1 / Sentinel V7 |
-| **Session Hardening** | Throne Guard v2.6.0 |
+| **Security Engine** | GeDefense v8.0.0 (19 Defense Modules) |
+| **Master Protection** | ThroneGuard Master Enclave (14 Toxic Capabilities Stripped) |
+| **Login Surface** | LoginPager Cyberpunk Live Preview Gateway |
+| **Studio Engines** | Omega Vault, Book Reader, Chronos, Dattrack, VGTAstra |
 | **Frame Policy** | `WPDeskFramePolicy` — single-owner XFO, no stacking |
 | **Bypass Mechanism** | `?vgt_bypass=1` — classic view for session |
 | **Default Mode** | Off — explicit per-user opt-in required |
@@ -562,7 +354,7 @@ Modular PHP kernel (Settings / AppBuilder / Plugin). VGT Build Center consolidat
 ```bash
 # 1. Clone into WordPress plugins directory
 cd /var/www/html/wp-content/plugins/
-git clone https://github.com/visiongaiatechnology/vgtdesk
+git clone https://github.com/visiongaiatechnology/vgtdesk.git desktop
 
 # 2. Activate in WordPress Admin
 # Plugins → VGT WP-Desk → Activate
@@ -571,11 +363,11 @@ git clone https://github.com/visiongaiatechnology/vgtdesk
 # Admin notice → click to activate for your user
 # Or: WP-Desk → Settings → Desktop as Default View
 
-# 4. Initialize Throne Guard (Critical — do this first)
-# Desktop → Master User Control → set Superkey (12+ chars) + configure role hardening
+# 4. Initialize ThroneGuard Master (Critical — do this first)
+# Security Center → ThroneGuard Master → set Superkey (12+ chars) + configure role hardening
 
-# 5. Configure Sentinel CE / V7
-# Desktop → Sentinel widget → verify AEGIS, CERBERUS, AIRLOCK, HADES, CHRONOS, GHOST TRAP active
+# 5. Verify GeDefense v8.0.0 Core
+# Security Center → Overview & Vitals → verify all 19 defense modules active
 
 # 6. Select Layout (Optional)
 # Command Center → Display → Layout
@@ -593,14 +385,12 @@ git clone https://github.com/visiongaiatechnology/vgtdesk
 | Tool | Type | Purpose |
 |---|---|---|
 | 🖥️ **VGT WP-Desk** | **Operator OS** | Hardened OS layer for WordPress backend — you are here |
-| 🏰 **VGT Throne Guard** | **Hardening** | Toxic capability stripping + Superkey vault — integrated |
-| ⚔️ **[VGT Sentinel](https://github.com/visiongaiatechnology/sentinelcom)** | **WAF / IDS** | Zero-Trust WordPress WAF — integrated |
-| 🛡️ **[VGT Myrmidon](https://github.com/visiongaiatechnology/vgtmyrmidon)** | **ZTNA** | Zero Trust device registry and cryptographic integrity verification |
-| ⚡ **[VGT Auto-Punisher](https://github.com/visiongaiatechnology/vgt-auto-punisher)** | **IDS** | L4+L7 Hybrid IDS — attackers terminated before they even knock |
+| 🛡️ **[GeDefense WP](https://github.com/visiongaiatechnology/gedefensewp)** | **Security Core** | Sovereign 19-module security kernel (WAF, RASP, Deception, ThroneGuard) — integrated |
+| 🏰 **VGT ThroneGuard** | **Hardening** | Toxic capability stripping + Superkey vault — integrated via GeDefense |
+| 🎨 **VGT LoginPager** | **Auth Surface** | Zero-dependency Cyberpunk login customizer — integrated via GeDefense |
 | 📊 **[VGT Dattrack](https://github.com/visiongaiatechnology/dattrack)** | **Analytics** | Sovereign analytics engine — your data, your server, no third parties |
-| 🔐 **[VGT Omega Vault](https://github.com/visiongaiatechnology/vgt-omega-vault)** | **Encrypted Forms** | AES-256-GCM form vault with drag-and-drop builder — integrated via Build Center |
-| 🧠 **[VGT AETHEL](https://github.com/visiongaiatechnology/vgt-aethel)** | **Sovereign AI Kernel** | Local AI agent runtime — Astra cockpit integrated in Build Center |
-| 🌐 **[VGT Global Threat Sync](https://github.com/visiongaiatechnology/vgt-global-threat-sync)** | **Preventive** | Daily threat feed — block known attackers before arrival |
+| 🔐 **[VGT Omega Vault](https://github.com/visiongaiatechnology/vgt-omega-vault)** | **Encrypted Forms** | AES-256-GCM form vault with drag-and-drop builder — integrated |
+| 🧠 **[VGT AETHEL / Astra](https://github.com/visiongaiatechnology/vgt-aethel)** | **Sovereign AI** | Local AI reasoning pipelines for WordPress — integrated |
 
 ---
 
@@ -629,10 +419,8 @@ Licensed under **AGPLv3** — *"For Humans, not for SaaS Corporations."*
 
 [![VGT](https://img.shields.io/badge/VGT-VisionGaia_Technology-red?style=for-the-badge)](https://visiongaiatechnology.de)
 
-VisionGaia Technology builds enterprise-grade infrastructure — engineered to the DIAMANT VGT SUPREME standard.
-
-> *"WP-Desk V2 was built because a hardened operator workspace needs more than feature additions — it needs a control plane. One Frame Policy. One Design System. One Recovery path. Zero overheating."*
+VisionGaia Technology builds sovereign, enterprise-grade infrastructure — engineered to the **DIAMANT VGT SUPREME** standard.
 
 ---
 
-*Version 2.0.0-beta.1 — VGT WP-Desk // Operator OS // V2 Control Plane // Unified Design System // Frame & Portal Hardening // Recovery Control Plane // Classic Mode // 9-Engine Desktop // Multi-Layout (macOS/Windows/Linux) // Command Center // VGT Build Center // Sentinel Hardening Auditor // Folder Mode // Aero Snap // RAM Hibernation // Sentinel CE v1.7.1 // Throne Guard v2.6.0 // Zero-Overheat Architecture // AGPLv3*
+*Version 2.0.0 — VGT WP-Desk // Operator OS // GeDefense v8.0.0 // ThroneGuard Master // LoginPager Gateway // V2 Control Plane // Unified Design System // Frame & Portal Hardening // Recovery Control Plane // Classic Mode // 9-Engine Desktop // Multi-Layout (macOS/Windows/Linux) // Command Center // VGT Build Center // Omega Vault // Chronos // Dattrack // VGTAstra // Zero-Overheat Architecture // AGPLv3*

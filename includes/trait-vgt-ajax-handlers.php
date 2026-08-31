@@ -172,7 +172,7 @@ trait WPDeskAJAXTrait
                             'type'      => $r['type'],
                             'message'   => $r['message'],
                             'ip'        => $r['ip'],
-                            'version'   => 'Sentinel CE',
+                            'version'   => 'GeDefense Core',
                         ];
                     }
                 }
@@ -191,7 +191,7 @@ trait WPDeskAJAXTrait
                             'type'      => $r['type'],
                             'message'   => $r['message'],
                             'ip'        => $r['ip'],
-                            'version'   => 'Sentinel V7',
+                            'version'   => 'GeDefense Core',
                         ];
                     }
                 }
@@ -273,18 +273,20 @@ trait WPDeskAJAXTrait
             $new_superkey = isset($_POST['new_superkey']) ? (string) $_POST['new_superkey'] : '';
 
             $user_id = get_current_user_id();
-            $superkey_hash = get_user_meta($user_id, 'mcp_superkey_hash', true);
+            
+            // Check GeDefense ThroneGuard hash first, then legacy fallback
+            $superkey_hash = (string) get_option('vis_throneguard_superkey_hash', '');
             if (empty($superkey_hash)) {
-                $global_hash = get_option('mcp_superkey_hash', '');
-                if (!empty($global_hash)) {
-                    $superkey_hash = $global_hash;
-                }
+                $superkey_hash = (string) get_option('mcp_superkey_hash', '');
+            }
+            if (empty($superkey_hash)) {
+                $superkey_hash = (string) get_user_meta($user_id, 'mcp_superkey_hash', true);
             }
 
             if (!empty($superkey_hash)) {
                 if ($current_superkey === '' || !password_verify($current_superkey, $superkey_hash)) {
                     sleep(1);
-                    throw new ValidationException('Der aktuelle Superkey ist ungueltig.');
+                    throw new ValidationException('Der aktuelle Superkey ist ungültig.');
                 }
             }
 
@@ -293,9 +295,22 @@ trait WPDeskAJAXTrait
             }
 
             $new_hash = password_hash($new_superkey, PASSWORD_DEFAULT);
+            
+            // Persist across GeDefense ThroneGuard & Master roles
+            update_option('vis_throneguard_superkey_hash', $new_hash, false);
+            update_option('mcp_superkey_hash', $new_hash, false);
             update_user_meta($user_id, 'mcp_superkey_hash', $new_hash);
 
-            WPDeskAjaxGuard::send_success('Superkey erfolgreich aktualisiert.');
+            if (class_exists('\\VIS_Throne_Guard')) {
+                \VIS_Throne_Guard::log_event('SUPERKEY_UPDATE', 'ThroneGuard Master Superkey über VGT Desk aktualisiert.', 'success');
+            }
+
+            WPDeskSecurity::audit_control_action('superkey_update', ['user_id' => $user_id]);
+
+            WPDeskAjaxGuard::send_success([
+                'message' => 'ThroneGuard Superkey erfolgreich aktualisiert.',
+                'superkey_active' => true
+            ]);
         });
     }
 

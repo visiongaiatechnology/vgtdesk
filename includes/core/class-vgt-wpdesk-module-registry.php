@@ -25,19 +25,14 @@ final class WPDeskModuleRegistry
     {
         return [
             [
-                'key'          => 'sentinel_ce',
-                'path'         => 'vision-integrity-sentinel.php',
+                'key'          => 'gedefense',
+                'path'         => 'includes/gedefense/gedefense-wp.php',
                 'option_gated' => true,
             ],
             [
                 'key'          => 'iframe_transformer',
                 'path'         => 'includes/class-iframe-transformer.php',
                 'option_gated' => false,
-            ],
-            [
-                'key'          => 'throne_guard',
-                'path'         => 'includes/class-vgt-throne-guard.php',
-                'option_gated' => true,
             ],
             [
                 'key'          => 'security_center',
@@ -51,11 +46,6 @@ final class WPDeskModuleRegistry
                         \VisionGaia\WPDesk\VGTSecurityCenter::get_instance();
                     }
                 },
-            ],
-            [
-                'key'          => 'loginpager',
-                'path'         => 'includes/modules/loginpager/login-engine.php',
-                'option_gated' => true,
             ],
             [
                 'key'          => 'omega_vault',
@@ -119,45 +109,41 @@ final class WPDeskModuleRegistry
                 $path = $base . $mod['path'];
                 $guard = $mod['guard'] ?? null;
                 $after = $mod['after_load'] ?? null;
-                if (function_exists('add_action')) {
-                    add_action('plugins_loaded', static function () use ($key, $path, $guard, $after, $is_enabled): void {
-                        if (!empty(self::$booted[$key])) {
-                            return;
+
+                add_action('init', static function () use ($key, $path, $guard, $after): void {
+                    if (!empty(self::$booted[$key])) {
+                        return;
+                    }
+                    if (is_callable($guard) && !$guard()) {
+                        return;
+                    }
+                    if (is_readable($path)) {
+                        require_once $path;
+                        self::$booted[$key] = true;
+                        if (is_callable($after)) {
+                            $after();
                         }
-                        if (!$is_enabled($key)) {
-                            return;
-                        }
-                        if (is_callable($guard) && !$guard()) {
-                            return;
-                        }
-                        if (is_file($path)) {
-                            require_once $path;
-                            if (is_callable($after)) {
-                                $after();
-                            }
-                            self::$booted[$key] = true;
-                        }
-                    }, 1);
-                }
+                    }
+                }, 1);
                 continue;
             }
 
             $path = $base . $mod['path'];
-            if (!is_file($path)) {
+            if (!is_readable($path)) {
                 continue;
             }
 
             require_once $path;
-            if (!empty($mod['after_load']) && is_callable($mod['after_load'])) {
-                ($mod['after_load'])();
-            }
             self::$booted[$key] = true;
+
+            if (!empty($mod['after_load']) && is_callable($mod['after_load'])) {
+                $mod['after_load']();
+            }
         }
     }
 
-    /** @return array<string,bool> */
-    public static function booted_keys(): array
+    public static function is_booted(string $key): bool
     {
-        return self::$booted;
+        return !empty(self::$booted[$key]);
     }
 }

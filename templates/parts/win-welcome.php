@@ -278,20 +278,12 @@ $show_welcome = !isset($user_settings['show_welcome_on_startup']) || $user_setti
                                     <div class="vgt-welcome-card">
                                         <h4 style="color: #cbd5e1; font-size: 11px; font-weight: 700; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px;">Aktivierte Module</h4>
                                         <ul style="margin: 0; padding: 0 0 0 15px; font-size: 11.5px; color: #94a3b8; line-height: 1.6; list-style-type: disc;">
-                                            <?php if (defined('VIS_VERSION')): ?>
-                                                <li>Sentinel V7 <span style="color: #10b981; font-weight: 600;">(Aktiv - Omega Fusion)</span></li>
-                                                <li>Sentinel CE v1.7.0 <span style="color: #64748b; font-weight: 600;">(Ersetzt durch V7)</span></li>
-                                            <?php else: ?>
-                                                <li>Sentinel CE v1.7.0 <?php echo (get_option('vgt_sentinel_enabled') === 'true') ? '<span style="color: #10b981; font-weight: 600;">(Aktiv)</span>' : '<span style="color: #f43f5e; font-weight: 600;">(Inaktiv)</span>'; ?></li>
-                                            <?php endif; ?>
-                                            <li>Throne Guard v2.6.0 <span style="color: #10b981; font-weight: 600;">(Gesichert)</span></li>
-                                            <?php if (defined('VIS_VERSION')): ?>
-                                                <li>Dattrack Telemetry <span style="color: #10b981; font-weight: 600;">(Aktiv - In V7 integriert)</span></li>
-                                                <li>Aegis Firewall V4.0 <span style="color: #10b981; font-weight: 600;">(Aktiv - In V7 integriert)</span></li>
-                                            <?php else: ?>
-                                                <li>Dattrack Telemetry <?php echo (get_option('vgt_dattrack_enabled') === 'true') ? '<span style="color: #06b6d4; font-weight: 600;">(DSGVO-safe)</span>' : '<span style="color: #f43f5e; font-weight: 600;">(Inaktiv)</span>'; ?></li>
-                                                <li>Aegis Firewall V4.0 <?php echo (get_option('vgt_sentinel_enabled') === 'true') ? '<span style="color: #10b981; font-weight: 600;">(Aktiv)</span>' : '<span style="color: #f43f5e; font-weight: 600;">(Inaktiv)</span>'; ?></li>
-                                            <?php endif; ?>
+                                            <li>GeDefense v8.0.0 <span style="color: #10b981; font-weight: 600;">(Aktiv — 19 Module)</span></li>
+                                            <li>ThroneGuard Master <span style="color: #10b981; font-weight: 600;">(Gesichert — 14 Caps)</span></li>
+                                            <li>LoginPager Gateway <span style="color: #00f0ff; font-weight: 600;">(Aktiv — Sovereign Auth)</span></li>
+                                            <li>Aegis WAF & Prometheus AI <span style="color: #10b981; font-weight: 600;">(Aktiv — L7 Shield)</span></li>
+                                            <li>Morpheus RASP & Trinity Grid <span style="color: #10b981; font-weight: 600;">(Aktiv — RASP Mesh)</span></li>
+                                            <li>Chronos Scanner & Cerberus <span style="color: #10b981; font-weight: 600;">(Aktiv — L0/L1 Bans)</span></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -307,7 +299,7 @@ $show_welcome = !isset($user_settings['show_welcome_on_startup']) || $user_setti
                                             <span class="vgt-feat-icon">🎨</span>
                                             <span class="vgt-feat-title">Unified Design System</span>
                                         </div>
-                                        <p class="vgt-feat-desc">Ein Guss: Security Center, Sentinel, Astra, Vault &amp; Desk teilen Tokens, Cards, Sidebar und Indigo-Brand — keine Patchwork-UIs mehr.</p>
+                                        <p class="vgt-feat-desc">Ein Guss: Security Center, GeDefense, Astra, Vault &amp; Desk teilen Tokens, Cards, Sidebar und Indigo-Brand — keine Patchwork-UIs mehr.</p>
                                     </div>
 
                                     <div class="vgt-feat-card">
@@ -331,7 +323,7 @@ $show_welcome = !isset($user_settings['show_welcome_on_startup']) || $user_setti
                                             <span class="vgt-feat-icon">🛡️</span>
                                             <span class="vgt-feat-title">Operator Security Plane</span>
                                         </div>
-                                        <p class="vgt-feat-desc">Security Center, Throne Guard, Recovery und Sentinel in einer Control-Plane — gehärtet, auditierbar, local-first.</p>
+                                        <p class="vgt-feat-desc">Security Center, ThroneGuard, Recovery und GeDefense v8 in einer Control-Plane — gehärtet, auditierbar, local-first.</p>
                                     </div>
                                 </div>
                             </div>

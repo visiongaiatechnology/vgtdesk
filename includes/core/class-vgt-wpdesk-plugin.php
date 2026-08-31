@@ -20,25 +20,11 @@ final class WPDeskPlugin
     private array $apps = [];
 
     private const INTEGRATED_MODULES = [
-        'sentinel_ce' => [
-            'label' => 'Sentinel CE',
-            'description' => 'Open-Source Security Core mit WAF, Scanner und Hardening.',
+        'gedefense' => [
+            'label' => 'GeDefense WP (v8.0.0)',
+            'description' => 'Sovereign Multi-Tier Security Kernel (WAF, RASP, Deception, ThroneGuard & LoginPager).',
             'option' => 'vgt_sentinel_enabled',
             'default' => true,
-            'reload' => true,
-        ],
-        'throne_guard' => [
-            'label' => 'Throne Guard',
-            'description' => 'Master-Rollen, Superkey und Backend-Hardening.',
-            'option' => 'vgt_module_throne_guard_enabled',
-            'default' => true,
-            'reload' => true,
-        ],
-        'dattrack' => [
-            'label' => 'Dattrack',
-            'description' => 'Privacy-fokussierte lokale Analytics und Rollups.',
-            'option' => 'vgt_dattrack_enabled',
-            'default' => false,
             'reload' => true,
         ],
         'omega_vault' => [
@@ -62,11 +48,11 @@ final class WPDeskPlugin
             'default' => true,
             'reload' => true,
         ],
-        'loginpager' => [
-            'label' => 'LoginPager',
-            'description' => 'Login-Oberflaechen und Admin-Zugangsanpassungen.',
-            'option' => 'vgt_module_loginpager_enabled',
-            'default' => true,
+        'dattrack' => [
+            'label' => 'Dattrack',
+            'description' => 'Privacy-fokussierte lokale Analytics und Rollups.',
+            'option' => 'vgt_dattrack_enabled',
+            'default' => false,
             'reload' => true,
         ],
         'astra' => [
@@ -215,6 +201,7 @@ final class WPDeskPlugin
         $legacy_plugins = [
             plugin_basename(VGT_WPDESK_PATH . 'vision-integrity-sentinel.php'),
             plugin_basename(VGT_WPDESK_PATH . 'includes/class-vgt-throne-guard.php'),
+            plugin_basename(VGT_WPDESK_PATH . 'includes/modules/loginpager/login-engine.php'),
             plugin_basename(VGT_WPDESK_PATH . 'includes/build-center/vault.php'),
             plugin_basename(VGT_WPDESK_PATH . 'includes/book-reader/bookreader.php'),
             plugin_basename(VGT_WPDESK_PATH . 'includes/chronos/Chronosloader.php'),
@@ -463,17 +450,19 @@ final class WPDeskPlugin
         wp_localize_script('vgt-desktop-core', 'vgtConfig', [
             'ajaxUrl'      => admin_url('admin-ajax.php'),
             'adminUrl'     => admin_url(),
-            'version'      => defined('VGT_WPDESK_VERSION') ? VGT_WPDESK_VERSION : '2.0.0-beta.1',
-            'versionLabel' => defined('VGT_WPDESK_VERSION_LABEL') ? VGT_WPDESK_VERSION_LABEL : 'V2.0 Beta v1',
+            'version'      => defined('VGT_WPDESK_VERSION') ? VGT_WPDESK_VERSION : '2.0.0',
+            'versionLabel' => defined('VGT_WPDESK_VERSION_LABEL') ? VGT_WPDESK_VERSION_LABEL : 'V2.0.0',
             'nonce'        => wp_create_nonce('vgt_desktop_action'),
             'toggleNonce'  => wp_create_nonce('vgt_toggle_desktop'),
             'userSettings' => $user_settings,
-            'sentinelEnabled' => $sentinel_active,
+            'sentinelEnabled' => WPDeskSecurity::is_gedefense_active(),
+            'isGeDefense'     => WPDeskSecurity::is_gedefense_active(),
+            'geDefenseModules'=> 19,
             'sentinelBans'    => $bans_count,
-            'isSentinelV7'    => $sentinel_v7_active,
-            'sentinelMode'    => $sentinel_state['mode'],
+            'isSentinelV7'    => true,
+            'sentinelMode'    => 'v8',
             'superkeyActive'  => WPDeskSecurity::throne_guard_active(),
-            'dattrackEnabled' => self::is_integrated_module_enabled('dattrack') && !$sentinel_v7_active && (get_option('vgt_dattrack_enabled') === 'true'),
+            'dattrackEnabled' => self::is_integrated_module_enabled('dattrack') && (get_option('vgt_dattrack_enabled') === 'true'),
             'integratedModules' => self::integrated_module_statuses(),
             'apps'            => $this->apps
         ]);
@@ -610,9 +599,14 @@ final class WPDeskPlugin
             html, html.wp-toolbar { padding-top: 0 !important; margin-top: 0 !important; height: 100vh !important; background: #070b14 !important; }
             body { background: #070b14 !important; }
             body.admin-bar #wpcontent, #wpcontent, #wpbody, .wrap {
-                margin-left: 0 !important; margin-right: 0 !important; padding: 16px !important;
-                background: #070b14 !important; color: #cbd5e1 !important; min-height: 100vh !important;
+                margin: 0 !important; padding: 0 !important;
+                background: #020617 !important; color: #cbd5e1 !important; min-height: 100vh !important;
                 box-sizing: border-box !important;
+            }
+            .wrap { padding: 16px !important; }
+            .vis-omega-wrapper, .vgt-sc-wrapper { margin: 0 !important; padding: 0 !important; }
+            #wpadminbar, #adminmenumain, #adminmenuback, #adminmenuwrap, #wpfooter, .update-nag, .notice {
+                display: none !important;
             }
             a { color: var(--vgt-accent) !important; }
             a:hover { color: var(--vgt-accent-hover) !important; }

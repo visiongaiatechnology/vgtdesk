@@ -772,6 +772,38 @@ Object.assign(window.VGTDeskEngine, {
 
             info.append(title, desc, state);
 
+            const health = moduleInfo.health && typeof moduleInfo.health === 'object' ? moduleInfo.health : null;
+            if (health) {
+                const healthGrid = document.createElement('div');
+                healthGrid.className = 'vgt-cc-module-health';
+                const rows = [
+                    ['API-Key', health.apiKeyPresent ? 'vorhanden' : 'fehlt'],
+                    ['Groq', health.groqReachable ? 'erreichbar' : (health.lastGatewayStatus || 'unbekannt')],
+                    ['Modelle', String(health.modelCount || 0)],
+                    ['Memory', health.memoryMode || 'unbekannt'],
+                ];
+                rows.forEach(([labelText, valueText]) => {
+                    const item = document.createElement('span');
+                    const label = document.createElement('b');
+                    label.textContent = `${labelText}: `;
+                    const value = document.createElement('span');
+                    value.textContent = valueText;
+                    item.append(label, value);
+                    healthGrid.appendChild(item);
+                });
+                if (health.lastGatewayError) {
+                    const error = document.createElement('span');
+                    error.className = 'vgt-cc-module-health-error';
+                    const label = document.createElement('b');
+                    label.textContent = 'Gateway: ';
+                    const value = document.createElement('span');
+                    value.textContent = String(health.lastGatewayError).slice(0, 160);
+                    error.append(label, value);
+                    healthGrid.appendChild(error);
+                }
+                info.appendChild(healthGrid);
+            }
+
             const input = document.createElement('input');
             input.type = 'checkbox';
             input.className = 'vgt-toggle-switch vgt-integrated-module-toggle';

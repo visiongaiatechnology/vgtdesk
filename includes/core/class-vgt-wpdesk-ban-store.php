@@ -196,4 +196,23 @@ final class WPDeskBanStore
             throw new StorageException('Datenbanktabelle fuer Sperren nicht gefunden.');
         }
     }
+
+    /**
+     * Backward-compatibility aliases for dashboard callers.
+     */
+    public static function get_active_bans(int $limit = 50): array
+    {
+        return self::list_recent($limit);
+    }
+
+    public static function get_banned_ips(int $limit = 50): array
+    {
+        return self::list_recent($limit);
+    }
+
+    public static function ban_count(): int
+    {
+        return self::count_all();
+    }
+
 }

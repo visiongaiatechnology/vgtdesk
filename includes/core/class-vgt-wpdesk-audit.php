@@ -181,4 +181,10 @@ final class WPDeskAudit
         $key = strtolower($key);
         return (string) preg_replace('/[^a-z0-9_\-]/', '', $key);
     }
+
+    public static function log(string $type, string $action, array $context = []): void
+    {
+        self::record($action, array_merge(['category' => $type], $context));
+    }
+
 }

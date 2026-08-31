@@ -99,6 +99,9 @@ final class WPDeskFramePolicy
             return '';
         }
         if (self::is_admin_portal_url($url, $admin_base)) {
+            if (!str_contains($url, '://') && !str_starts_with($url, '/')) {
+                return $admin_base . ltrim($url, '/');
+            }
             // If absolute front-looking but still admin path, keep.
             if (str_contains($url, '://') && !str_contains(strtolower($url), '/wp-admin')) {
                 // Relative admin file resolved against wrong base earlier — rebuild.

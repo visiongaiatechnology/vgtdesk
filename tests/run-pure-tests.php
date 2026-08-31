@@ -139,7 +139,7 @@ assert_true(WPDeskAjaxGuard::user_can('manage_options') === false, 'missing curr
 $defs = WPDeskModuleRegistry::definitions();
 assert_true(count($defs) >= 8, 'module registry has integrated modules');
 $keys = array_column($defs, 'key');
-assert_true(in_array('sentinel_ce', $keys, true), 'registry includes sentinel_ce');
+assert_true(in_array('gedefense', $keys, true) || in_array('sentinel_ce', $keys, true), 'registry includes gedefense');
 assert_true(in_array('dattrack', $keys, true), 'registry includes dattrack');
 assert_true(in_array('omega_vault', $keys, true), 'registry includes omega_vault');
 

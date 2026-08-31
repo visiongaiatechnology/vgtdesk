@@ -3,7 +3,7 @@
  * Plugin Name:       VGT WP-Desk — Premium Slim Desktop (Modular)
  * Plugin URI:        https://visiongaiatechnology.de
  * Description:       Ein eleganter, modularer Desktop-Mode für das WordPress-Backend. Schlank, unzerstörbar und hochkompatibel.
- * Version:           2.0.0-beta.1
+ * Version:           2.0.0
  * Author:            VisionGaiaTechnology
  * Author URI:        https://visiongaiatechnology.de
  * License:           AGPLv3
@@ -28,9 +28,9 @@ if (!defined('ABSPATH')) {
 define('VGT_WPDESK_PATH', plugin_dir_path(__FILE__));
 define('VGT_WPDESK_URL', plugin_dir_url(__FILE__));
 /** Semver for assets / internals */
-define('VGT_WPDESK_VERSION', '2.0.0-beta.1');
+define('VGT_WPDESK_VERSION', '2.0.0');
 /** Public marketing label shown in UI */
-define('VGT_WPDESK_VERSION_LABEL', 'V2.0 Beta v1');
+define('VGT_WPDESK_VERSION_LABEL', 'V2.0.0');
 
 // KERNEL EXCEPTION HIERARCHY (PATTERN 1.5.A)
 class WPDeskException     extends \Exception {}

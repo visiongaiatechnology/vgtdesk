@@ -466,7 +466,8 @@ final class WPDeskSettings
             }
         }
 
-        if ($is_iframe) {
+        $page = isset($_GET['page']) ? (string)$_GET['page'] : '';
+        if ($is_iframe || in_array($page, ['vgt-wp-desk', 'vgt-security-center', 'vgt-suite', 'vgt-recovery-center'], true)) {
             return;
         }
 

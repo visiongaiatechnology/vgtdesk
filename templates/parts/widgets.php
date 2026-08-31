@@ -1,6 +1,6 @@
 <?php
 /**
- * Template part: Desktop Widgets
+ * Template part: Desktop Widgets — Powered by GeDefense v8.0.0
  * STATUS: 💠 DIAMANT VGT SUPREME
  */
 
@@ -10,19 +10,12 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Secure local IP Whitelist status check (no external requests, zero GDPR concern)
-$vgts_config = get_option('vgts_config', []);
-$raw_whitelist = $vgts_config['aegis_whitelist_ips'] ?? ($vgts_config['whitelist_ips'] ?? '');
+$vis_config = get_option('vis_config', get_option('vgts_config', []));
+$vis_config = is_array($vis_config) ? $vis_config : [];
+$raw_whitelist = $vis_config['aegis_whitelist_ips'] ?? ($vis_config['whitelist_ips'] ?? '');
 $whitelist_ips = array_filter(array_map('trim', explode("\n", (string)$raw_whitelist)));
 
-$current_ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
-    $current_ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
-} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-    $current_ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
-}
-$current_ip = sanitize_text_field(trim($current_ip));
-
+$current_ip = \VisionGaia\WPDesk\WPDeskSecurity::client_ip();
 $is_ip_whitelisted = in_array($current_ip, $whitelist_ips, true);
 ?>
             <!-- DESKTOP WIDGETS LAYER -->
@@ -34,7 +27,7 @@ $is_ip_whitelisted = in_array($current_ip, $whitelist_ips, true);
                 </div>
                 <!-- System Status Widget -->
                 <div id="widget-system" class="vgt-widget widget-system glassmorphism absolute" style="z-index: 15; width: 260px; display: flex; flex-direction: column; gap: 8px;">
-                    <h4 class="vgt-widget-title" style="color: var(--vgt-accent-color); margin: 0 0 4px 0;">System & Sicherheit</h4>
+                    <h4 class="vgt-widget-title" style="color: var(--vgt-accent-color); margin: 0 0 4px 0;">🛡️ System & GeDefense</h4>
                     
                     <!-- CPU Meter -->
                     <div class="vgt-widget-row-col">
@@ -62,12 +55,12 @@ $is_ip_whitelisted = in_array($current_ip, $whitelist_ips, true);
 
                     <!-- Security Statuses -->
                     <div class="vgt-widget-row">
-                        <span>Throne Guard:</span>
-                        <strong id="vgt-widget-tg-status">--</strong>
+                        <span>ThroneGuard:</span>
+                        <strong id="vgt-widget-tg-status" style="color: #10b981;">Bereit</strong>
                     </div>
                     <div class="vgt-widget-row">
-                        <span>Sentinel WAF:</span>
-                        <strong id="vgt-widget-sentinel-status">--</strong>
+                        <span>GeDefense Core:</span>
+                        <strong id="vgt-widget-sentinel-status" style="color: #00f0ff;">19 Module aktiv</strong>
                     </div>
                     <div class="vgt-widget-row">
                         <span>Aegis Whitelist:</span>
@@ -76,7 +69,7 @@ $is_ip_whitelisted = in_array($current_ip, $whitelist_ips, true);
                         </strong>
                     </div>
                     <div class="vgt-widget-row">
-                        <span>Bannliste:</span>
+                        <span>Cerberus Banns:</span>
                         <strong id="vgt-widget-bans-status">-- IPs</strong>
                     </div>
                 </div>
@@ -95,20 +88,6 @@ $is_ip_whitelisted = in_array($current_ip, $whitelist_ips, true);
                         <!-- Populate dynamically by JS -->
                     </div>
                 </div>
-
-                <?php if (!defined('VIS_VERSION')): ?>
-                <!-- Dattrack Telemetry Widget -->
-                <div id="widget-dattrack" class="vgt-widget widget-dattrack glassmorphism absolute" style="z-index: 15; width: 260px; display: flex; flex-direction: column; gap: 8px;">
-                    <h4 class="vgt-widget-title" style="color: #00f0ff; margin: 0 0 6px 0;">📊 Dattrack Telemetrie</h4>
-                    <div class="vgt-widget-dattrack-stats" style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
-                        <div>Hits heute: <strong id="vgt-dt-today-events" style="color: #00f0ff;">--</strong></div>
-                        <div>Uniques: <strong id="vgt-dt-today-users" style="color: #00f0ff;">--</strong></div>
-                    </div>
-                    <div id="vgt-dattrack-chart" class="vgt-dt-chart" style="display: flex; align-items: flex-end; justify-content: space-between; height: 40px; padding: 4px 10px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.02);">
-                        <!-- Populate dynamically by JS -->
-                    </div>
-                </div>
-                <?php endif; ?>
 
                 <!-- Sovereign Optimizer Widget -->
                 <div id="widget-optimizer" class="vgt-widget widget-optimizer glassmorphism absolute" style="z-index: 15; width: 260px; display: flex; flex-direction: column; gap: 8px;">
