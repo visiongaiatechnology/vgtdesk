@@ -39,7 +39,7 @@ VGT WP-Desk v2.0.0 has undergone an exhaustive security posture and integrity re
 - Single-owner Frame Policy (`WPDeskFramePolicy`) preventing clickjacking and header stacking
 - Zero external CDN dependencies & 100% same-origin isolation
 
-Within the reviewed scope, no exploitable vulnerabilities exist.
+Within the reviewed scope, no exploitable vulnerabilities were identified during the performed tests and review.
 
 See: [SECURITY_POSTURE.md](SECURITY_POSTURE.md)
 
