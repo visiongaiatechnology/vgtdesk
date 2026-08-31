@@ -45,7 +45,8 @@ See: [SECURITY_POSTURE.md](SECURITY_POSTURE.md)
 
 ---
 
-<img width="2560" height="1229" alt="VGT WP-Desk Operator OS" src="https://github.com/user-attachments/assets/a3120a9e-49fd-4ce8-947f-a62bceddf2cb" />
+<img width="2560" height="1229" alt="image" src="https://github.com/user-attachments/assets/ba5a557f-f1e9-4154-8b71-5ce0df2218a0" />
+
 
 ---
 
